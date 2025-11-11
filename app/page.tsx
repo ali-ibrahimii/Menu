@@ -18,47 +18,52 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { Globe, PanelLeftClose, Menu } from "lucide-react";
+import { Globe, X, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
-import { Food, Category, } from "@/types";
+import { Food, Category } from "@/types";
 import { translations } from "@/translations/translation";
-
 
 export default function Home() {
   const [foods, setFoods] = useState<Food[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [language, setLanguage] = useState<'fa' | 'ar' | 'en'>("fa");
+  const [language, setLanguage] = useState<"fa" | "ar" | "en">("fa");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filteredFoods, setFilteredFoods] = useState<Food[]>([]);
   const t = (key: string) => {
     return translations[language][key as keyof typeof translations.fa] || key;
   };
 
-
   // گرفتن نام غذا بر اساس زبان
   const getFoodName = (food: Food) => {
     switch (language) {
-      case "fa": return food.name_fa;
-      case "ar": return food.name_ar;
-      case "en": return food.name_en;
-      default: return food.name_fa;
+      case "fa":
+        return food.name_fa;
+      case "ar":
+        return food.name_ar;
+      case "en":
+        return food.name_en;
+      default:
+        return food.name_fa;
     }
   };
 
   const getFoodDescription = (food: Food) => {
     switch (language) {
-      case "fa": return food.description_fa;
-      case "ar": return food.description_ar;
-      case "en": return food.description_en;
-      default: return food.description_fa;
+      case "fa":
+        return food.description_fa;
+      case "ar":
+        return food.description_ar;
+      case "en":
+        return food.description_en;
+      default:
+        return food.description_fa;
     }
   };
 
-  
   // گرفتن اطلاعات غذاها و دسته‌بندی‌ها از دیتابیس
   useEffect(() => {
     const fetchData = async () => {
@@ -73,24 +78,21 @@ export default function Home() {
 
         // دریافت دسته‌بندی‌ها - نام جدول را یکسان کنید
         const { data: categoriesData, error: categoriesError } = await supabase
-          .from("categories")  // ✅ اینجا را به "categories" تغییر دهید
+          .from("categories") // ✅ اینجا را به "categories" تغییر دهید
           .select("*")
           .order("name");
 
         if (categoriesError) {
           console.error("Error fetching categories:", categoriesError);
           // اگر جدول categories وجود ندارد، از جدول category امتحان کنید
-          const { data: categoriesData2, error: categoriesError2 } = await supabase
-            .from("category")
-            .select("*")
-            .order("name");
-          
+          const { data: categoriesData2, error: categoriesError2 } =
+            await supabase.from("category").select("*").order("name");
+
           if (categoriesError2) throw categoriesError2;
           setCategories(categoriesData2 || []);
         } else {
           setCategories(categoriesData || []);
         }
-
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -124,7 +126,7 @@ export default function Home() {
 
       // اینجا هم نام جدول را یکسان کنید
       const { data: categoriesData, error: categoriesError } = await supabase
-        .from("categories")  // ✅ اینجا هم "categories"
+        .from("categories") // ✅ اینجا هم "categories"
         .select("*")
         .order("name");
 
@@ -183,9 +185,7 @@ export default function Home() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <p className="text-gray-600 text-lg animate-pulse">
-          {t('loading')}
-        </p>
+        <p className="text-gray-600 text-lg animate-pulse">{t("loading")}</p>
       </div>
     );
   }
@@ -214,43 +214,65 @@ export default function Home() {
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
-                <DrawerTitle>{}</DrawerTitle>
-                <DrawerDescription>
-                  {t('sideBarMenu')}
-                </DrawerDescription>
+                <DrawerTitle>
+                  <div className="flex flex-col gap-5 justify-center items-center mt-10">
+                    <Image
+                      src="/logo.png"
+                      alt="Vatandar logo"
+                      width={80}
+                      height={50}
+                      className="object-cover"
+                    />
+
+                    <div className="">
+                    <Image
+                      src="/line.png"
+                      alt="Vatandar logo"
+                      width={200}
+                      height={100}
+                      className="object-cover"
+                    />
+                    </div>
+                  </div>
+                </DrawerTitle>
+                <DrawerDescription></DrawerDescription>
               </DrawerHeader>
               <div className="flex flex-col gap-3 p-4">
-                {/* دکمه نمایش همه غذاها */}
-                <Button
-                  variant={selectedCategory === null ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(null)}
-                  className="justify-start"
-                >
-                  همه غذاها
-                </Button>
+                <div className="">
+                  {/* دکمه نمایش همه غذاها */}
+                  <Button
+                    variant={selectedCategory === null ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(null)}
+                    className="justify-start w-40 flex items-center"
+                  >
+                    {t("allFoods")}
+                  </Button>
 
-                {/* دکمه‌های دسته‌بندی‌ها */}
-                {categories.length > 0 ? (
-                  categories.map((category) => (
-                    <Button
-                      key={category.id}
-                      variant={
-                        selectedCategory === category.slug ? "default" : "outline"
-                      }
-                      onClick={() => setSelectedCategory(category.slug)}
-                      className="justify-start"
-                    >
-                      {category.name}
-                    </Button>
-                  ))
-                ) : (
-                  <p className="text-sm text-gray-500">هیچ دسته‌بندی یافت نشد</p>
-                )}
+                  {/* دکمه‌های دسته‌بندی‌ها */}
+                  {categories.length > 0 ? (
+                    categories.map((category) => (
+                      <Button
+                        key={category.id}
+                        variant={
+                          selectedCategory === category.slug
+                            ? "default"
+                            : "outline"
+                        }
+                        onClick={() => setSelectedCategory(category.slug)}
+                        className="justify-start w-40 flex items-center"
+                      >
+                        {category.name}
+                      </Button>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">{t("noFoods")}</p>
+                  )}
+                </div>
               </div>
               <DrawerFooter>
                 <DrawerClose className="absolute top-6 left-2">
                   <Button variant="ghost">
-                    <PanelLeftClose />
+                    <X />
                   </Button>
                 </DrawerClose>
               </DrawerFooter>
@@ -264,8 +286,6 @@ export default function Home() {
             height={50}
             className="object-cover"
           />
-
-          <p>{t('restaurantName')}</p>
           
           {/* language button */}
           <DropdownMenu>
@@ -279,13 +299,14 @@ export default function Home() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuRadioGroup value={language} onValueChange={(value) => setLanguage(value as 'fa' | 'ar' | 'en')}>
-                <DropdownMenuRadioItem value="fa">
-                  فارسی
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="ar">
-                  عربی
-                </DropdownMenuRadioItem>
+              <DropdownMenuRadioGroup
+                value={language}
+                onValueChange={(value) =>
+                  setLanguage(value as "fa" | "ar" | "en")
+                }
+              >
+                <DropdownMenuRadioItem value="fa">فارسی</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="ar">عربی</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="en">
                   انگلیسی
                 </DropdownMenuRadioItem>
@@ -299,14 +320,17 @@ export default function Home() {
       <div className="mb-4 text-sm text-gray-600">
         {selectedCategory ? (
           <p>
-            نمایش غذاهای دسته‌بندی:{" "}
+            {t("showingCategory")}{" "}
             <span className="font-bold">
-              {categories.find((cat) => cat.slug === selectedCategory)?.name || selectedCategory}
+              {categories.find((cat) => cat.slug === selectedCategory)?.name ||
+                selectedCategory}
             </span>{" "}
-            ({filteredFoods.length} مورد)
+            ({filteredFoods.length} {t("itemsCount")})
           </p>
         ) : (
-          <p>همه غذاها ({filteredFoods.length} مورد)</p>
+          <p>
+            {t("allFoods")} ({filteredFoods.length} {t("itemsCount")})
+          </p>
         )}
       </div>
 
@@ -335,7 +359,7 @@ export default function Home() {
                   {getFoodDescription(food)}
                 </p>
                 <span className="text-base font-bold text-yellow-600 mt-1">
-                  {food.price.toLocaleString()} {t('price')}
+                  {food.price.toLocaleString()} {t("price")}
                 </span>
                 <p className="text-xs text-gray-400">{food.category}</p>
               </div>
@@ -343,7 +367,7 @@ export default function Home() {
           ))
         ) : (
           <div className="col-span-full text-center py-8 text-gray-500">
-            {selectedCategory ? t('notFoodInCategory') : t('noFoods')}
+            {selectedCategory ? t("noFoodInCategory") : t("noFoods")}
           </div>
         )}
       </div>

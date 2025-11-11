@@ -1,6 +1,6 @@
 export const translations = {
     fa: {
-      restaurantName: "استوران اسپرلوس",
+      restaurantName: "رستوران وطندار",
       address: "نبش بهارستان ۱۷",
       viewMenu: "مشاهده منو/فروشگاه",
       open: "باز",
@@ -17,7 +17,7 @@ export const translations = {
       sideBarMenu: "برای دیدن دسته بندی های غذا، روی آنها کلیک کنید",
     },
     ar: {
-        restaurantName: "مطعم سبيرلوس",
+        restaurantName: "مطعم وطندار",
         address: "زاوية بهارستان ۱۷",
         viewMenu: "عرض القائمة/المتجر",
         open: "مفتوح",
@@ -34,7 +34,7 @@ export const translations = {
         sideBarMenu: "برای دیدن دسته بندی های غذا، روی آنها کلیک کنید",
     },
     en: {
-      restaurantName: "Sperlous Restaurant",
+      restaurantName: "Vatandar Restaurant",
       address: "Baharestan 17 Corner",
       viewMenu: "View Menu/Store",
       open: "Open",
