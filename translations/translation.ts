@@ -1,7 +1,8 @@
 export const translations = {
     fa: {
       restaurantName: "رستوران وطندار",
-      address: "نبش بهارستان ۱۷",
+      address: "بلوار امام خمینی، میدان ده دی",
+      address1: "بلوار شهید مفتح، چهار راه ابوریحان",
       viewMenu: "مشاهده منو/فروشگاه",
       open: "باز",
       closed: "بسته",
@@ -19,6 +20,7 @@ export const translations = {
     ar: {
         restaurantName: "مطعم وطندار",
         address: "زاوية بهارستان ۱۷",
+        address1: "بلوار شهید مفتح، چهار راه ابوریحان",
         viewMenu: "عرض القائمة/المتجر",
         open: "مفتوح",
         closed: "مغلق",
@@ -36,6 +38,7 @@ export const translations = {
     en: {
       restaurantName: "Vatandar Restaurant",
       address: "Baharestan 17 Corner",
+      address1: "بلوار شهید مفتح، چهار راه ابوریحان",
       viewMenu: "View Menu/Store",
       open: "Open",
       closed: "Closed",
