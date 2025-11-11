@@ -256,7 +256,7 @@ export default function Home() {
 
       {/* Main Content Card */}
       <div className="absolute bottom-0 w-full z-20">
-        <div className="bg-linear-0 from-gray-400 from-40% to-gray-50/60 pb-20 rounded-t-[55px] pt-8 px-4">
+        <div className="bg-linear-0 from-gray-400 from-40% to-gray-50/60 pb-30 rounded-t-[55px] pt-8 px-4">
           <div className="absolute left-0 top-10 flex items-center gap-2 bg-gray-200 px-4 py-3 rounded-tr-xl rounded-br-xl font-bold">
             <Clock size={17} />
             <span className="font-medium pb-1">{t("open")}</span>
@@ -264,7 +264,7 @@ export default function Home() {
 
           {/* Navigation Bar */}
           <div className="flex flex-col items-center space-y-10 w-full">
-            <div className="flex-col flex items-center space-y-3">
+            <div className="flex-col flex items-center space-y-1">
               {/* Logo */}
               <Image
                 src={"/logo.png"}
@@ -311,7 +311,7 @@ export default function Home() {
 
             {/* menu view button */}
             <Link href="/menu">
-              <Button size={"lg"} className="w-full">
+              <Button className="w-full px-15 py-5">
                 {t("viewMenu")}
               </Button>
             </Link>

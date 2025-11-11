@@ -17,15 +17,18 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { useId } from "react";
 import { Button } from "@/components/ui/button";
-import { Globe, X, Menu } from "lucide-react";
+import { Globe, X, Menu, ArrowLeft, SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
 import { Food, Category } from "@/types";
 import { translations } from "@/translations/translation";
+import { Input } from "@/components/ui/input";
 
 export default function Home() {
+  const id = useId();
   const [foods, setFoods] = useState<Food[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,9 +36,24 @@ export default function Home() {
   const [language, setLanguage] = useState<"fa" | "ar" | "en">("fa");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filteredFoods, setFilteredFoods] = useState<Food[]>([]);
+  
   const t = (key: string) => {
     return translations[language][key as keyof typeof translations.fa] || key;
   };
+
+  // search input
+  const [searchTerm, setSearchTerm] = useState("");
+  
+  // فیلتر نهایی: دسته‌بندی + جستجو
+  const finalFilteredFoods = filteredFoods.filter((food) => {
+    if (!searchTerm) return true;
+
+    const name = getFoodName(food).toLowerCase();
+    const description = getFoodDescription(food).toLowerCase();
+    const search = searchTerm.toLowerCase();
+
+    return name.includes(search) || description.includes(search);
+  });
 
   // گرفتن نام غذا بر اساس زبان
   const getFoodName = (food: Food) => {
@@ -64,6 +82,19 @@ export default function Home() {
     }
   };
 
+  const getSearchPlaceholder = () => {
+    switch (language) {
+      case "fa":
+        return "جستجو در منو...";
+      case "ar":
+        return "البحث في القائمة...";
+      case "en":
+        return "Search in menu...";
+      default:
+        return "جستجو در منو...";
+    }
+  };
+
   // گرفتن اطلاعات غذاها و دسته‌بندی‌ها از دیتابیس
   useEffect(() => {
     const fetchData = async () => {
@@ -76,15 +107,14 @@ export default function Home() {
         if (foodsError) throw foodsError;
         setFoods(foodsData || []);
 
-        // دریافت دسته‌بندی‌ها - نام جدول را یکسان کنید
+        // دریافت دسته‌بندی‌ها
         const { data: categoriesData, error: categoriesError } = await supabase
-          .from("categories") // ✅ اینجا را به "categories" تغییر دهید
+          .from("categories")
           .select("*")
           .order("name");
 
         if (categoriesError) {
           console.error("Error fetching categories:", categoriesError);
-          // اگر جدول categories وجود ندارد، از جدول category امتحان کنید
           const { data: categoriesData2, error: categoriesError2 } =
             await supabase.from("category").select("*").order("name");
 
@@ -124,9 +154,8 @@ export default function Home() {
       if (foodsError) throw foodsError;
       setFoods(foodsData || []);
 
-      // اینجا هم نام جدول را یکسان کنید
       const { data: categoriesData, error: categoriesError } = await supabase
-        .from("categories") // ✅ اینجا هم "categories"
+        .from("categories")
         .select("*")
         .order("name");
 
@@ -177,11 +206,6 @@ export default function Home() {
     };
   }, [refreshing]);
 
-  // برای دیباگ - بررسی داده‌ها
-  console.log("Categories:", categories);
-  console.log("Selected Category:", selectedCategory);
-  console.log("Filtered Foods:", filteredFoods);
-
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -191,24 +215,24 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 overflow-y-auto overscroll-none touch-pan-y">
+    <main className="min-h-screen bg-gray-50 overflow-y-auto overscroll-none touch-pan-y">
       <div
-        className={`fixed top-0 left-0 right-0 flex justify-center transition-transform duration-300 ${
+        className={`fixed top-0 left-0 right-0 flex justify-center transition-transform duration-300 z-50 ${
           refreshing ? "translate-y-4 opacity-100" : "-translate-y-10 opacity-0"
         }`}
       >
         <div className="bg-green-100 text-green-600 px-4 py-1 rounded-full text-sm shadow">
-          منو به‌روزرسانی شد ✅
+          {t("updated")}
         </div>
       </div>
 
-      {/* header */}
-      <div className="sticky top-0 w-full bg-gray-50 z-40 border-b mb-4">
-        <div className="flex justify-between items-center">
-          {/* sidebar */}
+      {/* Header */}
+      <div className="sticky top-0 w-full bg-white/95 backdrop-blur-md z-40 border-b shadow-sm">
+        <div className="flex justify-between items-center p-4">
+          {/* Sidebar Menu */}
           <Drawer direction="right">
-            <DrawerTrigger>
-              <Button variant={"ghost"}>
+            <DrawerTrigger asChild>
+              <Button variant={"ghost"} size="icon">
                 <Menu />
               </Button>
             </DrawerTrigger>
@@ -223,32 +247,28 @@ export default function Home() {
                       height={50}
                       className="object-cover"
                     />
-
-                    <div className="">
-                    <Image
-                      src="/line.png"
-                      alt="Vatandar logo"
-                      width={200}
-                      height={100}
-                      className="object-cover"
-                    />
+                    <div>
+                      <Image
+                        src="/line.png"
+                        alt="Decoration line"
+                        width={200}
+                        height={100}
+                        className="object-cover"
+                      />
                     </div>
                   </div>
                 </DrawerTitle>
-                <DrawerDescription></DrawerDescription>
               </DrawerHeader>
               <div className="flex flex-col gap-3 p-4">
-                <div className="">
-                  {/* دکمه نمایش همه غذاها */}
+                <div>
                   <Button
                     variant={selectedCategory === null ? "default" : "outline"}
                     onClick={() => setSelectedCategory(null)}
-                    className="justify-start w-40 flex items-center"
+                    className="justify-start w-full"
                   >
                     {t("allFoods")}
                   </Button>
 
-                  {/* دکمه‌های دسته‌بندی‌ها */}
                   {categories.length > 0 ? (
                     categories.map((category) => (
                       <Button
@@ -259,19 +279,21 @@ export default function Home() {
                             : "outline"
                         }
                         onClick={() => setSelectedCategory(category.slug)}
-                        className="justify-start w-40 flex items-center"
+                        className="justify-start w-full mt-2"
                       >
                         {category.name}
                       </Button>
                     ))
                   ) : (
-                    <p className="text-sm text-gray-500">{t("noFoods")}</p>
+                    <p className="text-sm text-gray-500 text-center py-4">
+                      {t("noFoods")}
+                    </p>
                   )}
                 </div>
               </div>
               <DrawerFooter>
-                <DrawerClose className="absolute top-6 left-2">
-                  <Button variant="ghost">
+                <DrawerClose className="absolute top-4 left-4">
+                  <Button variant="ghost" size="icon">
                     <X />
                   </Button>
                 </DrawerClose>
@@ -279,6 +301,7 @@ export default function Home() {
             </DrawerContent>
           </Drawer>
 
+          {/* Logo */}
           <Image
             src="/logo.png"
             alt="Vatandar logo"
@@ -286,16 +309,12 @@ export default function Home() {
             height={50}
             className="object-cover"
           />
-          
-          {/* language button */}
+
+          {/* Language Switcher */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost">
-                <Globe
-                  className="-me-1 opacity-60"
-                  size={16}
-                  aria-hidden="true"
-                />
+              <Button variant="ghost" size="icon">
+                <Globe className="opacity-60" size={18} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -307,74 +326,113 @@ export default function Home() {
               >
                 <DropdownMenuRadioItem value="fa">فارسی</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="ar">العربیه</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="en">
-                  English
-                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="en">English</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
 
-      {/* نمایش تعداد غذاهای فیلتر شده */}
-      <div className="mb-4 text-sm text-gray-600">
-        {selectedCategory ? (
-          <p>
-            {t("showingCategory")}{" "}
-            <span className="font-bold">
-              {categories.find((cat) => cat.slug === selectedCategory)?.name ||
-                selectedCategory}
-            </span>{" "}
-            ({filteredFoods.length} {t("itemsCount")})
-          </p>
-        ) : (
-          <p>
-            {t("allFoods")} ({filteredFoods.length} {t("itemsCount")})
-          </p>
-        )}
-      </div>
+      {/* Main Content */}
+      <div className="p-4 pt-6">
+        {/* Search Box */}
+        <div className="mb-6">
+          <div className="relative">
+            <Input
+              className="peer ps-9 pe-9 rounded-full w-full h-12 text-md"
+              placeholder={getSearchPlaceholder()}
+              type="search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-4 text-muted-foreground/80">
+              <SearchIcon size={18} />
+            </div>
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute inset-y-0 end-0 flex items-center justify-center pe-4 text-muted-foreground/80 hover:text-foreground"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+        </div>
 
-      {/* شبکه کارت‌های غذا */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        {filteredFoods.length > 0 ? (
-          filteredFoods.map((food) => (
-            <div
-              key={food.id}
-              className="flex items-center p-3 w-full h-34 bg-white rounded-2xl shadow hover:shadow-lg transition-all duration-200 active:scale-95"
-            >
-              <div className="w-4/12 h-full rounded-2xl p-[2.1px] bg-[linear-gradient(135deg,#10b981_0%,transparent_35%),linear-gradient(-45deg,#10b981_0%,transparent_35%)]">
-                <div className="w-full h-full rounded-[13px] overflow-hidden bg-white">
-                  <img
-                    src={food.image_url}
-                    alt={getFoodName(food)}
-                    className="object-cover w-full h-full"
-                  />
+        {/* Filter Info */}
+        <div className="mb-6 text-sm text-gray-600">
+          {searchTerm ? (
+            <p>
+              {finalFilteredFoods.length} {t("itemsCount")} برای "{searchTerm}" {t("found")}
+            </p>
+          ) : selectedCategory ? (
+            <p>
+              {t("showingCategory")}{" "}
+              <span className="font-bold">
+                {categories.find((cat) => cat.slug === selectedCategory)?.name}
+              </span>{" "}
+              ({finalFilteredFoods.length} {t("itemsCount")})
+            </p>
+          ) : (
+            <p>
+              {t("allFoods")} ({finalFilteredFoods.length} {t("itemsCount")})
+            </p>
+          )}
+        </div>
+
+        {/* Food Cards Grid */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {finalFilteredFoods.length > 0 ? (
+            finalFilteredFoods.map((food) => (
+              <div
+                key={food.id}
+                className="flex items-center p-4 bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 border"
+              >
+                <div className="w-4/12 h-24 rounded-2xl p-[2px] bg-gradient-to-br from-green-400 to-green-600">
+                  <div className="w-full h-full rounded-[14px] overflow-hidden bg-white">
+                    <img
+                      src={food.image_url}
+                      alt={getFoodName(food)}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col justify-between mr-3 w-8/12">
+                  <h2 className="text-lg font-semibold text-gray-800 truncate">
+                    {getFoodName(food)}
+                  </h2>
+                  <p className="text-sm text-gray-500 line-clamp-2 mt-1">
+                    {getFoodDescription(food)}
+                  </p>
+                  <span className="text-base font-bold text-green-600 mt-2">
+                    {food.price.toLocaleString()} {t("price")}
+                  </span>
                 </div>
               </div>
-              <div className="flex flex-col justify-between mr-3 w-9/12">
-                <h2 className="text-lg font-semibold text-gray-800 truncate">
-                  {getFoodName(food)}
-                </h2>
-                <p className="text-sm text-gray-500 line-clamp-2">
-                  {getFoodDescription(food)}
-                </p>
-                <span className="text-base font-bold text-yellow-600 mt-1">
-                  {food.price.toLocaleString()} {t("price")}
-                </span>
-                <p className="text-xs text-gray-400">{food.category}</p>
-              </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12 text-gray-500">
+              <p className="text-lg">
+                {searchTerm || selectedCategory ? t("noFoodInCategory") : t("noFoods")}
+              </p>
+              {searchTerm && (
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() => setSearchTerm("")}
+                >
+                  {t("clearSearch")}
+                </Button>
+              )}
             </div>
-          ))
-        ) : (
-          <div className="col-span-full text-center py-8 text-gray-500">
-            {selectedCategory ? t("noFoodInCategory") : t("noFoods")}
-          </div>
-        )}
-      </div>
+          )}
+        </div>
 
-      <p className="text-center text-gray-400 text-sm mt-6 mb-4">
-        © 2025 Watandar Restaurant
-      </p>
+        {/* Footer */}
+        <p className="text-center text-gray-400 text-sm mt-8 mb-4">
+          © 2025 {t("restaurantName")}
+        </p>
+      </div>
     </main>
   );
 }
