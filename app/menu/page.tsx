@@ -275,7 +275,7 @@ export default function Home() {
                         onClick={() => setSelectedCategory(category.slug)}
                         className="justify-start w-40 flex items-center"
                       >
-                        {t()}
+                        {category.name}
                       </Button>
                     ))
                   ) : (
