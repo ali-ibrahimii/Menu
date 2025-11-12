@@ -1,10 +1,20 @@
-import './globals.css'
-import { ReactNode } from 'react'
+import "./globals.css";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="fa" dir="rtl">
-      <body className="bg-gray-50">{children}</body>
+      <body>
+        <LanguageProvider>
+          
+            {children}
+          
+        </LanguageProvider>
+      </body>
     </html>
-  )
+  );
 }

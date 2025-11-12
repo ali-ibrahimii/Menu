@@ -25,8 +25,12 @@ import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
 import { Food, Category } from "@/types";
 import { translations } from "@/translations/translation";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import AddToCartButton from "@/components/AddToCartButton";
+import CartDrawer from "@/components/CartDrawer";
 
 export default function Home() {
   const id = useId();
@@ -34,7 +38,7 @@ export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [language, setLanguage] = useState<"fa" | "ar" | "en">("fa");
+  const { language } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filteredFoods, setFilteredFoods] = useState<Food[]>([]);
   const t = (key: string) => {
@@ -213,8 +217,8 @@ export default function Home() {
       </div>
 
       {/* header */}
-      <div className="fixed top-0 left-0 transform w-full bg-white/80 backdrop-blur-md z-40 border-b shadow-sm">
-        <div className="flex justify-between items-center">
+      <div className="fixed top-0 left-0 transform w-full bg-white/20 backdrop-blur-md z-40 border-b shadow-md py-2">
+        <div className="flex justify-between px-4 items-center">
           {/* sidebar */}
           <Drawer direction="right">
             <DrawerTrigger>
@@ -271,7 +275,7 @@ export default function Home() {
                         onClick={() => setSelectedCategory(category.slug)}
                         className="justify-start w-40 flex items-center"
                       >
-                        {category.name}
+                        {t()}
                       </Button>
                     ))
                   ) : (
@@ -289,42 +293,21 @@ export default function Home() {
             </DrawerContent>
           </Drawer>
 
-          <Image
-            src="/logo.png"
-            alt="Vatandar logo"
-            width={80}
-            height={50}
-            className="object-cover"
-          />
+          <div className="flex justify-center items-center">
+            <Image
+              src="/logo.png"
+              alt="Vatandar logo"
+              width={80}
+              height={50}
+              className="object-cover"
+            />
+          </div>
 
           {/* language button */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost">
-                <Globe
-                  className="-me-1 opacity-60"
-                  size={16}
-                  aria-hidden="true"
-                />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuRadioGroup
-                value={language}
-                onValueChange={(value) =>
-                  setLanguage(value as "fa" | "ar" | "en")
-                }
-              >
-                <DropdownMenuRadioItem value="fa">فارسی</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="ar">
-                  العربیه
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="en">
-                  English
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div>
+            <LanguageSwitcher />
+            <CartDrawer />
+          </div>
         </div>
       </div>
 
@@ -333,7 +316,7 @@ export default function Home() {
           <div className="relative">
             <Input
               id={id}
-              className="peer ps-9 pe-9 rounded-full w-full h-12 text-md px-20"
+              className="peer ps-9 pe-9 rounded-full bg-orange-200/50 w-full h-12 text-md px-20"
               placeholder={t("search")}
               type="search"
               value={searchTerm}
@@ -354,7 +337,7 @@ export default function Home() {
       </div>
 
       {/* نمایش تعداد غذاهای فیلتر شده */}
-      <div className="mb-4 text-sm text-gray-600">
+      <div className="my-3 text-sm text-gray-600">
         {selectedCategory ? (
           <p>
             {t("showingCategory")}{" "}
@@ -372,12 +355,12 @@ export default function Home() {
       </div>
 
       {/* شبکه کارت‌های غذا */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 mt-30">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
         {filterFood.length > 0 ? (
           filterFood.map((food) => (
             <div
               key={food.id}
-              className="flex items-center p-3 w-full h-34 bg-orange-100/10 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
+              className="relative flex items-center w-full h-35 bg-orange-100/10 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
             >
               <div className="w-4/12 h-full rounded-2xl p-[2.1px] bg-[linear-gradient(135deg,#10b981_0%,transparent_35%),linear-gradient(-45deg,#10b981_0%,transparent_35%)]">
                 <div className="w-full h-full rounded-[13px] overflow-hidden bg-orange-200">
@@ -388,7 +371,7 @@ export default function Home() {
                   />
                 </div>
               </div>
-              <div className="flex flex-col justify-between mr-3 w-9/12">
+              <div className="flex flex-col mr-3 w-8/12">
                 <h2 className="text-lg font-semibold text-gray-800 truncate">
                   {getFoodName(food)}
                 </h2>
@@ -398,6 +381,11 @@ export default function Home() {
                 <span className="text-base font-bold text-yellow-600 mt-1">
                   {food.price.toLocaleString()} {t("price")}
                 </span>
+                <div className="absolute left-2 -bottom-10 flex items-end mr-30 mb-12">
+                  <div className="w-24">
+                    <AddToCartButton food={food} getFoodName={getFoodName} />
+                  </div>
+                </div>
               </div>
             </div>
           ))
@@ -408,7 +396,7 @@ export default function Home() {
         )}
       </div>
 
-      <p className="text-center text-gray-400 text-sm mt-6 mb-4">
+      <p className="text-center text-gray-400 text-sm mt-6">
         © 2025 Watandar Restaurant
       </p>
     </main>

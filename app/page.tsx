@@ -33,14 +33,16 @@ import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
 import { Food, Category } from "@/types";
 import { translations } from "@/translations/translation";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Home() {
   const [foods, setFoods] = useState<Food[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [language, setLanguage] = useState<"fa" | "ar" | "en">("fa");
+  const { language } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filteredFoods, setFilteredFoods] = useState<Food[]>([]);
 
@@ -225,39 +227,15 @@ export default function Home() {
 
           {/* Language */}
           <div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button>
-                  <Globe size={22} />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuRadioGroup
-                  value={language}
-                  onValueChange={(value) =>
-                    setLanguage(value as "fa" | "ar" | "en")
-                  }
-                >
-                  <DropdownMenuRadioItem value="fa">
-                    فارسی
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="ar">
-                    العربیه
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="en">
-                    English
-                  </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <LanguageSwitcher />
           </div>
         </div>
       </div>
 
       {/* Main Content Card */}
       <div className="absolute bottom-0 w-full z-20">
-        <div className="bg-linear-0 from-gray-400 from-40% to-gray-50/60 pb-30 rounded-t-[55px] pt-8 px-4">
-          <div className="absolute left-0 top-10 flex items-center gap-2 bg-gray-200 px-4 py-3 rounded-tr-xl rounded-br-xl font-bold">
+        <div className="bg-linear-0 from-gray-400 from-40% to-gray-50/60 pb-20 rounded-t-[55px] pt-8 px-4">
+          <div className="absolute left-0 top-12 flex items-center gap-2 bg-gray-200 px-4 py-3 rounded-tr-xl rounded-br-xl font-bold">
             <Clock size={17} />
             <span className="font-medium pb-1">{t("open")}</span>
           </div>
@@ -291,19 +269,19 @@ export default function Home() {
             {/* Social */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <button className="p-3 rounded-full border-3 border-black">
+                <button className="p-3 rounded-full border-2 border-black">
                   <Share2 size={20} />
                 </button>
-                <button className="p-3 rounded-full border-3 border-black">
+                <button className="p-3 rounded-full border-2 border-black">
                   <Instagram size={20} color="#000" />
                 </button>
-                <button className="p-3 rounded-full border-3 border-black">
+                <button className="p-3 rounded-full border-2 border-black">
                   <Clock size={20} color="#000" />
                 </button>
-                <button className="p-3 rounded-full border-3 border-black">
+                <button className="p-3 rounded-full border-2 border-black">
                   <MapPin size={20} color="#000" />
                 </button>
-                <button className="p-3 rounded-full border-3 border-black">
+                <button className="p-3 rounded-full border-2 border-black">
                   <PhoneCall size={20} color="#000" />
                 </button>
               </div>
