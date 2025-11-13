@@ -31,6 +31,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AddToCartButton from "@/components/AddToCartButton";
 import CartDrawer from "@/components/CartDrawer";
+import FoodDetails from "@/components/FoodDetails";
+import Link from "next/link";
 
 export default function Home() {
   const id = useId();
@@ -41,6 +43,8 @@ export default function Home() {
   const { language } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filteredFoods, setFilteredFoods] = useState<Food[]>([]);
+  const [selectedFood, setSelectedFood] = useState<Food | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const t = (key: string) => {
     return translations[language][key as keyof typeof translations.fa] || key;
   };
@@ -50,6 +54,16 @@ export default function Home() {
   const filterFood = filteredFoods.filter((food) =>
     food.name_fa.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleFoodClick = (food: Food) => {
+    setSelectedFood(food);
+    setIsDetailsOpen(true);
+  };
+
+  const handleCloseDetails = () => {
+    setIsDetailsOpen(false);
+    setSelectedFood(null);
+  };
 
   // گرفتن نام غذا بر اساس زبان
   const getFoodName = (food: Food) => {
@@ -358,8 +372,9 @@ export default function Home() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
         {filterFood.length > 0 ? (
           filterFood.map((food) => (
-            <div
+            <Link
               key={food.id}
+              href={`/menu/${food.id}`}
               className="relative flex items-center w-full h-35 bg-orange-100/10 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
             >
               <div className="w-4/12 h-full rounded-2xl p-[2.1px] bg-[linear-gradient(135deg,#10b981_0%,transparent_35%),linear-gradient(-45deg,#10b981_0%,transparent_35%)]">
@@ -371,6 +386,7 @@ export default function Home() {
                   />
                 </div>
               </div>
+
               <div className="flex flex-col mr-3 w-8/12">
                 <h2 className="text-lg font-semibold text-gray-800 truncate">
                   {getFoodName(food)}
@@ -387,13 +403,14 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))
         ) : (
           <div className="col-span-full text-center py-8 text-gray-500">
             {selectedCategory ? t("noFoodInCategory") : t("noFoods")}
           </div>
         )}
+        
       </div>
 
       <p className="text-center text-gray-400 text-sm mt-6">
