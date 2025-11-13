@@ -18,6 +18,7 @@ export type Food = {
   is_vegetarian: Text;
   cooking_time: number;
   serves: number;
+  images: string[];
 };
 
 export type Category = {
