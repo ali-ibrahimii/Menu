@@ -11,6 +11,13 @@ export type Food = {
   category: string;
   is_available?: boolean;
   sort_order?: number;
+  ingredients_fa: Text;
+  ingredients_ar: Text;
+  ingredients_en: Text;
+  is_spicy: Text;
+  is_vegetarian: Text;
+  cooking_time: number;
+  serves: number;
 };
 
 export type Category = {
