@@ -19,7 +19,15 @@ import {
 } from "@/components/ui/drawer";
 import { useId } from "react";
 import { Button } from "@/components/ui/button";
-import { Globe, X, Menu, ArrowLeft, SearchIcon } from "lucide-react";
+import {
+  Globe,
+  X,
+  Menu,
+  ArrowLeft,
+  SearchIcon,
+  CheckCircle,
+  LayoutGrid,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
@@ -33,6 +41,7 @@ import AddToCartButton from "@/components/AddToCartButton";
 import CartDrawer from "@/components/CartDrawer";
 import FoodDetails from "@/components/FoodDetails";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 
 export default function Home() {
   const id = useId();
@@ -89,6 +98,19 @@ export default function Home() {
         return food.description_en;
       default:
         return food.description_fa;
+    }
+  };
+
+  const getIngredients = (food: Food) => {
+    switch (language) {
+      case "fa":
+        return food.ingredients_fa;
+      case "ar":
+        return food.ingredients_ar;
+      case "en":
+        return food.ingredients_en;
+      default:
+        return food.ingredients_fa;
     }
   };
 
@@ -325,12 +347,13 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="mt-25">
-        <div className="*:not-first:mt-2">
+      {/* دکمه دسته بندی و موتور جستجو */}
+      <div className="flex items-center justify-center w-full space-x-2 mt-25">
+        <div className="*:not-first:mt-2 w-11/12">
           <div className="relative">
             <Input
               id={id}
-              className="peer ps-9 pe-9 rounded-full bg-orange-200/50 w-full h-12 text-md px-20"
+              className="peer ps-9 pe-9 rounded-md bg-accent w-full h-12 text-md px-20"
               placeholder={t("search")}
               type="search"
               value={searchTerm}
@@ -347,6 +370,9 @@ export default function Home() {
               <ArrowLeft size={17} aria-hidden="true" />
             </button>
           </div>
+        </div>
+        <div className="w-1/12">
+          <LayoutGrid size={30} />
         </div>
       </div>
 
@@ -372,12 +398,15 @@ export default function Home() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
         {filterFood.length > 0 ? (
           filterFood.map((food) => (
-            <Link
+            <div
+              dir={`${language === "en" ? 'ltr' : 'rtl'}`}
               key={food.id}
-              href={`/menu/${food.id}`}
               className="relative flex items-center w-full h-35 bg-orange-100/10 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
             >
-              <div className="w-4/12 h-full rounded-2xl p-[2.1px] bg-[linear-gradient(135deg,#10b981_0%,transparent_35%),linear-gradient(-45deg,#10b981_0%,transparent_35%)]">
+              <Link
+                href={`/menu/${food.id}`}
+                className="w-4/12 h-full rounded-2xl p-[2.1px] bg-[linear-gradient(135deg,#10b981_0%,transparent_35%),linear-gradient(-45deg,#10b981_0%,transparent_35%)]"
+              >
                 <div className="w-full h-full rounded-[13px] overflow-hidden bg-orange-200">
                   <img
                     src={food.image_url}
@@ -385,32 +414,46 @@ export default function Home() {
                     className="object-cover w-full h-full"
                   />
                 </div>
-              </div>
+              </Link>
 
-              <div className="flex flex-col mr-3 w-8/12">
-                <h2 className="text-lg font-semibold text-gray-800 truncate">
+              <div className="flex flex-col mx-3 w-8/12">
+                <h2 className="text-md font-semibold text-gray-800 truncate">
                   {getFoodName(food)}
                 </h2>
-                <p className="text-sm text-gray-500 line-clamp-2">
-                  {getFoodDescription(food)}
-                </p>
-                <span className="text-base font-bold text-yellow-600 mt-1">
+
+                {/* مواد تشکیل دهنده */}
+                {getIngredients(food) && (
+                  <p className="text-gray-600 text-[13px] leading-4.5">
+                    {getIngredients(food).toString()}
+                  </p>
+                )}
+
+                <span className="text-[14px] font-bold text-yellow-600 mt-1">
                   {food.price.toLocaleString()} {t("price")}
                 </span>
-                <div className="absolute left-2 -bottom-10 flex items-end mr-30 mb-12">
-                  <div className="w-24">
-                    <AddToCartButton food={food} getFoodName={getFoodName} />
-                  </div>
+
+                <div className=" flex justify-end ml-3">
+                  {!food.is_available ? (
+                    <Badge
+                      variant={food.is_available ? "default" : "destructive"}
+                      className=""
+                    >
+                      {food.is_available ? t("available") : t("notAvailable")}
+                    </Badge>
+                  ) : (
+                    <div className={`flex justify-center items-center`}>
+                      <AddToCartButton food={food} getFoodName={getFoodName} />
+                    </div>
+                  )}
                 </div>
               </div>
-            </Link>
+            </div>
           ))
         ) : (
           <div className="col-span-full text-center py-8 text-gray-500">
             {selectedCategory ? t("noFoodInCategory") : t("noFoods")}
           </div>
         )}
-        
       </div>
 
       <p className="text-center text-gray-400 text-sm mt-6">

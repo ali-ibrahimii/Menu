@@ -385,6 +385,50 @@ export default function AddFoodPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
         </div>
 
+        {/* بخش ۳ : مواد تشکیل دهنده */}
+        <div className="bg-white p-6 rounded-lg border space-y-6">
+          <h2 className="text-xl font-semibold text-orange-600 border-b pb-2">
+            مواد تشکیل دهنده
+          </h2>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="ingredients_fa">مواد تشکیل دهنده (فارسی)</Label>
+              <Textarea
+                id="ingredients_fa"
+                name="ingredients_fa"
+                placeholder="گوشت گوساله، برنج، سبزیجات معطر، لیمو عمانی..."
+                value={form.ingredients_fa}
+                onChange={handleInputChange}
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="ingredients_ar">مواد تشکیل دهنده (عربی)</Label>
+              <Textarea
+                id="ingredients_ar"
+                name="ingredients_ar"
+                placeholder="لحم بقري، أرز، أعشاب عطرية، لیمون عماني..."
+                value={form.ingredients_ar}
+                onChange={handleInputChange}
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="ingredients_en">مواد تشکیل دهنده (انگلیسی)</Label>
+              <Textarea
+                id="ingredients_en"
+                name="ingredients_en"
+                placeholder="Beef, rice, aromatic herbs, dried lime..."
+                value={form.ingredients_en}
+                onChange={handleInputChange}
+                rows={3}
+              />
+            </div>
+          </div>
+        </div>
         
 
         {/* بخش ۴: تنظیمات و دسته‌بندی */}

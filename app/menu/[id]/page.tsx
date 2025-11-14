@@ -318,8 +318,6 @@ export default function FoodDetailPage() {
                   </div>
                 </div>
               )}
-
-             
             </div>
 
            

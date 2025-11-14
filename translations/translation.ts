@@ -29,7 +29,7 @@ export const translations = {
     saveOrder: "ذخیره سفارش",
     close: "بستن",
     orderSaved: "سفارش با موفقیت ذخیره شد",
-    addToCart: "افزودن به سبد",
+    addToCart: "افزودن",
     customerName: "نام مشتری",
     customerNamePlaceholder: "نام خود را وارد کنید",
     customerNameRequired: "لطفاً نام خود را وارد کنید",
@@ -40,6 +40,9 @@ export const translations = {
     orderSubmitted: "سفارش شما با موفقیت ثبت شد",
     orderError: "خطا در ثبت سفارش",
     emptyCartError: "سبد خرید شما خالی است",
+
+    available: "موجود",
+    notAvailable: "ناموجود"
   },
   ar: {
     restaurantName: "مطعم وطندار",
@@ -71,7 +74,7 @@ export const translations = {
     saveOrder: "حفظ الطلب",
     close: "إغلاق",
     orderSaved: "تم حفظ الطلب بنجاح",
-    addToCart: "إضافة إلى العربة",
+    addToCart: "إضافة",
     customerName: "اسم الزبون",
     customerNamePlaceholder: "أدخل اسمك",
     customerNameRequired: "الرجاء إدخال اسمك",
@@ -82,6 +85,9 @@ export const translations = {
     orderSubmitted: "تم تقديم طلبك بنجاح",
     orderError: "خطأ في تقديم الطلب",
     emptyCartError: "عربة التسوق فارغة",
+
+    available: "سبد خرید شما خالی است",
+    notAvailable: "ناموجود"
   },
   en: {
     restaurantName: "Vatandar Restaurant",
@@ -113,7 +119,7 @@ export const translations = {
     saveOrder: "Save Order",
     close: "Close",
     orderSaved: "Order saved successfully",
-    addToCart: "Add to Cart",
+    addToCart: "Add",
     customerName: "Customer Name",
     customerNamePlaceholder: "Enter your name",
     customerNameRequired: "Please enter your name",
@@ -124,5 +130,8 @@ export const translations = {
     orderSubmitted: "Your order has been submitted successfully",
     orderError: "Error submitting order",
     emptyCartError: "Your cart is empty",
+
+    available: "سبد خرید شما خالی است",
+    notAvailable: "not"
   },
 };

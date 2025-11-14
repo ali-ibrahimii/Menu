@@ -209,7 +209,7 @@ export default function RatingSystem({ foodId }: RatingSystemProps) {
                   className="focus:outline-none"
                 >
                   <Star
-                    size={32}
+                    size={24}
                     className={`${
                       star <= rating
                         ? "fill-yellow-400 text-yellow-400"
