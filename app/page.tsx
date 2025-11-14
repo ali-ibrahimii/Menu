@@ -47,8 +47,9 @@ export default function Home() {
   const [filteredFoods, setFilteredFoods] = useState<Food[]>([]);
 
   const t = (key: string) => {
-    return translations[language][key as keyof typeof translations.fa] || key;
-  };
+  const langTranslations = translations[language] as Record<string, string>;
+  return langTranslations[key] || key;
+};
 
   // گرفتن نام غذا بر اساس زبان
   const getFoodName = (food: Food) => {

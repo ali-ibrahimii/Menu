@@ -55,8 +55,9 @@ export default function Home() {
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const t = (key: string) => {
-    return translations[language][key as keyof typeof translations.fa] || key;
-  };
+  const langTranslations = translations[language] as Record<string, string>;
+  return langTranslations[key] || key;
+};
 
   //   search input
   const [searchTerm, setSearchTerm] = useState("");
