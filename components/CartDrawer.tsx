@@ -45,8 +45,9 @@ export default function CartDrawer() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const t = (key: string) => {
-    return translations[language][key as keyof typeof translations.fa] || key;
-  };
+  const langTranslations = translations[language] as Record<string, string>;
+  return langTranslations[key] || key;
+};
 
   const getFoodName = (item: any) => {
     switch (language) {
