@@ -22,8 +22,9 @@ export default function AddToCartButton({
 
   const { language } = useLanguage();
   const t = (key: string) => {
-    return translations[language][key as keyof typeof translations.fa] || key;
-  };
+  const langTranslations = translations[language] as Record<string, string>;
+  return langTranslations[key] || key;
+};
 
   const cartItem = items.find((item) => item.id === food.id);
   const quantity = cartItem?.quantity || 0;
