@@ -128,14 +128,18 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <p className="text-gray-600 text-lg animate-pulse">{t("loading")}</p>
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">{t("loading")}</p>
+        </div>
       </div>
     );
   }
+  
 
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main dir={language === 'en' ? "ltr" : "rtl"} className="relative min-h-screen overflow-hidden">
       {/* Background Image - Fixed */}
       <div className="fixed inset-0 -z-10">
         <Image
@@ -152,7 +156,7 @@ export default function Home() {
       <div className="relative z-10 text-white pt-8 px-4">
         <div className="flex justify-between px-2 items-center mb-4">
           {/* sidebar */}
-          <Drawer direction="right">
+          <Drawer direction={language === "en" ? "left" : "right"}>
             <DrawerTrigger>
               <Button variant={"outline"}>
                 <Menu color="#000" />

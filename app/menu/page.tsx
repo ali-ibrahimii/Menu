@@ -55,7 +55,7 @@ export default function Home() {
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const t = (key: string) => {
-    return translations[language][key as keyof typeof translations.fa] || key;
+    return (translations[language] as any)[key] || key;
   };
 
   //   search input
@@ -234,8 +234,11 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <p className="text-gray-600 text-lg animate-pulse">{t("loading")}</p>
+      <div dir={language === 'en' ? 'ltr' : 'rtl'} className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">{t("loading")}</p>
+        </div>
       </div>
     );
   }
@@ -399,7 +402,7 @@ export default function Home() {
         {filterFood.length > 0 ? (
           filterFood.map((food) => (
             <div
-              dir={`${language === "en" ? 'ltr' : 'rtl'}`}
+              dir={`${language === "en" ? "ltr" : "rtl"}`}
               key={food.id}
               className="relative flex items-center w-full h-35 bg-orange-100/10 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
             >
@@ -416,7 +419,10 @@ export default function Home() {
                 </div>
               </Link>
 
-              <div className="flex flex-col mx-3 w-8/12">
+              <div
+                onClick={() => handleFoodClick(food)}
+                className="flex flex-col mx-3 w-8/12"
+              >
                 <h2 className="text-md font-semibold text-gray-800 truncate">
                   {getFoodName(food)}
                 </h2>
@@ -447,6 +453,15 @@ export default function Home() {
                   )}
                 </div>
               </div>
+              {selectedFood && (
+                <FoodDetails
+                  food={selectedFood}
+                  isOpen={isDetailsOpen}
+                  onClose={handleCloseDetails}
+                  getFoodName={getFoodName}
+                  getFoodDescription={getFoodDescription}
+                />
+              )}
             </div>
           ))
         ) : (

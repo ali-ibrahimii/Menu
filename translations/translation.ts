@@ -40,9 +40,14 @@ export const translations = {
     orderSubmitted: "سفارش شما با موفقیت ثبت شد",
     orderError: "خطا در ثبت سفارش",
     emptyCartError: "سبد خرید شما خالی است",
+    rateProduct: "امتیاز به محصول",
+    yourRating: "امتیاز شما",
+    averageRating: "میانگین امتیاز",
+    reviews: "نظر",
+    thankYouRating: "با تشکر! شما امتیاز دادید",
 
     available: "موجود",
-    notAvailable: "ناموجود"
+    notAvailable: "ناموجود",
   },
   ar: {
     restaurantName: "مطعم وطندار",
@@ -87,7 +92,7 @@ export const translations = {
     emptyCartError: "عربة التسوق فارغة",
 
     available: "سبد خرید شما خالی است",
-    notAvailable: "ناموجود"
+    notAvailable: "ناموجود",
   },
   en: {
     restaurantName: "Vatandar Restaurant",
@@ -132,6 +137,6 @@ export const translations = {
     emptyCartError: "Your cart is empty",
 
     available: "سبد خرید شما خالی است",
-    notAvailable: "not"
+    notAvailable: "not available",
   },
 };
