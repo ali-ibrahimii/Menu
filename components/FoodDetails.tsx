@@ -56,7 +56,7 @@ export default function FoodDetails({
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const foodId = params.id as string;
   const t = (key: string) => {
-    return (translations[language] as any)[key] || key;
+    return translations[language][key as keyof typeof translations.fa] || key;
   };
   
 

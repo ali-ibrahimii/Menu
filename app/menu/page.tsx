@@ -55,7 +55,7 @@ export default function Home() {
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const t = (key: string) => {
-    return (translations[language] as any)[key] || key;
+    return translations[language][key as keyof typeof translations.fa] || key;
   };
 
   //   search input
@@ -234,7 +234,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div dir={language === 'en' ? 'ltr' : 'rtl'} className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
           <p className="text-gray-600">{t("loading")}</p>
