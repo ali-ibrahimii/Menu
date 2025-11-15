@@ -4,16 +4,22 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  RefreshCw, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  RefreshCw,
+  CheckCircle,
+  XCircle,
   Clock,
   Receipt,
   User,
   Hash,
-  Notebook
+  Notebook,
 } from "lucide-react";
 
 interface OrderItem {
@@ -33,7 +39,7 @@ interface Order {
   table_number: string;
   notes: string;
   total_price: number;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: "pending" | "confirmed" | "completed" | "cancelled";
   items: OrderItem[];
 }
 
@@ -46,15 +52,15 @@ export default function AdminOrdersPage() {
   const fetchOrders = async () => {
     try {
       const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("orders")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setOrders(data || []);
     } catch (error) {
-      console.error('Error fetching orders:', error);
-      alert('خطا در دریافت سفارشات');
+      console.error("Error fetching orders:", error);
+      alert("خطا در دریافت سفارشات");
     } finally {
       setLoading(false);
     }
@@ -65,55 +71,58 @@ export default function AdminOrdersPage() {
   }, []);
 
   // آپدیت وضعیت سفارش
-  const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
+  const updateOrderStatus = async (
+    orderId: string,
+    newStatus: Order["status"]
+  ) => {
     setUpdatingOrder(orderId);
     try {
       const { error } = await supabase
-        .from('orders')
+        .from("orders")
         .update({ status: newStatus })
-        .eq('id', orderId);
+        .eq("id", orderId);
 
       if (error) throw error;
-      
+
       // آپدیت local state
-      setOrders(prev => 
-        prev.map(order => 
+      setOrders((prev) =>
+        prev.map((order) =>
           order.id === orderId ? { ...order, status: newStatus } : order
         )
       );
-      
+
       alert(`سفارش با موفقیت ${getStatusLabel(newStatus)} شد`);
     } catch (error) {
-      console.error('Error updating order:', error);
-      alert('خطا در آپدیت سفارش');
+      console.error("Error updating order:", error);
+      alert("خطا در آپدیت سفارش");
     } finally {
       setUpdatingOrder(null);
     }
   };
 
   // نمایش وضعیت سفارش
-  const getStatusBadge = (status: Order['status']) => {
+  const getStatusBadge = (status: Order["status"]) => {
     const statusConfig = {
-      pending: { 
-        color: "bg-yellow-100 text-yellow-800 border-yellow-200", 
-        icon: Clock, 
-        label: "در انتظار" 
+      pending: {
+        color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+        icon: Clock,
+        label: "در انتظار",
       },
-      confirmed: { 
-        color: "bg-blue-100 text-blue-800 border-blue-200", 
-        icon: CheckCircle, 
-        label: "تأیید شده" 
+      confirmed: {
+        color: "bg-blue-100 text-blue-800 border-blue-200",
+        icon: CheckCircle,
+        label: "تأیید شده",
       },
-      completed: { 
-        color: "bg-green-100 text-green-800 border-green-200", 
-        icon: CheckCircle, 
-        label: "تکمیل شده" 
+      completed: {
+        color: "bg-green-100 text-green-800 border-green-200",
+        icon: CheckCircle,
+        label: "تکمیل شده",
       },
-      cancelled: { 
-        color: "bg-red-100 text-red-800 border-red-200", 
-        icon: XCircle, 
-        label: "لغو شده" 
-      }
+      cancelled: {
+        color: "bg-red-100 text-red-800 border-red-200",
+        icon: XCircle,
+        label: "لغو شده",
+      },
     };
 
     const config = statusConfig[status];
@@ -127,18 +136,18 @@ export default function AdminOrdersPage() {
     );
   };
 
-  const getStatusLabel = (status: Order['status']) => {
+  const getStatusLabel = (status: Order["status"]) => {
     const labels = {
       pending: "در انتظار",
       confirmed: "تأیید شده",
       completed: "تکمیل شده",
-      cancelled: "لغو شده"
+      cancelled: "لغو شده",
     };
     return labels[status];
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('fa-IR');
+    return new Date(dateString).toLocaleString("fa-IR");
   };
 
   if (loading) {
@@ -164,7 +173,11 @@ export default function AdminOrdersPage() {
             مشاهده و مدیریت تمام سفارشات دریافتی
           </p>
         </div>
-        <Button onClick={fetchOrders} variant="outline" className="flex items-center gap-2">
+        <Button
+          onClick={fetchOrders}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
           <RefreshCw size={16} />
           بروزرسانی
         </Button>
@@ -196,7 +209,7 @@ export default function AdminOrdersPage() {
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="space-y-4">
                 {/* اطلاعات مشتری */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 bg-gray-50 rounded-lg">
@@ -205,7 +218,7 @@ export default function AdminOrdersPage() {
                     <span className="font-medium">مشتری:</span>
                     <span>{order.customer_name}</span>
                   </div>
-                  
+
                   {order.table_number && (
                     <div className="flex items-center gap-2">
                       <Hash size={16} className="text-gray-500" />
@@ -213,7 +226,7 @@ export default function AdminOrdersPage() {
                       <span>{order.table_number}</span>
                     </div>
                   )}
-                  
+
                   <div className="flex items-center gap-2">
                     <span className="font-medium">جمع کل:</span>
                     <span className="text-lg font-bold text-green-600">
@@ -227,7 +240,9 @@ export default function AdminOrdersPage() {
                   <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg">
                     <Notebook size={16} className="text-blue-500 mt-1" />
                     <div>
-                      <span className="font-medium text-blue-700">یادداشت:</span>
+                      <span className="font-medium text-blue-700">
+                        یادداشت:
+                      </span>
                       <p className="text-blue-600 mt-1">{order.notes}</p>
                     </div>
                   </div>
@@ -235,10 +250,15 @@ export default function AdminOrdersPage() {
 
                 {/* آیتم‌های سفارش */}
                 <div>
-                  <h4 className="font-semibold mb-3 text-lg">آیتم‌های سفارش:</h4>
+                  <h4 className="font-semibold mb-3 text-lg">
+                    آیتم‌های سفارش:
+                  </h4>
                   <div className="space-y-3">
                     {order.items.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
                         <div className="flex items-center gap-3 flex-1">
                           <img
                             src={item.image_url}
@@ -255,7 +275,8 @@ export default function AdminOrdersPage() {
                         <div className="text-right">
                           <p className="font-medium">تعداد: {item.quantity}</p>
                           <p className="text-green-600 font-semibold">
-                            {(item.price * item.quantity).toLocaleString()} تومان
+                            {(item.price * item.quantity).toLocaleString()}{" "}
+                            تومان
                           </p>
                         </div>
                       </div>
@@ -265,10 +286,10 @@ export default function AdminOrdersPage() {
 
                 {/* دکمه‌های مدیریت */}
                 <div className="flex gap-2 pt-4 border-t">
-                  {order.status === 'pending' && (
+                  {order.status === "pending" && (
                     <>
                       <Button
-                        onClick={() => updateOrderStatus(order.id, 'confirmed')}
+                        onClick={() => updateOrderStatus(order.id, "confirmed")}
                         disabled={updatingOrder === order.id}
                         className="flex-1 bg-blue-600 hover:bg-blue-700"
                       >
@@ -276,7 +297,7 @@ export default function AdminOrdersPage() {
                       </Button>
                       <Button
                         variant="outline"
-                        onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                        onClick={() => updateOrderStatus(order.id, "cancelled")}
                         disabled={updatingOrder === order.id}
                         className="text-red-600 border-red-200 hover:bg-red-50"
                       >
@@ -284,11 +305,11 @@ export default function AdminOrdersPage() {
                       </Button>
                     </>
                   )}
-                  
-                  {order.status === 'confirmed' && (
+
+                  {order.status === "confirmed" && (
                     <>
                       <Button
-                        onClick={() => updateOrderStatus(order.id, 'completed')}
+                        onClick={() => updateOrderStatus(order.id, "completed")}
                         disabled={updatingOrder === order.id}
                         className="flex-1 bg-green-600 hover:bg-green-700"
                       >
@@ -296,7 +317,7 @@ export default function AdminOrdersPage() {
                       </Button>
                       <Button
                         variant="outline"
-                        onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                        onClick={() => updateOrderStatus(order.id, "cancelled")}
                         disabled={updatingOrder === order.id}
                         className="text-red-600 border-red-200 hover:bg-red-50"
                       >
@@ -304,14 +325,11 @@ export default function AdminOrdersPage() {
                       </Button>
                     </>
                   )}
-                  
-                  {(order.status === 'completed' || order.status === 'cancelled') && (
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      disabled
-                    >
-                      {order.status === 'completed' ? 'تکمیل شده' : 'لغو شده'}
+
+                  {(order.status === "completed" ||
+                    order.status === "cancelled") && (
+                    <Button variant="outline" className="flex-1" disabled>
+                      {order.status === "completed" ? "تکمیل شده" : "لغو شده"}
                     </Button>
                   )}
                 </div>

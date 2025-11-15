@@ -219,6 +219,9 @@ export default function Home() {
                     <p className="text-sm text-gray-500">{t("noFoods")}</p>
                   )}
                 </div>
+                  <Link href={'/myOrders'}>
+                    My orders
+                  </Link>
               </div>
               <DrawerFooter>
                 <DrawerClose className="absolute top-6 left-2">
