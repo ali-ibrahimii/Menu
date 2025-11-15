@@ -28,6 +28,22 @@ import { translations } from "@/translations/translation";
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
+// تابع ایجاد شناسه دستگاه (همان تابع قبلی)
+const getDeviceId = () => {
+  if (typeof window === 'undefined') return 'unknown';
+  
+  let deviceId = localStorage.getItem('deviceId');
+  
+  if (!deviceId) {
+    deviceId = 'device_' + Math.random().toString(36).substr(2, 9) + 
+               '_' + Date.now().toString(36);
+    localStorage.setItem('deviceId', deviceId);
+    localStorage.setItem('customerName', 'مهمان');
+  }
+  
+  return deviceId;
+};
+
 export default function CartDrawer() {
   const { language } = useLanguage();
   const {
@@ -45,9 +61,9 @@ export default function CartDrawer() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const t = (key: string) => {
-  const langTranslations = translations[language] as Record<string, string>;
-  return langTranslations[key] || key;
-};
+    const langTranslations = translations[language] as Record<string, string>;
+    return langTranslations[key] || key;
+  };
 
   const getFoodName = (item: any) => {
     switch (language) {
@@ -72,15 +88,23 @@ export default function CartDrawer() {
     setIsSubmitting(true);
 
     try {
-      // آماده کردن داده‌های سفارش
+      // گرفتن device_id
+      const deviceId = getDeviceId();
+      
+      // آماده کردن داده‌های سفارش با device_id
       const orderData = {
         customer_name: customerName.trim(),
         table_number: tableNumber.trim() || null,
         notes: notes.trim() || null,
         total_price: getTotalPrice(),
         items: items,
-        status: 'pending'
+        status: 'pending',
+        device_id: deviceId, // ✅ اضافه کردن device_id
+        created_at: new Date().toISOString()
       };
+
+      console.log('📦 ثبت سفارش با device_id:', deviceId);
+      console.log('📊 داده‌های سفارش:', orderData);
 
       // ثبت سفارش در دیتابیس Supabase
       const { data, error } = await supabase
@@ -89,7 +113,16 @@ export default function CartDrawer() {
         .select();
 
       if (error) {
+        console.error('❌ خطا در ثبت سفارش:', error);
         throw error;
+      }
+
+      console.log('✅ سفارش با موفقیت ثبت شد:', data);
+
+      // ذخیره اطلاعات مشتری برای استفاده بعدی
+      localStorage.setItem('customerName', customerName.trim());
+      if (tableNumber.trim()) {
+        localStorage.setItem('tableNumber', tableNumber.trim());
       }
 
       // نمایش پیام موفقیت
@@ -109,10 +142,23 @@ export default function CartDrawer() {
     }
   };
 
+  // وقتی دراور باز می‌شه، اطلاعات قبلی رو از localStorage بیار
+  const handleDrawerOpen = () => {
+    const savedName = localStorage.getItem('customerName');
+    const savedTable = localStorage.getItem('tableNumber');
+    
+    if (savedName && savedName !== 'مهمان') {
+      setCustomerName(savedName);
+    }
+    if (savedTable) {
+      setTableNumber(savedTable);
+    }
+  };
+
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative" onClick={handleDrawerOpen}>
           <ShoppingCart size={20} />
           {getTotalItems() > 0 && (
             <Badge 

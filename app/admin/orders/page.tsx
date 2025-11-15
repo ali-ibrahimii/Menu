@@ -37,6 +37,7 @@ interface Order {
   created_at: string;
   customer_name: string;
   table_number: string;
+  deviceId: string;
   notes: string;
   total_price: number;
   status: "pending" | "confirmed" | "completed" | "cancelled";

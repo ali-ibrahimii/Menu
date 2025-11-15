@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   RefreshCw, 
@@ -16,7 +17,8 @@ import {
   Notebook,
   Package,
   Calendar,
-  DollarSign
+  DollarSign,
+  Smartphone
 } from "lucide-react";
 import { translations } from "@/translations/translation";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -40,11 +42,34 @@ interface Order {
   total_price: number;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   items: OrderItem[];
+  device_id: string; // این فیلد ضروری است
 }
+
+// تابع ایجاد شناسه دستگاه
+const getDeviceId = () => {
+  if (typeof window === 'undefined') return 'unknown';
+  
+  let deviceId = localStorage.getItem('deviceId');
+  
+  if (!deviceId) {
+    // ایجاد شناسه منحصر بفرد برای دستگاه
+    deviceId = 'device_' + Math.random().toString(36).substr(2, 9) + 
+               '_' + Date.now().toString(36);
+    localStorage.setItem('deviceId', deviceId);
+    
+    // ذخیره نام پیش‌فرض
+    localStorage.setItem('customerName', 'مهمان');
+  }
+  
+  return deviceId;
+};
 
 export default function MyOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showNameForm, setShowNameForm] = useState(false);
+  const [customerName, setCustomerName] = useState('');
+  const [tableNumber, setTableNumber] = useState('');
   const { language } = useLanguage();
   
   const t = (key: string) => {
@@ -52,35 +77,96 @@ export default function MyOrders() {
     return langTranslations[key] || key;
   };
 
-  // دریافت تمام سفارشات از همه دستگاه‌ها
+  // دریافت اطلاعات دستگاه
+  const getDeviceInfo = () => {
+    if (typeof window === 'undefined') return { deviceId: 'unknown', customerName: 'مهمان', tableNumber: '' };
+    
+    const deviceId = getDeviceId();
+    const customerName = localStorage.getItem('customerName') || 'مهمان';
+    const tableNumber = localStorage.getItem('tableNumber') || '';
+    
+    return { deviceId, customerName, tableNumber };
+  };
+
+  // دریافت سفارشات فقط برای این دستگاه
   const fetchOrders = async () => {
     try {
-      console.log('دریافت تمام سفارشات از همه دستگاه‌ها...');
+      const { deviceId, customerName, tableNumber } = getDeviceInfo();
       
+      console.log('جستجوی سفارشات برای دستگاه:', deviceId);
+      
+      // فقط سفارشات این دستگاه را بگیر
       const { data, error } = await supabase
         .from('orders')
         .select('*')
+        .eq('device_id', deviceId) // فیلتر بر اساس device_id
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error('خطا در دریافت سفارشات:', error);
-        throw error;
+        
+        // اگر ستون device_id وجود ندارد، با customer_name و table_number فیلتر کنیم
+        if (error.code === '42703') { // ستون وجود ندارد
+          console.log('ستون device_id وجود ندارد، جستجو با اطلاعات مشتری...');
+          
+          let query = supabase
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (tableNumber) {
+            query = query.eq('table_number', tableNumber);
+          } else if (customerName && customerName !== 'مهمان') {
+            query = query.eq('customer_name', customerName);
+          }
+
+          const { data: fallbackData, error: fallbackError } = await query;
+          
+          if (fallbackError) {
+            console.error('خطا در جستجوی جایگزین:', fallbackError);
+            setOrders([]);
+          } else {
+            console.log('سفارشات یافت شده (جایگزین):', fallbackData?.length || 0);
+            setOrders(fallbackData || []);
+          }
+        } else {
+          setOrders([]);
+        }
+        return;
       }
       
-      console.log('تعداد سفارشات دریافت شده:', data?.length || 0);
+      console.log('سفارشات یافت شده برای این دستگاه:', data?.length || 0);
       setOrders(data || []);
       
     } catch (error) {
       console.error('Error fetching orders:', error);
-      alert('خطا در دریافت سفارشات');
       setOrders([]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
+  // ذخیره اطلاعات مشتری
+  const saveCustomerInfo = () => {
+    if (customerName.trim()) {
+      localStorage.setItem('customerName', customerName.trim());
+    }
+    if (tableNumber.trim()) {
+      localStorage.setItem('tableNumber', tableNumber.trim());
+    }
+    setShowNameForm(false);
     fetchOrders();
+  };
+
+  useEffect(() => {
+    const { customerName } = getDeviceInfo();
+    
+    // اگر نام مشتری 'مهمان' هست، فرم را نشان بده
+    if (customerName === 'مهمان') {
+      setShowNameForm(true);
+    } else {
+      fetchOrders();
+    }
   }, []);
 
   // نمایش وضعیت سفارش
@@ -137,12 +223,60 @@ export default function MyOrders() {
     }
   };
 
+  // فرم اطلاعات مشتری
+  if (showNameForm) {
+    return (
+      <div className="container mx-auto p-6 max-w-md">
+        <Card>
+          <CardHeader className="text-center">
+            <Smartphone size={48} className="mx-auto mb-4 text-green-600" />
+            <CardTitle>شناسایی سفارشات شما</CardTitle>
+            <CardDescription>
+              لطفاً اطلاعات خود را وارد کنید تا سفارشات شما نمایش داده شود
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                نام شما (اختیاری)
+              </label>
+              <Input
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="مثلاً: علی"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                شماره میز (اختیاری)
+              </label>
+              <Input
+                value={tableNumber}
+                onChange={(e) => setTableNumber(e.target.value)}
+                placeholder="مثلاً: 5"
+              />
+            </div>
+            
+            <Button onClick={saveCustomerInfo} className="w-full">
+              تأیید و مشاهده سفارشات
+            </Button>
+            
+            <p className="text-xs text-gray-500 text-center">
+              این اطلاعات فقط برای نمایش سفارشات شما استفاده می‌شود
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
-          <RefreshCw className="animate-spin mx-auto mb-4" size={32} />
-          <p className="text-gray-600">در حال بارگذاری سفارشات...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">در حال دریافت سفارشات شما...</p>
         </div>
       </div>
     );
@@ -154,17 +288,26 @@ export default function MyOrders() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Receipt size={28} />
-            همه سفارشات
+            سفارشات من
           </h1>
           <p className="text-gray-600 mt-2">
-            مشاهده تمام سفارشات از همه دستگاه‌ها ({orders.length} سفارش)
+            سفارشات ثبت شده از این دستگاه ({orders.length} سفارش)
           </p>
         </div>
-        <Button onClick={fetchOrders} variant="outline" className="flex items-center gap-2">
-          <RefreshCw size={16}  className=""/>
-          بروزرسانی
-        </Button>
-        
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => setShowNameForm(true)} 
+            variant="outline" 
+            className="flex items-center gap-2"
+          >
+            <Smartphone size={16} />
+            تغییر اطلاعات
+          </Button>
+          <Button onClick={fetchOrders} variant="outline" className="flex items-center gap-2">
+            <RefreshCw size={16} />
+            بروزرسانی
+          </Button>
+        </div>
       </div>
 
       {orders.length === 0 ? (
@@ -172,8 +315,18 @@ export default function MyOrders() {
           <CardContent className="text-center py-12">
             <Receipt size={48} className="mx-auto mb-4 opacity-50" />
             <CardDescription className="text-lg">
-              هنوز هیچ سفارشی ثبت نشده است
+              هیچ سفارشی از این دستگاه پیدا نشد
             </CardDescription>
+            <p className="text-sm text-gray-500 mt-2">
+              اگر قبلاً سفارش داده‌اید، اطلاعات خود را بررسی کنید
+            </p>
+            <Button 
+              onClick={() => setShowNameForm(true)} 
+              variant="outline" 
+              className="mt-4"
+            >
+              تغییر اطلاعات جستجو
+            </Button>
           </CardContent>
         </Card>
       ) : (
