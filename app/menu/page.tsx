@@ -103,6 +103,7 @@ export default function Home() {
   };
 
   const getIngredients = (food: Food) => {
+    let ingredients;
     switch (language) {
       case "fa":
         return food.ingredients_fa;
@@ -113,6 +114,12 @@ export default function Home() {
       default:
         return food.ingredients_fa;
     }
+
+    if (ingredients instanceof Text) {
+      return ingredients.textContent || "";
+    }
+
+    return ingredients?.toString() || "";
   };
 
   // گرفتن اطلاعات غذاها و دسته‌بندی‌ها از دیتابیس
@@ -407,12 +414,11 @@ export default function Home() {
               key={food.id}
               className="relative flex items-center w-full h-35 bg-orange-100/10 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
             >
-
               {/*  شروع عکس کارت غذا */}
               <div
                 onClick={() => handleFoodClick(food)}
                 className="w-4/12 h-full rounded-2xl p-[2.1px] bg-[linear-gradient(135deg,#10b981_0%,transparent_35%),linear-gradient(-45deg,#10b981_0%,transparent_35%)] cursor-pointer"
-               >
+              >
                 <div className="w-full h-full rounded-[13px] overflow-hidden bg-orange-200">
                   <img
                     src={food.image_url}
@@ -423,10 +429,9 @@ export default function Home() {
               </div>
               {/*  پایان عکس کارت غذا */}
 
-
               {/* شروع متن کارت غذا */}
               <div className="flex flex-col mx-3 w-8/12">
-                <div 
+                <div
                   onClick={() => handleFoodClick(food)}
                   className="cursor-pointer"
                 >
@@ -446,13 +451,12 @@ export default function Home() {
                   </span>
                 </div>
 
-
                 {/* دکمه افزودن به سبد خرید */}
                 <div className=" flex justify-end ml-3">
                   {!food.is_available ? (
                     <Badge
                       variant={food.is_available ? "default" : "destructive"}
-                      className={`${food.is_available ? '' : 'opacity-30'}`}
+                      className={`${food.is_available ? "" : "opacity-30"}`}
                     >
                       {food.is_available ? t("available") : t("notAvailable")}
                     </Badge>
