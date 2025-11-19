@@ -254,17 +254,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-6 overflow-y-auto overscroll-none touch-pan-y">
-      {/* Background Image - Fixed */}
-      <div className="fixed inset-0 -z-10">
-        <Image
-          src={"/wood2-bg.jpg"}
-          alt={t("restaurantName")}
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-black/40"></div>
-      </div>
 
       <div
         className={`fixed top-0 left-0 right-0 flex justify-center transition-transform duration-300 ${
@@ -276,64 +265,43 @@ export default function Home() {
         </div>
       </div>
 
-      {/* شروع هدر */}
-      <div className="fixed top-0 left-0 transform w-full bg-white/1 border border-b-white/10 backdrop-blur-xs z-40 shadow-lg py-2">
-        <div className="flex justify-between px-4 items-center">
-          {/* sidebar */}
-          <Drawer direction="right">
-            <DrawerTrigger>
-              <Button variant={"ghost"}>
-                <Menu />
-              </Button>
-            </DrawerTrigger>
-            <DrawerContent>
-              <DrawerHeader>
-                <DrawerTitle>
-                  <div className="flex flex-col gap-5 justify-center items-center mt-10">
-                    <Image
-                      src="/logo.png"
-                      alt="Vatandar logo"
-                      width={80}
-                      height={50}
-                      className="object-cover"
-                    />
-
-                    <div className="">
-                      <Image
-                        src="/line.png"
-                        alt="Vatandar logo"
-                        width={200}
-                        height={100}
-                        className="object-cover"
-                      />
-                    </div>
-                  </div>
-                </DrawerTitle>
-                <DrawerDescription></DrawerDescription>
-              </DrawerHeader>
-
-              <DrawerFooter>
-                <DrawerClose className="absolute top-6 left-2">
-                  <Button variant="ghost">
-                    <X />
-                  </Button>
-                </DrawerClose>
-              </DrawerFooter>
-            </DrawerContent>
-          </Drawer>
-
-          {/* language button */}
-          <div>
-            <LanguageSwitcher />
-            <CartDrawer />
+      
+       {/* دکمه دسته بندی و موتور جستجو */}
+      <div className="flex items-center justify-center w-full space-x-2 ">
+        <div className="flex">
+          <LanguageSwitcher />
+          <CartDrawer />
+        </div>
+        <div className="*:not-first:mt-2 w-11/12">
+          <div className="relative">
+            <Input
+              id={id}
+              className="peer ps-9 pe-9 rounded-full bg-accent w-full h-10 text-md px-20"
+              placeholder={t("search")}
+              type="search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-4 pt-1 text-muted-foreground/80 peer-disabled:opacity-50">
+              <SearchIcon size={16} />
+            </div>
+            <button
+              className="absolute inset-y-0 end-1 flex h-full w-9 items-center justify-center rounded-e-md text-muted-foreground/80 transition-[color,box-shadow] outline-none hover:text-foreground focus:z-10 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Submit search"
+              type="submit"
+            >
+              <ArrowLeft size={17} aria-hidden="true" />
+            </button>
           </div>
         </div>
       </div>
-      {/* پایان هدر */}
 
       {/* شروع دسته بندی */}
-      <div className="mt-10 mb-5">
-        <ScrollArea dir={language === 'en' ? 'ltr' : 'rtl'} className="rounded-md flex whitespace-nowrap">
+      <div className="mt-3">
+        <ScrollArea
+          dir={language === "en" ? "ltr" : "rtl"}
+          className="rounded-md flex whitespace-nowrap"
+        >
           <div className="flex space-x-2">
             {/* دکمه نمایش همه غذاها */}
             <Button
@@ -367,37 +335,9 @@ export default function Home() {
       </div>
       {/* پایان دسته بندی */}
 
-      {/* دکمه دسته بندی و موتور جستجو */}
-      <div className="flex items-center justify-center w-full space-x-2 ">
-        <div className="*:not-first:mt-2 w-11/12">
-          <div className="relative">
-            <Input
-              id={id}
-              className="peer ps-9 pe-9 rounded-md bg-accent w-full h-12 text-md px-20"
-              placeholder={t("search")}
-              type="search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-4 pt-1 text-muted-foreground/80 peer-disabled:opacity-50">
-              <SearchIcon size={16} />
-            </div>
-            <button
-              className="absolute inset-y-0 end-1 flex h-full w-9 items-center justify-center rounded-e-md text-muted-foreground/80 transition-[color,box-shadow] outline-none hover:text-foreground focus:z-10 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Submit search"
-              type="submit"
-            >
-              <ArrowLeft size={17} aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-        <div className="w-1/12">
-          <LayoutGrid size={30} />
-        </div>
-      </div>
 
       {/* نمایش تعداد غذاهای فیلتر شده */}
-      <div className="my-3 text-sm text-gray-200">
+      <div className="my-3 text-sm text-gray-700">
         {selectedCategory ? (
           <p>
             {t("showingCategory")}{" "}
@@ -428,7 +368,7 @@ export default function Home() {
                 onClick={() => handleFoodClick(food)}
                 className="w-4/12 h-full rounded-2xl p-[2.1px] bg-[linear-gradient(135deg,#10b981_0%,transparent_35%),linear-gradient(-45deg,#10b981_0%,transparent_35%)] cursor-pointer"
               >
-                <div className="w-full h-full rounded-[13px] overflow-hidden bg-orange-200">
+                <div className="w-full h-full rounded-[13px] overflow-hidden bg-orange-700">
                   <img
                     src={food.image_url}
                     alt={getFoodName(food)}
@@ -444,13 +384,13 @@ export default function Home() {
                   onClick={() => handleFoodClick(food)}
                   className="cursor-pointer"
                 >
-                  <h2 className="text-md font-semibold text-gray-100 truncate">
+                  <h2 className="text-md font-semibold text-gray-800 truncate">
                     {getFoodName(food)}
                   </h2>
 
                   {/* مواد تشکیل دهنده */}
                   {getIngredients(food) && (
-                    <p className="text-gray-200 text-[13px] leading-4.5">
+                    <p className="text-gray-800 text-[13px] leading-4.5">
                       {getIngredients(food).toString()}
                     </p>
                   )}
