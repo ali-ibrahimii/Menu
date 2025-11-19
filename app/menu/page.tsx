@@ -439,7 +439,7 @@ export default function Home() {
         />
       )}
 
-      <p className="text-center text-gray-200 text-sm mt-6">
+      <p className="text-center text-gray-800 text-sm mt-6">
         © 2025 Watandar Restaurant
       </p>
     </main>
