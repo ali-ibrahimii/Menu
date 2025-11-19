@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-
+import { toast } from "sonner"
 export default function AddFoodPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -50,7 +50,7 @@ export default function AddFoodPage() {
 
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) {
-      alert("لطفاً حداقل یک عکس انتخاب کنید");
+      toast.warning("لطفاً حداقل یک عکس انتخاب کنید");
       return;
     }
 
@@ -68,7 +68,7 @@ export default function AddFoodPage() {
 
         if (error) {
           console.error(error);
-          alert(`خطا در آپلود عکس ${i + 1}`);
+          toast.warning(`خطا در آپلود عکس ${i + 1}`);
           continue;
         }
 
@@ -80,10 +80,10 @@ export default function AddFoodPage() {
       }
 
       setImageUrls((prev) => [...prev, ...uploadedUrls]);
-      alert(`${uploadedUrls.length} عکس با موفقیت آپلود شد`);
+      toast.success(`${uploadedUrls.length} عکس با موفقیت آپلود شد`);
     } catch (error) {
       console.error("Error uploading files:", error);
-      alert("خطا در آپلود عکس‌ها");
+      toast.warning("خطا در آپلود عکس‌ها");
     } finally {
       setUploadLoading(false);
     }
@@ -97,7 +97,7 @@ export default function AddFoodPage() {
     e.preventDefault();
 
     if (!form.name_fa || !form.price || imageUrls.length === 0 || !category) {
-      alert("تمام فیلدهای ضروری را پر کنید");
+      toast.warning("تمام فیلدهای ضروری را پر کنید");
       return;
     }
 
@@ -139,7 +139,7 @@ export default function AddFoodPage() {
         throw error;
       }
 
-      alert("غذا با موفقیت اضافه شد");
+      toast.success("غذا با موفقیت اضافه شد");
 
       // ریست فرم
       setForm({

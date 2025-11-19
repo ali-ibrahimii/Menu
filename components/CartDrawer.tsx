@@ -27,6 +27,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/translations/translation";
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { Textarea } from "./ui/textarea";
+import { toast } from "sonner";
 
 // تابع ایجاد شناسه دستگاه (همان تابع قبلی)
 const getDeviceId = () => {
@@ -59,6 +61,7 @@ export default function CartDrawer() {
   const [tableNumber, setTableNumber] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const t = (key: string) => {
     const langTranslations = translations[language] as Record<string, string>;
@@ -126,7 +129,7 @@ export default function CartDrawer() {
       }
 
       // نمایش پیام موفقیت
-      alert(t('orderSubmitted'));
+      toast.success(t('orderSubmitted'));
       
       // ریست فرم و سبد خرید
       clearCart();
@@ -134,6 +137,8 @@ export default function CartDrawer() {
       setTableNumber("");
       setNotes("");
 
+      setIsDrawerOpen(false)
+      
     } catch (error: any) {
       console.error('Error saving order:', error);
       alert(t('orderError') + ': ' + error.message);
@@ -145,18 +150,15 @@ export default function CartDrawer() {
   // وقتی دراور باز می‌شه، اطلاعات قبلی رو از localStorage بیار
   const handleDrawerOpen = () => {
     const savedName = localStorage.getItem('customerName');
-    const savedTable = localStorage.getItem('tableNumber');
     
     if (savedName && savedName !== 'مهمان') {
       setCustomerName(savedName);
     }
-    if (savedTable) {
-      setTableNumber(savedTable);
-    }
+    
   };
 
   return (
-    <Drawer>
+    <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <DrawerTrigger asChild>
         <Button variant="ghost" size="icon" className="relative" onClick={handleDrawerOpen}>
           <ShoppingCart size={20} />
@@ -237,7 +239,7 @@ export default function CartDrawer() {
                       <h4 className="font-medium text-sm">
                         {getFoodName(item)}
                       </h4>
-                      <p className="text-green-600 font-bold">
+                      <p className="text-green-600 text-[12px] font-bold">
                         {item.price.toLocaleString()} {t('price')}
                       </p>
                     </div>
@@ -282,7 +284,7 @@ export default function CartDrawer() {
               <div className="border-t pt-4 space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">{t('total')}:</span>
-                  <span className="text-lg font-bold text-green-600">
+                  <span className="text-sm font-bold text-green-600">
                     {getTotalPrice().toLocaleString()} {t('price')}
                   </span>
                 </div>
@@ -292,7 +294,7 @@ export default function CartDrawer() {
                     <Notebook size={16} />
                     {t('notes')}
                   </label>
-                  <Input
+                  <Textarea
                     placeholder={t('notesPlaceholder')}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}

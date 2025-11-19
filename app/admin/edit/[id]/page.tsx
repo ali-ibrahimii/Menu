@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { toast } from "sonner"
 
 export default function EditFoodPage() {
   const { id } = useParams()
@@ -38,7 +39,7 @@ export default function EditFoodPage() {
 
     if (error) {
       console.error(error)
-      alert('خطا در دریافت اطلاعات')
+      toast("خطا در دریافت اطلاعات")
       return
     }
 
@@ -97,7 +98,7 @@ export default function EditFoodPage() {
       console.error(error)
       alert('خطا در به‌روزرسانی اطلاعات')
     } else {
-      alert('غذا با موفقیت ویرایش شد ✅')
+      toast.success("غذا با موفقیت بروز رسانی شد")
       router.push('/admin/foods')
     }
   }

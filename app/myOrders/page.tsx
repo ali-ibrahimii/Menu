@@ -353,7 +353,7 @@ export default function MyOrders() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-2">
                     <User size={16} className="text-gray-500" />
-                    <span className="font-medium">مشتری:</span>
+                    <span className="font-sm">نام:</span>
                     <span>{order.customer_name}</span>
                   </div>
                   
@@ -366,8 +366,8 @@ export default function MyOrders() {
                   )}
                   
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">جمع کل:</span>
-                    <span className="text-lg font-bold text-green-600">
+                    <span className="font-sm">جمع کل:</span>
+                    <span className="text-sm font-light text-green-600">
                       {order.total_price.toLocaleString()} تومان
                     </span>
                   </div>
@@ -386,7 +386,7 @@ export default function MyOrders() {
 
                 {/* آیتم‌های سفارش */}
                 <div>
-                  <h4 className="font-semibold mb-3 text-lg flex items-center gap-2">
+                  <h4 className="font-semibold mb-3 text-md flex items-center gap-2">
                     <Package size={18} />
                     آیتم‌های سفارش:
                   </h4>
@@ -401,14 +401,14 @@ export default function MyOrders() {
                           />
                           <div className="flex-1">
                             <p className="font-semibold text-gray-800">{getItemName(item)}</p>
-                            <p className="text-sm text-gray-500 mt-1">
+                            <p className="text-sm font-light text-gray-500 mt-1">
                               {item.price.toLocaleString()} تومان
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium text-gray-700">تعداد: {item.quantity}</p>
-                          <p className="text-green-600 font-semibold text-lg mt-1">
+                          <p className="text-gray-700">تعداد: {item.quantity}</p>
+                          <p className="text-green-600 font-light text-md mt-1">
                             {(item.price * item.quantity).toLocaleString()} تومان
                           </p>
                         </div>
@@ -419,8 +419,8 @@ export default function MyOrders() {
 
                 {/* جمع کل نهایی */}
                 <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg border border-green-200">
-                  <span className="font-bold text-lg text-gray-800">مبلغ نهایی:</span>
-                  <span className="text-2xl font-bold text-green-600">
+                  <span className="font-bold text-md text-gray-800">مبلغ نهایی:</span>
+                  <span className="text-md font-light text-green-600">
                     {order.total_price.toLocaleString()} تومان
                   </span>
                 </div>

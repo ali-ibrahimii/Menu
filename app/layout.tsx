@@ -1,5 +1,6 @@
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function RootLayout({
   children,
@@ -10,9 +11,8 @@ export default function RootLayout({
     <html lang="fa" dir="rtl">
       <body>
         <LanguageProvider>
-          
-            {children}
-          
+          <Toaster />
+          {children}
         </LanguageProvider>
       </body>
     </html>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
+import { toast } from "sonner"
 
 type Food = {
   id: string
@@ -35,7 +36,7 @@ export default function AdminFoodsPage() {
       alert('خطا در حذف غذا')
       console.error(error)
     } else {
-      alert('غذا حذف شد ✅')
+      toast.success('غذا حذف شد')
       fetchFoods()
     }
   }

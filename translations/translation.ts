@@ -21,7 +21,13 @@ export const translations = {
     shoppingCart: "سبد خرید",
     cartDescription: "سفارشات خود را مدیریت کنید",
     emptyCart: "سبد خرید شما خالی است",
+    people: "نفر",
+    serves: "مناسب",
+    minutes: "دقیقه",
+    category: "دسته",
+    
     items: "مورد",
+    cookingTime: "زمان پخت و پز",
     total: "جمع کل",
     notes: "یادداشت",
     notesPlaceholder: "توضیحات سفارش...",
@@ -71,6 +77,12 @@ export const translations = {
     shoppingCart: "عربة التسوق",
     cartDescription: "إدارة طلباتك",
     emptyCart: "عربة التسوق فارغة",
+    people: "الناس",
+    serves: "يخدم",
+    cookingTime: "وقت الطبخ",
+    minutes: "دقائق",
+    category: "فئة",
+    
     items: "عنصر",
     total: "المجموع",
     notes: "ملاحظات",
@@ -91,8 +103,8 @@ export const translations = {
     orderError: "خطأ في تقديم الطلب",
     emptyCartError: "عربة التسوق فارغة",
 
-    available: "سبد خرید شما خالی است",
-    notAvailable: "ناموجود",
+    available: "متاح",
+    notAvailable: "غير موجود",
   },
   en: {
     restaurantName: "Vatandar Restaurant",
@@ -116,6 +128,12 @@ export const translations = {
     shoppingCart: "Shopping Cart",
     cartDescription: "Manage your orders",
     emptyCart: "Your cart is empty",
+    people: "people",
+    serves: "serves",
+    cookingTime: "Cooking time",
+    minutes: "minutes",
+    category: "category",
+
     items: "items",
     total: "Total",
     notes: "Notes",
@@ -136,7 +154,7 @@ export const translations = {
     orderError: "Error submitting order",
     emptyCartError: "Your cart is empty",
 
-    available: "سبد خرید شما خالی است",
+    available: "available",
     notAvailable: "not available",
   },
 };

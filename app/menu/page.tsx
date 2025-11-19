@@ -55,9 +55,9 @@ export default function Home() {
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const t = (key: string) => {
-  const langTranslations = translations[language] as Record<string, string>;
-  return langTranslations[key] || key;
-};
+    const langTranslations = translations[language] as Record<string, string>;
+    return langTranslations[key] || key;
+  };
 
   //   search input
   const [searchTerm, setSearchTerm] = useState("");
@@ -398,7 +398,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* شبکه کارت‌های غذا */}
+      {/* شروع کارت غذا */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
         {filterFood.length > 0 ? (
           filterFood.map((food) => (
@@ -407,10 +407,12 @@ export default function Home() {
               key={food.id}
               className="relative flex items-center w-full h-35 bg-orange-100/10 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
             >
-              <Link
-                href={`/menu/${food.id}`}
-                className="w-4/12 h-full rounded-2xl p-[2.1px] bg-[linear-gradient(135deg,#10b981_0%,transparent_35%),linear-gradient(-45deg,#10b981_0%,transparent_35%)]"
-              >
+
+              {/*  شروع عکس کارت غذا */}
+              <div
+                onClick={() => handleFoodClick(food)}
+                className="w-4/12 h-full rounded-2xl p-[2.1px] bg-[linear-gradient(135deg,#10b981_0%,transparent_35%),linear-gradient(-45deg,#10b981_0%,transparent_35%)] cursor-pointer"
+               >
                 <div className="w-full h-full rounded-[13px] overflow-hidden bg-orange-200">
                   <img
                     src={food.image_url}
@@ -418,32 +420,39 @@ export default function Home() {
                     className="object-cover w-full h-full"
                   />
                 </div>
-              </Link>
+              </div>
+              {/*  پایان عکس کارت غذا */}
 
-              <div
-                onClick={() => handleFoodClick(food)}
-                className="flex flex-col mx-3 w-8/12"
-              >
-                <h2 className="text-md font-semibold text-gray-800 truncate">
-                  {getFoodName(food)}
-                </h2>
 
-                {/* مواد تشکیل دهنده */}
-                {getIngredients(food) && (
-                  <p className="text-gray-600 text-[13px] leading-4.5">
-                    {getIngredients(food).toString()}
-                  </p>
-                )}
+              {/* شروع متن کارت غذا */}
+              <div className="flex flex-col mx-3 w-8/12">
+                <div 
+                  onClick={() => handleFoodClick(food)}
+                  className="cursor-pointer"
+                >
+                  <h2 className="text-md font-semibold text-gray-800 truncate">
+                    {getFoodName(food)}
+                  </h2>
 
-                <span className="text-[14px] font-bold text-yellow-600 mt-1">
-                  {food.price.toLocaleString()} {t("price")}
-                </span>
+                  {/* مواد تشکیل دهنده */}
+                  {getIngredients(food) && (
+                    <p className="text-gray-600 text-[13px] leading-4.5">
+                      {getIngredients(food).toString()}
+                    </p>
+                  )}
+                  {/* قیمت غذا */}
+                  <span className="text-[14px] font-bold text-yellow-600 mt-1">
+                    {food.price.toLocaleString()} {t("price")}
+                  </span>
+                </div>
 
+
+                {/* دکمه افزودن به سبد خرید */}
                 <div className=" flex justify-end ml-3">
                   {!food.is_available ? (
                     <Badge
                       variant={food.is_available ? "default" : "destructive"}
-                      className=""
+                      className={`${food.is_available ? '' : 'opacity-30'}`}
                     >
                       {food.is_available ? t("available") : t("notAvailable")}
                     </Badge>
@@ -454,15 +463,7 @@ export default function Home() {
                   )}
                 </div>
               </div>
-              {selectedFood && (
-                <FoodDetails
-                  food={selectedFood}
-                  isOpen={isDetailsOpen}
-                  onClose={handleCloseDetails}
-                  getFoodName={getFoodName}
-                  getFoodDescription={getFoodDescription}
-                />
-              )}
+              {/* پایان متن کارت غذا */}
             </div>
           ))
         ) : (
@@ -471,6 +472,19 @@ export default function Home() {
           </div>
         )}
       </div>
+      {/* پایان کارت غذا */}
+
+      {/* FoodDetails فقط یک بار اینجا رندر شود */}
+      {selectedFood && (
+        <FoodDetails
+          food={selectedFood}
+          isOpen={isDetailsOpen}
+          onClose={handleCloseDetails}
+          getFoodName={getFoodName}
+          getFoodDescription={getFoodDescription}
+          getIngredients={getIngredients}
+        />
+      )}
 
       <p className="text-center text-gray-400 text-sm mt-6">
         © 2025 Watandar Restaurant
