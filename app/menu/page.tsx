@@ -42,6 +42,7 @@ import CartDrawer from "@/components/CartDrawer";
 import FoodDetails from "@/components/FoodDetails";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export default function Home() {
   const id = useId();
@@ -252,7 +253,19 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6 overflow-y-auto overscroll-none touch-pan-y">
+    <main className="min-h-screen p-6 overflow-y-auto overscroll-none touch-pan-y">
+      {/* Background Image - Fixed */}
+      <div className="fixed inset-0 -z-10">
+        <Image
+          src={"/wood2-bg.jpg"}
+          alt={t("restaurantName")}
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/40"></div>
+      </div>
+
       <div
         className={`fixed top-0 left-0 right-0 flex justify-center transition-transform duration-300 ${
           refreshing ? "translate-y-4 opacity-100" : "-translate-y-10 opacity-0"
@@ -263,8 +276,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* header */}
-      <div className="fixed top-0 left-0 transform w-full bg-white/20 backdrop-blur-md z-40 border-b shadow-md py-2">
+      {/* شروع هدر */}
+      <div className="fixed top-0 left-0 transform w-full bg-white/1 border border-b-white/10 backdrop-blur-xs z-40 shadow-lg py-2">
         <div className="flex justify-between px-4 items-center">
           {/* sidebar */}
           <Drawer direction="right">
@@ -298,38 +311,7 @@ export default function Home() {
                 </DrawerTitle>
                 <DrawerDescription></DrawerDescription>
               </DrawerHeader>
-              <div className="flex flex-col gap-3 p-4">
-                <div className="">
-                  {/* دکمه نمایش همه غذاها */}
-                  <Button
-                    variant={selectedCategory === null ? "default" : "outline"}
-                    onClick={() => setSelectedCategory(null)}
-                    className="justify-start w-40 flex items-center"
-                  >
-                    {t("allFoods")}
-                  </Button>
 
-                  {/* دکمه‌های دسته‌بندی‌ها */}
-                  {categories.length > 0 ? (
-                    categories.map((category) => (
-                      <Button
-                        key={category.id}
-                        variant={
-                          selectedCategory === category.slug
-                            ? "default"
-                            : "outline"
-                        }
-                        onClick={() => setSelectedCategory(category.slug)}
-                        className="justify-start w-40 flex items-center"
-                      >
-                        {category.name}
-                      </Button>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500">{t("noFoods")}</p>
-                  )}
-                </div>
-              </div>
               <DrawerFooter>
                 <DrawerClose className="absolute top-6 left-2">
                   <Button variant="ghost">
@@ -340,16 +322,6 @@ export default function Home() {
             </DrawerContent>
           </Drawer>
 
-          <div className="flex justify-center items-center">
-            <Image
-              src="/logo.png"
-              alt="Vatandar logo"
-              width={80}
-              height={50}
-              className="object-cover"
-            />
-          </div>
-
           {/* language button */}
           <div>
             <LanguageSwitcher />
@@ -357,9 +329,46 @@ export default function Home() {
           </div>
         </div>
       </div>
+      {/* پایان هدر */}
+
+      {/* شروع دسته بندی */}
+      <div className="mt-10 mb-5">
+        <ScrollArea dir={language === 'en' ? 'ltr' : 'rtl'} className="rounded-md flex whitespace-nowrap">
+          <div className="flex space-x-2">
+            {/* دکمه نمایش همه غذاها */}
+            <Button
+              variant={selectedCategory === null ? "default" : "outline"}
+              onClick={() => setSelectedCategory(null)}
+              className="justify-start flex items-center"
+            >
+              {t("allFoods")}
+            </Button>
+
+            {/* دکمه‌های دسته‌بندی‌ها */}
+            {categories.length > 0 ? (
+              categories.map((category) => (
+                <Button
+                  key={category.id}
+                  variant={
+                    selectedCategory === category.slug ? "default" : "outline"
+                  }
+                  onClick={() => setSelectedCategory(category.slug)}
+                  className="justify-start flex items-center"
+                >
+                  {category.name}
+                </Button>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">{t("noFoods")}</p>
+            )}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
+      {/* پایان دسته بندی */}
 
       {/* دکمه دسته بندی و موتور جستجو */}
-      <div className="flex items-center justify-center w-full space-x-2 mt-25">
+      <div className="flex items-center justify-center w-full space-x-2 ">
         <div className="*:not-first:mt-2 w-11/12">
           <div className="relative">
             <Input
@@ -388,7 +397,7 @@ export default function Home() {
       </div>
 
       {/* نمایش تعداد غذاهای فیلتر شده */}
-      <div className="my-3 text-sm text-gray-600">
+      <div className="my-3 text-sm text-gray-200">
         {selectedCategory ? (
           <p>
             {t("showingCategory")}{" "}
@@ -412,7 +421,7 @@ export default function Home() {
             <div
               dir={`${language === "en" ? "ltr" : "rtl"}`}
               key={food.id}
-              className="relative flex items-center w-full h-35 bg-orange-100/10 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
+              className="relative flex items-center w-full h-35 backdrop-blur-xs bg-linear-to-t from-white/20 to-transparent border-b border-white/50 rounded-2xl shadow-lg hover:shadow-lg transition-all duration-200 active:scale-95"
             >
               {/*  شروع عکس کارت غذا */}
               <div
@@ -435,13 +444,13 @@ export default function Home() {
                   onClick={() => handleFoodClick(food)}
                   className="cursor-pointer"
                 >
-                  <h2 className="text-md font-semibold text-gray-800 truncate">
+                  <h2 className="text-md font-semibold text-gray-100 truncate">
                     {getFoodName(food)}
                   </h2>
 
                   {/* مواد تشکیل دهنده */}
                   {getIngredients(food) && (
-                    <p className="text-gray-600 text-[13px] leading-4.5">
+                    <p className="text-gray-200 text-[13px] leading-4.5">
                       {getIngredients(food).toString()}
                     </p>
                   )}
@@ -471,7 +480,7 @@ export default function Home() {
             </div>
           ))
         ) : (
-          <div className="col-span-full text-center py-8 text-gray-500">
+          <div className="col-span-full text-center py-8 text-gray-200">
             {selectedCategory ? t("noFoodInCategory") : t("noFoods")}
           </div>
         )}
@@ -490,7 +499,7 @@ export default function Home() {
         />
       )}
 
-      <p className="text-center text-gray-400 text-sm mt-6">
+      <p className="text-center text-gray-200 text-sm mt-6">
         © 2025 Watandar Restaurant
       </p>
     </main>
