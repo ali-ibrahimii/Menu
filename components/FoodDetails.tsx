@@ -103,7 +103,7 @@ export default function FoodDetails({
 
               {/* گالری تصاویر */}
               {images.length > 1 && (
-                <div className="flex gap-3 overflow-x-auto pb-4">
+                <div className="flex gap-3 overflow-x-auto">
                   {images.map((image, index) => (
                     <button
                       key={index}

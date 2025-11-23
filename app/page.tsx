@@ -36,6 +36,7 @@ import { translations } from "@/translations/translation";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import CheckRestaurantStatus from '@/components/CheckRestaurantStatus'
 
 export default function Home() {
   const [foods, setFoods] = useState<Food[]>([]);
@@ -244,8 +245,7 @@ export default function Home() {
       <div className="absolute bottom-0 w-full z-20">
         <div className="bg-linear-0 from-gray-400 from-40% to-gray-50/60 pb-20 rounded-t-[55px] pt-8 px-4">
           <div className="absolute left-0 top-12 flex items-center gap-2 bg-gray-200 px-4 py-3 rounded-tr-xl rounded-br-xl font-bold">
-            <Clock size={17} />
-            <span className="font-medium pb-1">{t("open")}</span>
+            <CheckRestaurantStatus />
           </div>
 
           {/* Navigation Bar */}

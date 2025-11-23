@@ -1,5 +1,6 @@
 export const translations = {
   fa: {
+    menu: "مینو",
     restaurantName: "رستوران وطندار",
     address: "بلوار امام خمینی، میدان ده دی",
     address1: "بلوار شهید مفتح، چهار راه ابوریحان",
@@ -56,6 +57,7 @@ export const translations = {
     notAvailable: "ناموجود",
   },
   ar: {
+    menu: "قائمة الطعام",
     restaurantName: "مطعم وطندار",
     address: "شارع الإمام الخميني، ساحة ده دي",
     address1: "جادة الشهيد مفتاح، مفترق أبو ريحان",
@@ -107,6 +109,7 @@ export const translations = {
     notAvailable: "غير موجود",
   },
   en: {
+    menu: "Menu",
     restaurantName: "Vatandar Restaurant",
     address: "Imam Khomeini Boulevard, Deh Day Square",
     address1: "Shahid Mofateh Blvd., Abu Raihan Crossroads",

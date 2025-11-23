@@ -44,6 +44,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
+
 export default function Home() {
   const id = useId();
   const [foods, setFoods] = useState<Food[]>([]);
@@ -253,30 +254,29 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen p-6 overflow-y-auto overscroll-none touch-pan-y">
-
-      <div
-        className={`fixed top-0 left-0 right-0 flex justify-center transition-transform duration-300 ${
-          refreshing ? "translate-y-4 opacity-100" : "-translate-y-10 opacity-0"
-        }`}
-      >
-        <div className="bg-green-100 text-green-600 px-4 py-1 rounded-full text-sm shadow">
-          منو به‌روزرسانی شد ✅
-        </div>
-      </div>
-
+    <main className="min-h-screen px-6 py-2 overflow-y-auto overscroll-none touch-pan-y">
       
        {/* دکمه دسته بندی و موتور جستجو */}
-      <div className="flex items-center justify-center w-full space-x-2 ">
+        <div 
+          className={`${language === 'en' ? "py-2" : "py-4"} text-4xl font-bold`}
+          dir={language === "en" ? "ltr" : "rtl"}
+        >
+          <h1 className={`text-4xl font-bold font-per`}>{t('menu')}</h1>
+        </div>
+      <div
+        dir={language === "en" ? "rtl" : "ltr"}      
+        className="flex items-center justify-center w-full space-x-2 ">
         <div className="flex">
           <LanguageSwitcher />
           <CartDrawer />
         </div>
         <div className="*:not-first:mt-2 w-11/12">
-          <div className="relative">
+          <div
+            dir={language === "en" ? "ltr" : "rtl"}
+            className="relative">
             <Input
               id={id}
-              className="peer ps-9 pe-9 rounded-full bg-accent w-full h-10 text-md px-20"
+              className="peer ps-9 pe-9 rounded-md bg-accent w-full h-10 text-md"
               placeholder={t("search")}
               type="search"
               value={searchTerm}
@@ -323,14 +323,14 @@ export default function Home() {
                   onClick={() => setSelectedCategory(category.slug)}
                   className="justify-start flex items-center"
                 >
-                  {category.name}
+                  {language === 'en' ? category.slug : language === 'ar' ? category.name_ar : category.name}
                 </Button>
               ))
             ) : (
               <p className="text-sm text-gray-500">{t("noFoods")}</p>
             )}
           </div>
-          <ScrollBar orientation="horizontal" />
+          <ScrollBar orientation="horizontal" className="hidden" />
         </ScrollArea>
       </div>
       {/* پایان دسته بندی */}

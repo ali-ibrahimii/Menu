@@ -1,4 +1,4 @@
-import "./globals.css";
+import "../styles/globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -11,7 +11,9 @@ export default function RootLayout({
     <html lang="fa" dir="rtl">
       <body>
         <LanguageProvider>
-          <Toaster />
+          <Toaster
+            position="top-center"
+          />
           {children}
         </LanguageProvider>
       </body>
