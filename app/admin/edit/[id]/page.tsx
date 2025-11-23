@@ -1,31 +1,31 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
-import { toast } from "sonner"
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 
 export default function EditFoodPage() {
-  const { id } = useParams()
-  const router = useRouter()
-  const [files, setFiles] = useState<File[]>([])
-  const [imageUrls, setImageUrls] = useState<string[]>([])
-  const [loading, setLoading] = useState(true)
-  const [updating, setUpdating] = useState(false)
-  const [uploadLoading, setUploadLoading] = useState(false)
-  const [category, setCategory] = useState("")
+  const { id } = useParams();
+  const router = useRouter();
+  const [files, setFiles] = useState<File[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [category, setCategory] = useState("");
 
   const [form, setForm] = useState({
     // اطلاعات اصلی
@@ -51,25 +51,25 @@ export default function EditFoodPage() {
     is_spicy: false,
     is_vegetarian: false,
     tags: "",
-  })
+  });
 
   // گرفتن اطلاعات غذا از Supabase
   useEffect(() => {
-    if (!id) return
-    fetchFood()
-  }, [id])
+    if (!id) return;
+    fetchFood();
+  }, [id]);
 
   const fetchFood = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('foods')
-        .select('*')
-        .eq('id', id)
-        .single()
+        .from("foods")
+        .select("*")
+        .eq("id", id)
+        .single();
 
       if (error) {
-        throw error
+        throw error;
       }
 
       // پر کردن فرم با اطلاعات موجود
@@ -89,80 +89,79 @@ export default function EditFoodPage() {
         is_available: data.is_available ?? true,
         is_spicy: data.is_spicy ?? false,
         is_vegetarian: data.is_vegetarian ?? false,
-        tags: data.tags ? data.tags.join(', ') : "",
-      })
+        tags: data.tags ? data.tags.join(", ") : "",
+      });
 
-      setCategory(data.category || "")
-      
+      setCategory(data.category || "");
+
       // تنظیم تصاویر
       if (data.images && data.images.length > 0) {
-        setImageUrls(data.images)
+        setImageUrls(data.images);
       } else if (data.image_url) {
-        setImageUrls([data.image_url])
+        setImageUrls([data.image_url]);
       }
-
     } catch (error: any) {
-      console.error('Error fetching food:', error)
-      toast.error("خطا در دریافت اطلاعات غذا")
+      console.error("Error fetching food:", error);
+      toast.error("خطا در دریافت اطلاعات غذا");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) {
-      toast.warning("لطفاً حداقل یک عکس انتخاب کنید")
-      return
+      toast.warning("لطفاً حداقل یک عکس انتخاب کنید");
+      return;
     }
 
-    setUploadLoading(true)
-    const uploadedUrls: string[] = []
+    setUploadLoading(true);
+    const uploadedUrls: string[] = [];
 
     try {
       for (let i = 0; i < files.length; i++) {
-        const file = files[i]
-        const fileName = `${Date.now()}-${i}-${file.name}`
+        const file = files[i];
+        const fileName = `${Date.now()}-${i}-${file.name}`;
 
         const { data, error } = await supabase.storage
           .from("menu-images")
-          .upload(fileName, file)
+          .upload(fileName, file);
 
         if (error) {
-          console.error(error)
-          toast.warning(`خطا در آپلود عکس ${i + 1}`)
-          continue
+          console.error(error);
+          toast.warning(`خطا در آپلود عکس ${i + 1}`);
+          continue;
         }
 
         const { data: publicUrlData } = supabase.storage
           .from("menu-images")
-          .getPublicUrl(fileName)
+          .getPublicUrl(fileName);
 
-        uploadedUrls.push(publicUrlData.publicUrl)
+        uploadedUrls.push(publicUrlData.publicUrl);
       }
 
-      setImageUrls((prev) => [...prev, ...uploadedUrls])
-      toast.success(`${uploadedUrls.length} عکس با موفقیت آپلود شد`)
+      setImageUrls((prev) => [...prev, ...uploadedUrls]);
+      toast.success(`${uploadedUrls.length} عکس با موفقیت آپلود شد`);
     } catch (error) {
-      console.error("Error uploading files:", error)
-      toast.warning("خطا در آپلود عکس‌ها")
+      console.error("Error uploading files:", error);
+      toast.warning("خطا در آپلود عکس‌ها");
     } finally {
-      setUploadLoading(false)
+      setUploadLoading(false);
     }
-  }
+  };
 
   const removeImage = (index: number) => {
-    setImageUrls((prev) => prev.filter((_, i) => i !== index))
-  }
+    setImageUrls((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!form.name_fa || !form.price || imageUrls.length === 0 || !category) {
-      toast.warning("تمام فیلدهای ضروری را پر کنید")
-      return
+      toast.warning("تمام فیلدهای ضروری را پر کنید");
+      return;
     }
 
-    setUpdating(true)
+    setUpdating(true);
 
     try {
       const foodData = {
@@ -192,51 +191,50 @@ export default function EditFoodPage() {
         is_spicy: form.is_spicy,
         is_vegetarian: form.is_vegetarian,
         updated_at: new Date().toISOString(),
-      }
+      };
 
       const { error } = await supabase
         .from("foods")
         .update(foodData)
-        .eq('id', id)
+        .eq("id", id);
 
       if (error) {
-        throw error
+        throw error;
       }
 
-      toast.success("غذا با موفقیت ویرایش شد")
-      router.push('/admin/foods')
-
+      toast.success("غذا با موفقیت ویرایش شد");
+      router.push("/admin/foods");
     } catch (error: any) {
-      console.error("Error updating food:", error)
-      toast.error("خطا در ویرایش غذا: " + error.message)
+      console.error("Error updating food:", error);
+      toast.error("خطا در ویرایش غذا: " + error.message);
     } finally {
-      setUpdating(false)
+      setUpdating(false);
     }
-  }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleSwitchChange = (name: string, checked: boolean) => {
     setForm((prev) => ({
       ...prev,
       [name]: checked,
-    }))
-  }
+    }));
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <p className="text-lg">در حال بارگذاری اطلاعات غذا...</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -262,11 +260,16 @@ export default function EditFoodPage() {
               onChange={(e) => handleFileUpload(e.target.files)}
               className="border p-2 w-full rounded"
             />
-            <Button 
-              type="button" 
-              disabled={uploadLoading} 
+            <Button
+              type="button"
+              disabled={uploadLoading}
               className="w-full"
-              onClick={() => document.querySelector('input[type="file"]')?.click()}
+              onClick={() => {
+                const fileInput = document.querySelector(
+                  'input[type="file"]'
+                ) as HTMLInputElement;
+                fileInput?.click();
+              }}
             >
               {uploadLoading ? "در حال آپلود..." : "آپلود عکس‌های جدید"}
             </Button>
@@ -446,7 +449,7 @@ export default function EditFoodPage() {
           <h2 className="text-xl font-semibold text-orange-600 border-b pb-2">
             مواد تشکیل دهنده
           </h2>
-          
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="ingredients_fa">مواد تشکیل دهنده (فارسی)</Label>
@@ -562,7 +565,7 @@ export default function EditFoodPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push('/admin/foods')}
+            onClick={() => router.push("/admin/foods")}
             className="flex-1"
           >
             انصراف
@@ -578,5 +581,5 @@ export default function EditFoodPage() {
         </div>
       </form>
     </div>
-  )
+  );
 }
