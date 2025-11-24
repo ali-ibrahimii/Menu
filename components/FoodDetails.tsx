@@ -9,18 +9,15 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { useState } from "react";
 import { Food } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Clock,
   Users,
-  Star,
   Flame,
   Leaf,
-  X,
   ShoppingCart,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -76,7 +73,7 @@ export default function FoodDetails({
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent className="h-[90vh]">
+      <DrawerContent className="h-[90vh] aspect-auto">
        
 
         <DrawerHeader className="pt-5">

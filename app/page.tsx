@@ -130,7 +130,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div dir={language === "en" ? "ltr" : "rtl"} className="flex justify-center items-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
           <p className="text-gray-600">{t("loading")}</p>
@@ -243,14 +243,14 @@ export default function Home() {
 
       {/* Main Content Card */}
       <div className="absolute bottom-0 w-full z-20">
-        <div className="bg-linear-0 from-gray-400 from-40% to-gray-50/60 pb-20 rounded-t-[55px] pt-8 px-4">
-          <div className="absolute left-0 top-12 flex items-center gap-2 bg-gray-200 px-4 py-3 rounded-tr-xl rounded-br-xl font-bold">
+        <div className="bg-linear-0 from-gray-400 from-40% to-gray-50/60 pb-15 rounded-t-[55px] pt-8 px-4">
+          <div className="">
             <CheckRestaurantStatus />
           </div>
 
           {/* Navigation Bar */}
-          <div className="flex flex-col items-center space-y-10 w-full">
-            <div className="flex-col flex items-center space-y-1">
+          <div className="flex flex-col items-center space-y-10 w-full border">
+            <div className="flex-col flex items-center space-y-1 border">
               {/* Logo */}
               <Image
                 src={"/logo.png"}
@@ -259,7 +259,7 @@ export default function Home() {
                 height={40}
                 className="object-cover"
               />
-              <div className="text-center">
+              <div className="text-center border">
                 <h1 className="text-2xl font-bold mb-2">
                   {t("restaurantName")}
                 </h1>
@@ -275,7 +275,7 @@ export default function Home() {
             </div>
 
             {/* Social */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 border">
               <div className="flex items-center gap-3">
                 <button className="p-3 rounded-full border-2 border-black">
                   <Share2 size={20} />
@@ -296,8 +296,8 @@ export default function Home() {
             </div>
 
             {/* menu view button */}
-            <Link href="/menu">
-              <Button className="w-full px-15 py-5">
+            <Link href="/menu" className="w-full flex justify-center">
+              <Button className="px-15 py-5 w-full">
                 {t("viewMenu")}
               </Button>
             </Link>

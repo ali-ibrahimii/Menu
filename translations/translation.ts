@@ -125,7 +125,7 @@ export const translations = {
     noFoodInCategory: "No food found in this category",
     noFoods: "No foods found",
     price: "TOM",
-    search: "...search",
+    search: "search...",
     sideBarMenu: "For watching the foods category, click there button",
     language: "Language",
     shoppingCart: "Shopping Cart",

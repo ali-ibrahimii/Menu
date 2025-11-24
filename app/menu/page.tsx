@@ -1,56 +1,27 @@
 "use client";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import { useId } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Globe,
-  X,
-  Menu,
-  ArrowLeft,
-  SearchIcon,
-  CheckCircle,
-  LayoutGrid,
-} from "lucide-react";
+import { ArrowLeft, SearchIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import Image from "next/image";
 import { Food, Category } from "@/types";
 import { translations } from "@/translations/translation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import AddToCartButton from "@/components/AddToCartButton";
 import CartDrawer from "@/components/CartDrawer";
 import FoodDetails from "@/components/FoodDetails";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-
+import Link from "next/link";
 
 export default function Home() {
   const id = useId();
   const [foods, setFoods] = useState<Food[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const { language } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filteredFoods, setFilteredFoods] = useState<Food[]>([]);
@@ -63,8 +34,15 @@ export default function Home() {
 
   //   search input
   const [searchTerm, setSearchTerm] = useState("");
-  const filterFood = filteredFoods.filter((food) =>
-    food.name_fa.toLowerCase().includes(searchTerm.toLowerCase())
+
+  const filterFood = filteredFoods.filter(
+    (food) =>
+      food.name_fa.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      food.name_ar.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      food.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      food.description_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      food.description_ar.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      food.description_fa.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleFoodClick = (food: Food) => {
@@ -174,77 +152,16 @@ export default function Home() {
     }
   }, [selectedCategory, foods]);
 
-  // تابع برای رفرش داده‌ها
-  const fetchData = async () => {
-    try {
-      const { data: foodsData, error: foodsError } = await supabase
-        .from("foods")
-        .select("*");
-
-      if (foodsError) throw foodsError;
-      setFoods(foodsData || []);
-
-      // اینجا هم نام جدول را یکسان کنید
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from("categories") // ✅ اینجا هم "categories"
-        .select("*")
-        .order("name");
-
-      if (categoriesError) throw categoriesError;
-      setCategories(categoriesData || []);
-    } catch (error) {
-      console.error("Error refreshing data:", error);
-    }
-  };
-
-  // ✅ کشیدن برای رفرش (Pull to refresh)
-  useEffect(() => {
-    let startY = 0;
-    let isPulled = false;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      if (window.scrollY === 0) {
-        startY = e.touches[0].clientY;
-        isPulled = true;
-      }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!isPulled) return;
-      const currentY = e.touches[0].clientY;
-      const distance = currentY - startY;
-      if (distance > 80) {
-        setRefreshing(true);
-      }
-    };
-
-    const handleTouchEnd = async () => {
-      if (refreshing) {
-        await fetchData();
-        setTimeout(() => setRefreshing(false), 800);
-      }
-      isPulled = false;
-    };
-
-    window.addEventListener("touchstart", handleTouchStart);
-    window.addEventListener("touchmove", handleTouchMove);
-    window.addEventListener("touchend", handleTouchEnd);
-
-    return () => {
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, [refreshing]);
-
-  // برای دیباگ - بررسی داده‌ها
   console.log("Categories:", categories);
   console.log("Selected Category:", selectedCategory);
   console.log("Filtered Foods:", filteredFoods);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div
+        dir={language === "en" ? "ltr" : "rtl"}
+        className="flex justify-center items-center min-h-screen"
+      >
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
           <p className="text-gray-600">{t("loading")}</p>
@@ -255,42 +172,56 @@ export default function Home() {
 
   return (
     <main className="min-h-screen px-6 py-2 overflow-y-auto overscroll-none touch-pan-y">
-      
-       {/* دکمه دسته بندی و موتور جستجو */}
-        <div 
-          className={`${language === 'en' ? "py-2" : "py-4"} text-4xl font-bold`}
-          dir={language === "en" ? "ltr" : "rtl"}
-        >
-          <h1 className={`text-4xl font-bold font-per`}>{t('menu')}</h1>
-        </div>
+      {/* دکمه برگشت به صفحه ورودی و مینو */}
       <div
-        dir={language === "en" ? "rtl" : "ltr"}      
-        className="flex items-center justify-center w-full space-x-2 ">
+        className={`text-3xl font-bold flex justify-between items-center mt-3 ${language === 'fa' && 'ar' ? 'mb-2' : 'mb-0.5'}`}
+        dir={language === "en" ? "ltr" : "rtl"}
+      >
+        <h1 className={`text-3xl font-bold`}>{t("menu")}</h1>
+        <Link
+          href={"/"}
+          className="flex justify-center active:scale-95 mt-2 items-center rounded-full border bg-accent/50 p-2"
+        >
+          <ChevronLeft
+            size={20}
+            className={`${language === "en" ? "rotate-180" : ""}`}
+          />
+        </Link>
+      </div>
+      <div
+        dir={language === "en" ? "rtl" : "ltr"}
+        className="flex items-center justify-center w-full space-x-3 "
+      >
         <div className="flex">
           <LanguageSwitcher />
           <CartDrawer />
         </div>
         <div className="*:not-first:mt-2 w-11/12">
-          <div
-            dir={language === "en" ? "ltr" : "rtl"}
-            className="relative">
+          <div dir={language === "en" ? "ltr" : "rtl"} className="relative">
             <Input
               id={id}
-              className="peer ps-9 pe-9 rounded-md bg-accent w-full h-10 text-md"
+              className="peer ps-9 pe-9 rounded-full w-full h-10 text-md"
               placeholder={t("search")}
               type="search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-4 pt-1 text-muted-foreground/80 peer-disabled:opacity-50">
-              <SearchIcon size={16} />
+              <SearchIcon
+                size={16}
+                className={`${language === "en" ? "" : "rotate-90"}`}
+              />
             </div>
             <button
               className="absolute inset-y-0 end-1 flex h-full w-9 items-center justify-center rounded-e-md text-muted-foreground/80 transition-[color,box-shadow] outline-none hover:text-foreground focus:z-10 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Submit search"
               type="submit"
             >
-              <ArrowLeft size={17} aria-hidden="true" />
+              <ArrowLeft
+                size={17}
+                aria-hidden="true"
+                className={`${language === "en" ? "rotate-180" : ""}`}
+              />
             </button>
           </div>
         </div>
@@ -307,7 +238,7 @@ export default function Home() {
             <Button
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => setSelectedCategory(null)}
-              className="justify-start flex items-center"
+              className="justify-start flex items-center rounded-full"
             >
               {t("allFoods")}
             </Button>
@@ -321,9 +252,13 @@ export default function Home() {
                     selectedCategory === category.slug ? "default" : "outline"
                   }
                   onClick={() => setSelectedCategory(category.slug)}
-                  className="justify-start flex items-center"
+                  className="justify-start flex items-center rounded-full"
                 >
-                  {language === 'en' ? category.slug : language === 'ar' ? category.name_ar : category.name}
+                  {language === "en"
+                    ? category.slug
+                    : language === "ar"
+                    ? category.name_ar
+                    : category.name}
                 </Button>
               ))
             ) : (
@@ -335,9 +270,8 @@ export default function Home() {
       </div>
       {/* پایان دسته بندی */}
 
-
       {/* نمایش تعداد غذاهای فیلتر شده */}
-      <div className="my-3 text-sm text-gray-700">
+      {/* <div className="my-3 text-sm text-gray-700">
         {selectedCategory ? (
           <p>
             {t("showingCategory")}{" "}
@@ -352,10 +286,10 @@ export default function Home() {
             {t("allFoods")} ({filteredFoods.length} {t("itemsCount")})
           </p>
         )}
-      </div>
+      </div> */}
 
       {/* شروع کارت غذا */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 mt-3 sm:grid-cols-2 md:grid-cols-3">
         {filterFood.length > 0 ? (
           filterFood.map((food) => (
             <div
@@ -420,7 +354,7 @@ export default function Home() {
             </div>
           ))
         ) : (
-          <div className="col-span-full text-center py-8 text-gray-200">
+          <div className="col-span-full text-center py-8 text-gray-600">
             {selectedCategory ? t("noFoodInCategory") : t("noFoods")}
           </div>
         )}
