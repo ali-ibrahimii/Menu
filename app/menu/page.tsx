@@ -314,7 +314,7 @@ export default function Home() {
               {/*  پایان عکس کارت غذا */}
 
               {/* شروع متن کارت غذا */}
-              <div className="flex flex-col mx-3 w-8/12">
+              <div className="flex flex-col mx-3 w-8/12 overflow-hidden">
                 <div
                   onClick={() => handleFoodClick(food)}
                   className="cursor-pointer"
@@ -325,7 +325,7 @@ export default function Home() {
 
                   {/* مواد تشکیل دهنده */}
                   {getIngredients(food) && (
-                    <p className="text-gray-800 text-[13px] leading-4.5">
+                    <p className="text-gray-800 text-[13px] line-clamp-2 leading-4.5">
                       {getIngredients(food).toString()}
                     </p>
                   )}
