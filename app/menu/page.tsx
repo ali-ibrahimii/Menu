@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import Link from "next/link";
 
+
 export default function Home() {
   const id = useId();
   const [foods, setFoods] = useState<Food[]>([]);

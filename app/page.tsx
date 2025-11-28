@@ -37,6 +37,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import CheckRestaurantStatus from '@/components/CheckRestaurantStatus'
+import PhoneDrawer from "@/components/PhoneDrawer";
 
 export default function Home() {
   const [foods, setFoods] = useState<Food[]>([]);
@@ -289,8 +290,8 @@ export default function Home() {
                 <button className="p-3 rounded-full border-2 border-black">
                   <MapPin size={20} color="#000" />
                 </button>
-                <button className="p-3 rounded-full border-2 border-black">
-                  <PhoneCall size={20} color="#000" />
+                <button className="">
+                  <PhoneDrawer />
                 </button>
               </div>
             </div>
