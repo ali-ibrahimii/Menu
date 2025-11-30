@@ -10,20 +10,23 @@ import {
 } from "@/components/ui/drawer";
 import { PhoneCall } from "lucide-react";
 import { Button } from "./ui/button";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRestaurantInfo } from "@/hooks/useRestaurantInfo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { supabase } from "@/lib/supabaseClient";
+import { translations } from "@/translations/translation";
 
 export default function PhoneDrawer() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { translatedInfo, loading, error } = useRestaurantInfo();
-  const { language } = useLanguage()
+  const { translatedInfo } = useRestaurantInfo();
+  const { language } = useLanguage();
+  const t = (key: string) => {
+    const langTranslations = translations[language] as Record<string, string>;
+    return langTranslations[key] || key;
+  };
 
-    const handleClick = () => {
-        setIsDrawerOpen(true)
-    }
-  
+  const handleClick = () => {
+    setIsDrawerOpen(true);
+  };
 
   return (
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
@@ -37,26 +40,33 @@ export default function PhoneDrawer() {
         </Button>
       </DrawerTrigger>
 
-      <DrawerContent className="h-[30vh] bg-accent/90">
+      <DrawerContent className="h-[35vh] bg-accent">
         <DrawerHeader>
-          <DrawerTitle className="flex items-center justify-center gap-2 font-bold text-xl">Contact us</DrawerTitle>
+          <DrawerTitle className="flex items-center justify-center gap-2 font-bold text-xl">
+            {translatedInfo?.name}
+          </DrawerTitle>
           <DrawerDescription></DrawerDescription>
         </DrawerHeader>
 
-        <div>
+        <div className="px-5">
+          <div>
             <h1>{translatedInfo?.branch1.name}</h1>
             <h1>{translatedInfo?.branch1.phone}</h1>
+            <h1>{translatedInfo?.branch1.phone2}</h1>
             <h1>{translatedInfo?.branch1.address}</h1>
-        </div>
-        <div>
+            <h1>{translatedInfo?.branch1.address}</h1>
+            <h1>{}</h1>
+          </div>
+          <div>
             <h1>{translatedInfo?.branch2.name}</h1>
             <h1>{translatedInfo?.branch2.phone}</h1>
+            <h1>{translatedInfo?.branch2.phone4}</h1>
             <h1>{translatedInfo?.branch2.address}</h1>
+          </div>
         </div>
 
-        <DrawerFooter className="flex-row gap-3">
-          <DrawerClose asChild>
-          </DrawerClose>
+        <DrawerFooter>
+          <DrawerClose asChild></DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

@@ -37,13 +37,23 @@ export interface RestaurantInfo {
   name_ar: string;
   name_en: string;
   
-  branch1_name: string;
+  branch1_name_fa: string;
+  branch1_name_ar: string;
+  branch1_name_en: string;
   branch1_phone: string;
-  branch1_address: string;
+  branch1_phone2: string;
+  branch1_address_fa: string;
+  branch1_address_ar: string;
+  branch1_address_en: string;
   
-  branch2_name: string;
+  branch2_name_fa: string;
+  branch2_name_ar: string;
+  branch2_name_en: string;
   branch2_phone: string;
-  branch2_address: string;
+  branch2_phone2: string;
+  branch2_address_fa: string;
+  branch2_address_ar: string;
+  branch2_address_en: string;
   
   working_hours_fa: string;
   working_hours_ar: string;
