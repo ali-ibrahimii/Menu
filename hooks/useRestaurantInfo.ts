@@ -45,13 +45,12 @@ export function useRestaurantInfo() {
         name: restaurantInfo[`branch1_name_${language}` as keyof RestaurantInfo] as string || restaurantInfo.branch1_name_fa,
         phone: restaurantInfo.branch1_phone,
         phone2: restaurantInfo.branch1_phone2,
-        phone3: restaurantInfo.branch2_phone,
-        phone4: restaurantInfo.branch2_phone2,
         address: restaurantInfo[`branch1_address_${language}` as keyof RestaurantInfo] as string || restaurantInfo.branch1_address_fa
       },
       branch2: {
         name: restaurantInfo[`branch2_name_${language}` as keyof RestaurantInfo] as string || restaurantInfo.branch2_name_fa,
         phone: restaurantInfo.branch2_phone,
+        phone2: restaurantInfo.branch2_phone2,
         address: restaurantInfo[`branch2_address_${language}` as keyof RestaurantInfo] as string || restaurantInfo.branch2_address_fa
       },
       instagram: restaurantInfo.instagram_url,

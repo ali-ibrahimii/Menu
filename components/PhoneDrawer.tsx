@@ -60,7 +60,7 @@ export default function PhoneDrawer() {
           <div>
             <h1>{translatedInfo?.branch2.name}</h1>
             <h1>{translatedInfo?.branch2.phone}</h1>
-            <h1>{translatedInfo?.branch2.phone4}</h1>
+            <h1>{translatedInfo?.branch2.phone2}</h1>
             <h1>{translatedInfo?.branch2.address}</h1>
           </div>
         </div>
