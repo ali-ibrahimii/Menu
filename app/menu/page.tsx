@@ -17,7 +17,6 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import Link from "next/link";
 
-
 export default function Home() {
   const id = useId();
   const [foods, setFoods] = useState<Food[]>([]);
@@ -175,10 +174,11 @@ export default function Home() {
     <main className="min-h-screen px-6 py-2 overflow-y-auto overscroll-none touch-pan-y">
       {/* دکمه برگشت به صفحه ورودی و مینو */}
       <div
-        className={`text-3xl font-bold flex justify-between items-center mt-3 ${language === 'fa' && 'ar' ? 'mb-2' : 'mb-0.5'}`}
+        className={`text-3xl font-bold flex justify-between items-center my-4`}
         dir={language === "en" ? "ltr" : "rtl"}
       >
         <h1 className={`text-3xl font-bold`}>{t("menu")}</h1>
+
         <Link
           href={"/"}
           className="flex justify-center active:scale-95 mt-2 items-center rounded-full border bg-accent/50 p-2"
@@ -189,15 +189,12 @@ export default function Home() {
           />
         </Link>
       </div>
-      <div
-        dir={language === "en" ? "rtl" : "ltr"}
-        className="flex items-center justify-center w-full space-x-3 "
-      >
-        <div className="flex">
-          <LanguageSwitcher />
-          <CartDrawer />
-        </div>
-        <div className="*:not-first:mt-2 w-11/12">
+
+      <div className="flex items-center justify-center w-full space-x-1">
+        <div
+          dir={language === "en" ? "rtl" : "ltr"}
+          className="*:not-first:mt-2 w-full"
+        >
           <div dir={language === "en" ? "ltr" : "rtl"} className="relative">
             <Input
               id={id}
@@ -226,10 +223,14 @@ export default function Home() {
             </button>
           </div>
         </div>
+        <div className="flex">
+          <LanguageSwitcher />
+          <CartDrawer />
+        </div>
       </div>
 
       {/* شروع دسته بندی */}
-      <div className="mt-3">
+      <div className="mt-2.5">
         <ScrollArea
           dir={language === "en" ? "ltr" : "rtl"}
           className="rounded-md flex whitespace-nowrap"
@@ -239,7 +240,7 @@ export default function Home() {
             <Button
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => setSelectedCategory(null)}
-              className="justify-start flex items-center rounded-full"
+              className="justify-start flex items-center rounded-full text-[13px]"
             >
               {t("allFoods")}
             </Button>
@@ -253,7 +254,7 @@ export default function Home() {
                     selectedCategory === category.slug ? "default" : "outline"
                   }
                   onClick={() => setSelectedCategory(category.slug)}
-                  className="justify-start flex items-center rounded-full"
+                  className="justify-start flex items-center rounded-full text-[13px]"
                 >
                   {language === "en"
                     ? category.slug
@@ -336,7 +337,7 @@ export default function Home() {
                 </div>
 
                 {/* دکمه افزودن به سبد خرید */}
-                <div className=" flex justify-end ml-3">
+                <div className=" flex justify-end">
                   {!food.is_available ? (
                     <Badge
                       variant={food.is_available ? "default" : "destructive"}
