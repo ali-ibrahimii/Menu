@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react"; // ✅ اضافه کردن useEffect
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { supabase } from "@/lib/supabaseClient";
 
 interface RatingSystemProps {
   foodId: string;
+  onRatingStatsChange?: (stats: RatingStats) => void; // ✅ اضافه کردن prop جدید
 }
 
 interface Review {
@@ -21,7 +22,13 @@ interface Review {
   created_at: string;
 }
 
-export default function RatingSystem({ foodId }: RatingSystemProps) {
+// ✅ اینترفیس برای آمار امتیازها
+export interface RatingStats {
+  averageRating: number;
+  totalReviews: number;
+}
+
+export default function RatingSystem({ foodId, onRatingStatsChange }: RatingSystemProps) {
   const { language } = useLanguage();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -29,7 +36,7 @@ export default function RatingSystem({ foodId }: RatingSystemProps) {
   const [comment, setComment] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [loadingReviews, setLoadingReviews] = useState(true); // ✅ اضافه کردن state برای لودینگ
+  const [loadingReviews, setLoadingReviews] = useState(true);
 
   const t = (key: string) => {
     const translations = {
@@ -85,7 +92,22 @@ export default function RatingSystem({ foodId }: RatingSystemProps) {
     return translations[language][key as keyof typeof translations.fa] || key;
   };
 
-  // ✅ تابع بارگذاری نظرات
+  // محاسبه میانگین امتیاز
+  const averageRating = reviews.length > 0 
+    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
+    : 0;
+
+  // ✅ تابع برای ارسال آمار به parent component
+  const updateRatingStats = () => {
+    if (onRatingStatsChange) {
+      onRatingStatsChange({
+        averageRating,
+        totalReviews: reviews.length
+      });
+    }
+  };
+
+  // ✅ بارگذاری نظرات
   const loadReviews = async () => {
     try {
       setLoadingReviews(true);
@@ -104,12 +126,16 @@ export default function RatingSystem({ foodId }: RatingSystemProps) {
     }
   };
 
-  // ✅ بارگذاری خودکار نظرات هنگام لود کامپوننت
   useEffect(() => {
     if (foodId) {
       loadReviews();
     }
   }, [foodId]);
+
+  // ✅ ارسال آمار هنگام تغییر reviews
+  useEffect(() => {
+    updateRatingStats();
+  }, [reviews]);
 
   const submitReview = async () => {
     if (!customerName.trim() || rating === 0) {
@@ -151,47 +177,9 @@ export default function RatingSystem({ foodId }: RatingSystemProps) {
     }
   };
 
-  // محاسبه میانگین امتیاز
-  const averageRating = reviews.length > 0 
-    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
-    : 0;
-
   return (
     <div className="space-y-6">
-      {/* آمار کلی */}
-      <div className=" rounded-xl px-6">
-        <div className="flex items-center flex-col w-full">
-          <div className="text-center flex flex-col px-8 py-4 bg-purple-50 rounded-xl">
-            <div className="font-semibold text-yellow-600">
-              {averageRating.toFixed(1)}
-            </div>
-            <div className="flex justify-center mt-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  size={16}
-                  className={`${
-                    star <= Math.round(averageRating)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
-            <div className="text-sm text-gray-600 mt-2">
-                {/* آمار بر اساس نظرات متن */}
-              {/* {t('basedOn')} {reviews.length} {t('reviewsCount')} */}
-            </div>
-          </div>
-
-          <Button
-            onClick={() => setShowReviewForm(true)}
-            className="bg-green-600 hover:bg-green-700 w-full mt-5"
-          >
-            {t('addReview')}
-          </Button>
-        </div>
-      </div>
+      {/* ✅ حذف بخش آمار کلی از اینجا */}
 
       {/* فرم ثبت نظر */}
       {showReviewForm && (
@@ -266,12 +254,21 @@ export default function RatingSystem({ foodId }: RatingSystemProps) {
         </div>
       )}
 
+      {/* دکمه ثبت نظر */}
+      {!showReviewForm && (
+        <Button
+          onClick={() => setShowReviewForm(true)}
+          className="bg-green-600 hover:bg-green-700 w-full"
+        >
+          {t('addReview')}
+        </Button>
+      )}
+
       {/* لیست نظرات */}
       <div className="space-y-4">
         <h3 className="text-xl font-semibold">{t('reviews')}</h3>
         
         {loadingReviews ? (
-          // ✅ نمایش لودینگ
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
             <p className="text-gray-600">{t('loadingReviews')}</p>
