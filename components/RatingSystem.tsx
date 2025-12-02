@@ -28,7 +28,10 @@ export interface RatingStats {
   totalReviews: number;
 }
 
-export default function RatingSystem({ foodId, onRatingStatsChange }: RatingSystemProps) {
+export default function RatingSystem({
+  foodId,
+  onRatingStatsChange,
+}: RatingSystemProps) {
   const { language } = useLanguage();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -54,7 +57,7 @@ export default function RatingSystem({ foodId, onRatingStatsChange }: RatingSyst
         reviewsCount: "نظر",
         submit: "ثبت",
         submitting: "در حال ثبت...",
-        loadingReviews: "در حال بارگذاری نظرات..."
+        loadingReviews: "در حال بارگذاری نظرات...",
       },
       ar: {
         addReview: "إضافة تقييم",
@@ -70,7 +73,7 @@ export default function RatingSystem({ foodId, onRatingStatsChange }: RatingSyst
         reviewsCount: "تقييم",
         submit: "إرسال",
         submitting: "جاري الإرسال...",
-        loadingReviews: "جاري تحميل التقييمات..."
+        loadingReviews: "جاري تحميل التقييمات...",
       },
       en: {
         addReview: "Add Review",
@@ -86,23 +89,24 @@ export default function RatingSystem({ foodId, onRatingStatsChange }: RatingSyst
         reviewsCount: "reviews",
         submit: "Submit",
         submitting: "Submitting...",
-        loadingReviews: "Loading reviews..."
-      }
+        loadingReviews: "Loading reviews...",
+      },
     };
     return translations[language][key as keyof typeof translations.fa] || key;
   };
 
   // محاسبه میانگین امتیاز
-  const averageRating = reviews.length > 0 
-    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
-    : 0;
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+      : 0;
 
   // ✅ تابع برای ارسال آمار به parent component
   const updateRatingStats = () => {
     if (onRatingStatsChange) {
       onRatingStatsChange({
         averageRating,
-        totalReviews: reviews.length
+        totalReviews: reviews.length,
       });
     }
   };
@@ -153,21 +157,21 @@ export default function RatingSystem({ foodId, onRatingStatsChange }: RatingSyst
             customer_name: customerName.trim(),
             rating,
             comment: comment.trim(),
-          }
+          },
         ])
         .select();
 
       if (error) throw error;
 
       // افزودن نظر جدید به لیست
-      setReviews(prev => [data[0], ...prev]);
-      
+      setReviews((prev) => [data[0], ...prev]);
+
       // ریست فرم
       setRating(0);
       setComment("");
       setCustomerName("");
       setShowReviewForm(false);
-      
+
       alert("نظر شما با موفقیت ثبت شد");
     } catch (error) {
       console.error("Error submitting review:", error);
@@ -178,105 +182,32 @@ export default function RatingSystem({ foodId, onRatingStatsChange }: RatingSyst
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       {/* ✅ حذف بخش آمار کلی از اینجا */}
 
-      {/* فرم ثبت نظر */}
-      {showReviewForm && (
-        <div className="bg-white rounded-xl p-6 border space-y-4">
-          <h3 className="text-lg font-semibold">{t('addReview')}</h3>
-          
-          <div className="space-y-2">
-            <Label>{t('yourRating')}</Label>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setRating(star)}
-                  className="focus:outline-none"
-                >
-                  <Star
-                    size={24}
-                    className={`${
-                      star <= rating
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
-                    } hover:text-yellow-400 transition-colors`}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="customerName">{t('yourName')}</Label>
-            <Input
-              id="customerName"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              placeholder={language === 'fa' ? "نام خود را وارد کنید" : 
-                         language === 'ar' ? "أدخل اسمك" : 
-                         "Enter your name"}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="comment">{t('yourComment')}</Label>
-            <Textarea
-              id="comment"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder={language === 'fa' ? "نظر خود را بنویسید..." : 
-                         language === 'ar' ? "اكتب تعليقك..." : 
-                         "Write your comment..."}
-              rows={4}
-            />
-          </div>
-
-          <div className="flex gap-3">
-            <Button
-              onClick={submitReview}
-              disabled={submitting}
-              className="flex-1 bg-green-600 hover:bg-green-700"
-            >
-              <Send size={16} className="ml-2" />
-              {submitting ? t('submitting') : t('submit')}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setShowReviewForm(false)}
-              disabled={submitting}
-            >
-              {t('cancel')}
-            </Button>
-          </div>
-        </div>
-      )}
-
       {/* دکمه ثبت نظر */}
-      {!showReviewForm && (
-        <Button
-          onClick={() => setShowReviewForm(true)}
-          className="bg-green-600 hover:bg-green-700 w-full"
-        >
-          {t('addReview')}
-        </Button>
-      )}
+      <div className="flex justify-center">
+        {!showReviewForm && (
+          <Button
+            onClick={() => setShowReviewForm(true)}
+            className="bg-green-600 hover:bg-green-700 w-full"
+          >
+            {t("addReview")}
+          </Button>
+        )}
+      </div>
 
       {/* لیست نظرات */}
-      <div className="space-y-4">
-        <h3 className="text-xl font-semibold">{t('reviews')}</h3>
-        
+      <div className="space-y-2">
+        <h3 className="text-xl font-bold">{t("reviews")}</h3>
+
         {loadingReviews ? (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">{t('loadingReviews')}</p>
+            <p className="text-gray-600">{t("loadingReviews")}</p>
           </div>
         ) : reviews.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            {t('noReviews')}
-          </div>
+          <div className="text-center py-8 text-gray-500">{t("noReviews")}</div>
         ) : (
           <div className="space-y-4">
             {reviews.map((review) => (
@@ -302,10 +233,10 @@ export default function RatingSystem({ foodId, onRatingStatsChange }: RatingSyst
                     </div>
                   </div>
                   <span className="text-sm text-gray-500">
-                    {new Date(review.created_at).toLocaleDateString('fa-IR')}
+                    {new Date(review.created_at).toLocaleDateString("fa-IR")}
                   </span>
                 </div>
-                
+
                 {review.comment && (
                   <p className="text-gray-700 leading-relaxed">
                     {review.comment}
@@ -316,6 +247,87 @@ export default function RatingSystem({ foodId, onRatingStatsChange }: RatingSyst
           </div>
         )}
       </div>
+
+      {/* فرم ثبت نظر */}
+      {showReviewForm && (
+        <div className="bg-white rounded-xl p-6 border space-y-4">
+          <h3 className="text-lg font-semibold">{t("addReview")}</h3>
+
+          <div className="space-y-2">
+            <Label>{t("yourRating")}</Label>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  className="focus:outline-none"
+                >
+                  <Star
+                    size={24}
+                    className={`${
+                      star <= rating
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-300"
+                    } hover:text-yellow-400 transition-colors`}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="customerName">{t("yourName")}</Label>
+            <Input
+              id="customerName"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              placeholder={
+                language === "fa"
+                  ? "نام خود را وارد کنید"
+                  : language === "ar"
+                  ? "أدخل اسمك"
+                  : "Enter your name"
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="comment">{t("yourComment")}</Label>
+            <Textarea
+              id="comment"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder={
+                language === "fa"
+                  ? "نظر خود را بنویسید..."
+                  : language === "ar"
+                  ? "اكتب تعليقك..."
+                  : "Write your comment..."
+              }
+              rows={4}
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <Button
+              onClick={submitReview}
+              disabled={submitting}
+              className="flex-1 bg-green-600 hover:bg-green-700"
+            >
+              <Send size={16} className="" />
+              {submitting ? t("submitting") : t("submit")}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowReviewForm(false)}
+              disabled={submitting}
+            >
+              {t("cancel")}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

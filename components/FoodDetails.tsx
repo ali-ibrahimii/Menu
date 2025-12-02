@@ -106,15 +106,6 @@ export default function FoodDetails({
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
       <DrawerContent className="h-[90vh]">
-        <DrawerHeader className="pt-5">
-          <DrawerTitle className="text-3xl py-1 font-bold text-center">
-            {getFoodName(food)}
-          </DrawerTitle>
-          <DrawerDescription className="text-center">
-            {getIngredients(food)}
-          </DrawerDescription>
-        </DrawerHeader>
-
         <div
           dir={language === "en" ? "ltr" : "rtl"}
           className="flex-1 overflow-y-auto p-4"
@@ -134,10 +125,10 @@ export default function FoodDetails({
               {/* گالری تصاویر */}
               {images.length > 1 && (
                 <div className="relative">
-                  <div className="absolute left-1/2 bottom-2 transform -translate-x-1/2 -translate-y-1/2">
-                    <div className="bg-black/10 backdrop-blur-md rounded-xl p-1.5 mb-2.5 border border-white/20">
+                  <div className="absolute left-1/2 -bottom-4 transform -translate-x-1/2 -translate-y-1/2">
+                    <div className="bg-black/10 backdrop-blur-[1px] rounded-xl p-1.5 mb-2.5 border border-white/20">
                       {/* اسکرول افقی فعال */}
-                      <div className="w-[225px] px-2 overflow-x-auto scrollbar-hide">
+                      <div className="w-[270px] px-2 overflow-x-auto scrollbar-hide">
                         <div className="flex gap-2">
                           {images.map((image, index) => (
                             <button
@@ -162,25 +153,28 @@ export default function FoodDetails({
                   </div>
 
                   {/* شمارنده */}
-                  {images.length > 4 && (
+                  {/* {images.length > 4 && (
                     <div className="absolute left-1/2 bottom-5 transform -translate-x-1/2 bg-black/50 text-white text-xs px-2 py-1 rounded-full border border-white/20 backdrop-blur-sm">
                       {selectedImageIndex + 1} / {images.length}
                     </div>
-                  )}
+                  )} */}
                 </div>
               )}
             </div>
 
             {/* بخش اطلاعات */}
-            <div className="space-y-6">
+            <div className="space-y-3">
               {/* عنوان و قیمت */}
               <div>
                 <div className="">
                   <div className="flex justify-between items-center">
-                    <Badge variant="secondary">{food.category} {food.category === 'afghan' || 'iranian' ? 'foods': ''}</Badge>
+                    <Badge variant="secondary">
+                      {food.category}{" "}
+                      {food.category === "afghan" || "iranian" ? "foods" : ""}
+                    </Badge>
 
                     {ratingStats.totalReviews > 0 && (
-                      <div className="flex items-center border gap-2">
+                      <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1">
                           <Star
                             size={14}
@@ -200,26 +194,22 @@ export default function FoodDetails({
                     <h1 className="text-[25px] font-bold text-gray-900">
                       {getFoodName(food)}
                     </h1>
+                    <div className={`${language === 'en' ? 'text-right' : 'text-left'}`}>
                     <Badge
                       variant={food.is_available ? "default" : "destructive"}
                       className=""
                     >
                       {food.is_available ? t("available") : t("notAvailable")}
                     </Badge>
-                  </div>
-                  <div className="text-right">
                     <div className="text-sm font-bold text-green-600">
                       {food.price.toLocaleString()} {t("price")}
                     </div>
                   </div>
+                  </div>
                 </div>
 
                 {/* دسته‌بندی و تگ‌ها */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {/* <Badge variant="secondary">
-                    {t("category")}: {food.category}
-                  </Badge> */}
-
+                <div className="flex flex-wrap gap-2">
                   {food.is_spicy && (
                     <Badge
                       variant="outline"
@@ -244,7 +234,7 @@ export default function FoodDetails({
 
               {/* توضیحات */}
               <div className="prose max-w-none">
-                <h1 className="font-bold my-1">
+                <h1 className="font-bold text-lg my-1">
                   {language === "fa"
                     ? "توضیحات"
                     : language === "ar"
@@ -319,20 +309,21 @@ export default function FoodDetails({
                   onRatingStatsChange={handleRatingStatsChange}
                 />
               </div>
-
-              {/* دکمه اقدام */}
-              <div className="flex gap-4 pt-6 border-t">
-                <Button
-                  onClick={handleAddToCart}
-                  disabled={!food.is_available}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 text-lg"
-                  size="lg"
-                >
-                  <ShoppingCart size={20} className="ml-2" />
-                  {t("addToCart")}
-                </Button>
-              </div>
             </div>
+          </div>
+          {/* دکمه اقدام */}
+          <div className="flex items-center justify-center space-x-4 p-2 mt-5 w-full">
+            <Button
+              onClick={handleAddToCart}
+              disabled={!food.is_available}
+              className="flex w-8/12 bg-green-600 hover:bg-green-700 text-white py-3 font-bold text-md"
+            >
+              <ShoppingCart size={20} />
+              {t("addToCart")}
+            </Button>
+            <Button variant="outline" className="">
+              Cancel
+            </Button>
           </div>
         </div>
       </DrawerContent>

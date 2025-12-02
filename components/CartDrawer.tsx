@@ -155,14 +155,14 @@ export default function CartDrawer() {
 
   return (
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <DrawerTrigger asChild>
+      <DrawerTrigger asChild >
         <Button
           variant="ghost"
           size="icon"
           className="relative"
           onClick={handleDrawerOpen}
         >
-          <ShoppingCart size={20} />
+          <ShoppingCart className="opacity-60" size={20} />
           {getTotalItems() > 0 && (
             <Badge
               variant="destructive"
@@ -174,26 +174,27 @@ export default function CartDrawer() {
         </Button>
       </DrawerTrigger>
 
-      <DrawerContent className="h-[90vh]">
+      <DrawerContent className="h-[90vh]" dir={language === 'en' ? 'ltr' : 'rtl'}>
         <DrawerHeader>
-          <DrawerTitle className="flex items-center gap-2">
-            <ShoppingCart size={20} />
+          <DrawerTitle className="flex items-center justify-center">
+            {t("shoppingCart")}
+            {/* <ShoppingCart size={20} />
             {t("shoppingCart")}
             {getTotalItems() > 0 && (
               <Badge variant="secondary">
                 {getTotalItems()} {t("items")}
               </Badge>
-            )}
+            )} */}
           </DrawerTitle>
-          <DrawerDescription>{t("cartDescription")}</DrawerDescription>
+          {/* <DrawerDescription>{t("cartDescription")}</DrawerDescription> */}
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* اطلاعات مشتری */}
           <div className="space-y-3">
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <User size={16} />
+            <div className="space-y-1">
+              <label className="text-[13px] font-medium flex items-center gap-1">
+                <User size={14} />
                 {t("customerName")} <span className="text-destructive">*</span>
               </label>
               <Input
@@ -204,9 +205,9 @@ export default function CartDrawer() {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Hash size={16} />
+            <div className="space-y-1">
+              <label className="text-[13px] font-medium flex items-center gap-1">
+                <Hash size={14} />
                 {t("tableNumber")}
               </label>
               <Input
@@ -225,7 +226,7 @@ export default function CartDrawer() {
             </div>
           ) : (
             <>
-              <div className="space-y-3">
+              <div className="space-y-2 p-2">
                 {items.map((item) => (
                   <div
                     key={item.id}
@@ -253,12 +254,12 @@ export default function CartDrawer() {
                         onClick={() =>
                           updateQuantity(item.id, item.quantity - 1)
                         }
-                        className="h-8 w-8 p-0"
+                        className="h-7 w-7 p-0"
                       >
                         <Minus size={14} />
                       </Button>
 
-                      <span className="text-sm font-medium min-w-8 text-center">
+                      <span className="text-[13px] font-medium min-w-5 text-center">
                         {item.quantity}
                       </span>
 
@@ -268,7 +269,7 @@ export default function CartDrawer() {
                         onClick={() =>
                           updateQuantity(item.id, item.quantity + 1)
                         }
-                        className="h-8 w-8 p-0"
+                        className="h-7 w-7 p-0"
                       >
                         <Plus size={14} />
                       </Button>
@@ -277,7 +278,7 @@ export default function CartDrawer() {
                         variant="ghost"
                         size="sm"
                         onClick={() => removeFromCart(item.id)}
-                        className="h-8 w-8 p-0 text-red-500"
+                        className="h-7 w-7 p-0 text-red-500"
                       >
                         <Trash2 size={14} />
                       </Button>

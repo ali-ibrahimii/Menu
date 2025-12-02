@@ -55,6 +55,12 @@ export const translations = {
 
     available: "موجود",
     notAvailable: "ناموجود",
+
+    contactInformation: 'اطلاعات تماس',
+    branch1: 'شعبه مرکزی',
+    branch2: 'شعبه دوم',
+    phone: 'تلفن',
+    phone2: 'تلفن دوم',
   },
   ar: {
     menu: "قائمة الطعام",
@@ -107,6 +113,12 @@ export const translations = {
 
     available: "متاح",
     notAvailable: "غير موجود",
+
+    contactInformation: 'معلومات الاتصال',
+    branch1: 'الفرع الرئيسي',
+    branch2: 'الفرع الثاني',
+    phone: 'هاتف',
+    phone2: 'الهاتف الثاني',
   },
   en: {
     menu: "Menu",
@@ -159,5 +171,11 @@ export const translations = {
 
     available: "available",
     notAvailable: "not available",
+
+    contactInformation: 'Contact Information',
+    branch1: 'Main Branch',
+    branch2: 'Second Branch',
+    phone: 'Phone',
+    phone2: 'Phone 2',
   },
 };

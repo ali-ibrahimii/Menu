@@ -171,17 +171,17 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen px-6 py-2 overflow-y-auto overscroll-none touch-pan-y">
+    <main className="min-h-screen px-6 py-2 pt-5 overflow-y-auto overscroll-none touch-pan-y">
       {/* دکمه برگشت به صفحه ورودی و مینو */}
       <div
-        className={`text-3xl font-bold flex justify-between items-center my-4`}
+        className={`text-3xl font-bold flex justify-between items-center ${language === 'en' ? '' : 'mb-2'}`}
         dir={language === "en" ? "ltr" : "rtl"}
       >
         <h1 className={`text-3xl font-bold`}>{t("menu")}</h1>
 
         <Link
           href={"/"}
-          className="flex justify-center active:scale-95 mt-2 items-center rounded-full border bg-accent/50 p-2"
+          className="flex justify-center active:scale-95 items-center rounded-full border bg-accent p-2 border backdrop-blur-[2px]"
         >
           <ChevronLeft
             size={20}
@@ -190,9 +190,10 @@ export default function Home() {
         </Link>
       </div>
 
-      <div className="flex items-center justify-center w-full space-x-1">
+      <div
+        dir={language === "en" ? "ltr" : "rtl"}
+        className="flex items-center justify-center w-full space-x-1">
         <div
-          dir={language === "en" ? "rtl" : "ltr"}
           className="*:not-first:mt-2 w-full"
         >
           <div dir={language === "en" ? "ltr" : "rtl"} className="relative">
