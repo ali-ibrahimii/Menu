@@ -14,7 +14,11 @@ import {
   Settings
 } from 'lucide-react';
 
-export default function AdminNavbar() {
+interface AdminNavBarProps {
+  onLogout: () => void;
+}
+
+export default function AdminNavbar({ onLogout }: AdminNavBarProps) {
   const { logout } = useAdminAuth();
   const pathname = usePathname();
   const username = localStorage.getItem('admin_username') || 'ادمین';
