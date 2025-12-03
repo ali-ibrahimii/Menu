@@ -2,6 +2,7 @@ import type { Viewport } from "next";
 import "../styles/globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { Toaster } from "@/components/ui/sonner";
+import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 
 export default function RootLayout({
   children,
@@ -12,8 +13,10 @@ export default function RootLayout({
     <html lang="fa" dir="rtl">
       <body>
         <LanguageProvider>
-          <Toaster position="top-center" />
-          {children}
+          <AdminAuthProvider>
+            <Toaster position="top-center" />
+            {children}
+          </AdminAuthProvider>
         </LanguageProvider>
       </body>
     </html>
