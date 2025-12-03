@@ -11,29 +11,29 @@ export function useRestaurantInfo() {
   const [error, setError] = useState<string | null>(null);
   const { language } = useLanguage();
 
+  const fetchRestaurantInfo = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('restaurant_info')
+        .select('*')
+        .eq('is_active', true)
+        .single();
+
+      if (error) throw error;
+      
+      console.log('✅ Restaurant Info from DB:', data); // دیباگ
+      
+      setRestaurantInfo(data);
+    } catch (err) {
+      console.error('Error fetching restaurant info:', err);
+      setError('خطا در دریافت اطلاعات رستوران');
+      setRestaurantInfo(getDefaultRestaurantInfo()); // فعال کردن اطلاعات پیش‌فرض
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchRestaurantInfo = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('restaurant_info')
-          .select('*')
-          .eq('is_active', true)
-          .single();
-
-        if (error) throw error;
-        
-        console.log('✅ Restaurant Info from DB:', data); // دیباگ
-        
-        setRestaurantInfo(data);
-      } catch (err) {
-        console.error('Error fetching restaurant info:', err);
-        setError('خطا در دریافت اطلاعات رستوران');
-        setRestaurantInfo(getDefaultRestaurantInfo()); // فعال کردن اطلاعات پیش‌فرض
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchRestaurantInfo();
   }, []);
 
@@ -58,24 +58,31 @@ export function useRestaurantInfo() {
       
       branch1: {
         name: restaurantInfo[`branch1_name_${language}` as keyof RestaurantInfo] as string || 
-              restaurantInfo.branch1_name_fa,
+              restaurantInfo.branch1_name_fa || 
+              'شعبه مرکزی',
         
         phone: restaurantInfo.branch1_phone || '021-88561000',
         phone2: restaurantInfo.branch1_phone2 || '',
         
+        // اصلاح این خط - استفاده از branch1_address_fa به جای branch1_address
         address: restaurantInfo[`branch1_address_${language}` as keyof RestaurantInfo] as string || 
-                restaurantInfo.branch1_address,
+                restaurantInfo.branch1_address_fa || // تغییر اینجا
+                'تهران، خیابان ولیعصر، پلاک ۱۲۳',
       },
       
       branch2: {
+        // اصلاح این خط - branch2_name_fa وجود دارد نه branch2_name
         name: restaurantInfo[`branch2_name_${language}` as keyof RestaurantInfo] as string || 
-              restaurantInfo.branch2_name,
+              restaurantInfo.branch2_name_fa || // تغییر اینجا
+              'شعبه ۲',
         
         phone: restaurantInfo.branch2_phone || '021-77543210',
         phone2: restaurantInfo.branch2_phone2 || '',
         
+        // اصلاح این خط - استفاده از branch2_address_fa به جای branch2_address
         address: restaurantInfo[`branch2_address_${language}` as keyof RestaurantInfo] as string || 
-                restaurantInfo.branch2_address,
+                restaurantInfo.branch2_address_fa || // تغییر اینجا
+                'تهران، میدان ونک، برج ونک',
       },
       
       instagram: restaurantInfo.instagram_url || 'https://instagram.com/vatandar.restaurant',
@@ -113,10 +120,7 @@ export function useRestaurantInfo() {
     translatedInfo: getTranslatedInfo(),
     loading,
     error,
-    refetch: () => {
-      setLoading(true);
-      fetchRestaurantInfo();
-    }
+    refetch: fetchRestaurantInfo
   };
 }
 
