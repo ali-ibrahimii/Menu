@@ -370,7 +370,7 @@ export default function AdminFoodsPage() {
                 <p className="text-2xl font-bold">{foods.length}</p>
               </div>
               <div className="p-2 bg-blue-100 rounded-lg">
-                <span className="">
+                <span>
                   <img src="/foods.png" className="w-10 h-10" alt="" />
                 </span>
               </div>
@@ -388,7 +388,7 @@ export default function AdminFoodsPage() {
                 </p>
               </div>
               <div className="p-2 bg-green-100 rounded-lg">
-                <span className="text-2xl">
+                <span>
                   <img src="/check.png" className="w-10 h-10" alt="" />
                 </span>
               </div>
