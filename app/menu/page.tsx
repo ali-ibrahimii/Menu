@@ -2,7 +2,7 @@
 
 import { useId } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, SearchIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, SearchIcon, ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Food, Category } from "@/types";
@@ -27,23 +27,88 @@ export default function Home() {
   const [filteredFoods, setFilteredFoods] = useState<Food[]>([]);
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  
+  // search input
+  const [searchTerm, setSearchTerm] = useState("");
+
   const t = (key: string) => {
     const langTranslations = translations[language] as Record<string, string>;
     return langTranslations[key] || key;
   };
 
-  //   search input
-  const [searchTerm, setSearchTerm] = useState("");
+  // گروه‌بندی غذاها بر اساس دسته‌بندی
+  const groupFoodsByCategory = (foodsList: Food[]) => {
+    const grouped: Record<string, Food[]> = {};
+    
+    foodsList.forEach(food => {
+      const categoryKey = food.category || 'uncategorized';
+      if (!grouped[categoryKey]) {
+        grouped[categoryKey] = [];
+      }
+      grouped[categoryKey].push(food);
+    });
+    
+    return grouped;
+  };
 
+  // فیلتر غذا بر اساس جستجو
   const filterFood = filteredFoods.filter(
     (food) =>
       food.name_fa.toLowerCase().includes(searchTerm.toLowerCase()) ||
       food.name_ar.toLowerCase().includes(searchTerm.toLowerCase()) ||
       food.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      food.description_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      food.description_ar.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      food.description_fa.toLowerCase().includes(searchTerm.toLowerCase())
+      food.description_en?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      food.description_ar?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      food.description_fa?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // گروه‌بندی غذاهای فیلتر شده
+  const groupedFoods = groupFoodsByCategory(filterFood);
+
+  // وزن‌دهی برای هر slug
+const categoryWeights: Record<string, number> = {
+  'Afghan foods': 1,
+  'Iranian foods': 2,
+  'Breakfast': 3,
+  'Drinks': 4,
+  'Hot drinks': 5,
+  'Cold drinks': 6,
+  'Coffee-based drinks': 7,
+  'Dessert': 8,
+  // برای slugهای نامعلوم، وزن زیاد بده تا به انتها بروند
+  'uncategorized': 999
+};
+
+// سپس مرتب‌سازی ساده‌تر:
+const sortedCategories = Object.entries(groupedFoods).sort(([slugA], [slugB]) => {
+  const weightA = categoryWeights[slugA] || 100;
+  const weightB = categoryWeights[slugB] || 100;
+  
+  return weightA - weightB;
+});
+
+  // گرفتن نام دسته‌بندی
+  const getCategoryName = (slug: string) => {
+    const category = categories.find(cat => {
+      // تطبیق slug با trim کردن فاصله‌ها
+      const catSlug = cat.slug?.trim().toLowerCase();
+      const foodSlug = slug?.trim().toLowerCase();
+      return catSlug === foodSlug;
+    });
+    
+    if (!category) return slug;
+    
+    switch (language) {
+      case "fa":
+        return category.name;
+      case "ar":
+        return category.name_ar;
+      case "en":
+        return category.slug?.trim();
+      default:
+        return category.name;
+    }
+  };
 
   const handleFoodClick = (food: Food) => {
     setSelectedFood(food);
@@ -86,17 +151,16 @@ export default function Home() {
     let ingredients;
     switch (language) {
       case "fa":
-        return food.ingredients_fa;
+        ingredients = food.ingredients_fa;
+        break;
       case "ar":
-        return food.ingredients_ar;
+        ingredients = food.ingredients_ar;
+        break;
       case "en":
-        return food.ingredients_en;
+        ingredients = food.ingredients_en;
+        break;
       default:
-        return food.ingredients_fa;
-    }
-
-    if (ingredients instanceof Text) {
-      return ingredients.textContent || "";
+        ingredients = food.ingredients_fa;
     }
 
     return ingredients?.toString() || "";
@@ -114,11 +178,11 @@ export default function Home() {
         if (foodsError) throw foodsError;
         setFoods(foodsData || []);
 
-        // دریافت دسته‌بندی‌ها - نام جدول را یکسان کنید
+        // دریافت دسته‌بندی‌ها
         const { data: categoriesData, error: categoriesError } = await supabase
-          .from("categories") // ✅ اینجا را به "categories" تغییر دهید
+          .from("categories")
           .select("*")
-          .order("name");
+          .order("order_number");
 
         if (categoriesError) {
           console.error("Error fetching categories:", categoriesError);
@@ -127,9 +191,20 @@ export default function Home() {
             await supabase.from("category").select("*").order("name");
 
           if (categoriesError2) throw categoriesError2;
-          setCategories(categoriesData2 || []);
+          
+          // تمیز کردن slugها
+          const cleanedCategories = categoriesData2?.map(cat => ({
+            ...cat,
+            slug: cat.slug?.trim()
+          })) || [];
+          setCategories(cleanedCategories);
         } else {
-          setCategories(categoriesData || []);
+          // تمیز کردن slugها
+          const cleanedCategories = categoriesData?.map(cat => ({
+            ...cat,
+            slug: cat.slug?.trim()
+          })) || [];
+          setCategories(cleanedCategories);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -145,7 +220,12 @@ export default function Home() {
   useEffect(() => {
     if (selectedCategory) {
       setFilteredFoods(
-        foods.filter((food) => food.category === selectedCategory)
+        foods.filter((food) => {
+          // تطبیق با trim کردن هر دو طرف
+          const foodCategory = food.category?.trim();
+          const selected = selectedCategory?.trim();
+          return foodCategory === selected;
+        })
       );
     } else {
       setFilteredFoods(foods);
@@ -155,6 +235,7 @@ export default function Home() {
   console.log("Categories:", categories);
   console.log("Selected Category:", selectedCategory);
   console.log("Filtered Foods:", filteredFoods);
+  console.log("Grouped Foods:", groupedFoods);
 
   if (loading) {
     return (
@@ -248,22 +329,23 @@ export default function Home() {
 
             {/* دکمه‌های دسته‌بندی‌ها */}
             {categories.length > 0 ? (
-              categories.map((category) => (
-                <Button
-                  key={category.id}
-                  variant={
-                    selectedCategory === category.slug ? "default" : "outline"
-                  }
-                  onClick={() => setSelectedCategory(category.slug)}
-                  className="justify-start flex items-center rounded-full text-[13px]"
-                >
-                  {language === "en"
-                    ? category.slug
-                    : language === "ar"
-                    ? category.name_ar
-                    : category.name}
-                </Button>
-              ))
+              categories.map((category) => {
+                const cleanSlug = category.slug?.trim();
+                return (
+                  <Button
+                    key={category.id}
+                    variant={selectedCategory === cleanSlug ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(cleanSlug)}
+                    className="justify-start flex items-center rounded-full text-[13px]"
+                  >
+                    {language === "en"
+                      ? cleanSlug
+                      : language === "ar"
+                      ? category.name_ar
+                      : category.name}
+                  </Button>
+                );
+              })
             ) : (
               <p className="text-sm text-gray-500">{t("noFoods")}</p>
             )}
@@ -273,92 +355,171 @@ export default function Home() {
       </div>
       {/* پایان دسته بندی */}
 
-      {/* نمایش تعداد غذاهای فیلتر شده */}
-      {/* <div className="my-3 text-sm text-gray-700">
-        {selectedCategory ? (
-          <p>
-            {t("showingCategory")}{" "}
-            <span className="font-bold">
-              {categories.find((cat) => cat.slug === selectedCategory)?.name ||
-                selectedCategory}
-            </span>{" "}
-            ({filteredFoods.length} {t("itemsCount")})
-          </p>
-        ) : (
-          <p>
-            {t("allFoods")} ({filteredFoods.length} {t("itemsCount")})
-          </p>
-        )}
-      </div> */}
-
       {/* شروع کارت غذا */}
-      <div className="grid grid-cols-1 gap-4 mt-3 sm:grid-cols-2 md:grid-cols-3">
-        {filterFood.length > 0 ? (
-          filterFood.map((food) => (
-            <div
-              dir={`${language === "en" ? "ltr" : "rtl"}`}
-              key={food.id}
-              className="relative flex items-center w-full h-35 backdrop-blur-xs bg-linear-to-t from-white/20 to-transparent border-b border-white/50 rounded-2xl shadow-lg hover:shadow-lg transition-all duration-200 active:scale-95"
-            >
-              {/*  شروع عکس کارت غذا */}
-              <div
-                onClick={() => handleFoodClick(food)}
-                className="w-4/12 h-full rounded-2xl p-[2.1px] bg-[linear-gradient(135deg,#10b981_0%,transparent_35%),linear-gradient(-45deg,#10b981_0%,transparent_35%)] cursor-pointer"
-              >
-                <div className="w-full h-full rounded-[13px] overflow-hidden bg-orange-700">
-                  <img
-                    src={food.image_url}
-                    alt={getFoodName(food)}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-              </div>
-              {/*  پایان عکس کارت غذا */}
-
-              {/* شروع متن کارت غذا */}
-              <div className="flex flex-col mx-3 w-8/12 overflow-hidden">
+      <div className="mt-3">
+        {selectedCategory ? (
+          // اگر دسته‌بندی خاصی انتخاب شده
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {filterFood.length > 0 ? (
+              filterFood.map((food) => (
                 <div
-                  onClick={() => handleFoodClick(food)}
-                  className="cursor-pointer"
+                  dir={`${language === "en" ? "ltr" : "rtl"}`}
+                  key={food.id}
+                  className="relative flex items-center w-full h-35 backdrop-blur-xs bg-linear-to-t from-white/20 to-transparent border-b border-white/50 rounded-2xl shadow-lg hover:shadow-lg transition-all duration-200 active:scale-95"
                 >
-                  <h2 className="text-md font-semibold text-gray-800 truncate">
-                    {getFoodName(food)}
-                  </h2>
-
-                  {/* مواد تشکیل دهنده */}
-                  {getIngredients(food) && (
-                    <p className="text-gray-800 text-[13px] line-clamp-2 leading-4.5">
-                      {getIngredients(food).toString()}
-                    </p>
-                  )}
-                  {/* قیمت غذا */}
-                  <span className="text-[14px] font-bold text-yellow-600 mt-1">
-                    {food.price.toLocaleString()} {t("price")}
-                  </span>
-                </div>
-
-                {/* دکمه افزودن به سبد خرید */}
-                <div className=" flex justify-end">
-                  {!food.is_available ? (
-                    <Badge
-                      variant={food.is_available ? "default" : "destructive"}
-                      className={`${food.is_available ? "" : "opacity-30"}`}
-                    >
-                      {food.is_available ? t("available") : t("notAvailable")}
-                    </Badge>
-                  ) : (
-                    <div className={`flex justify-center items-center`}>
-                      <AddToCartButton food={food} getFoodName={getFoodName} />
+                  {/*  شروع عکس کارت غذا */}
+                  <div
+                    onClick={() => handleFoodClick(food)}
+                    className="w-4/12 h-full rounded-2xl p-[2.1px] bg-[linear-gradient(135deg,#10b981_0%,transparent_35%),linear-gradient(-45deg,#10b981_0%,transparent_35%)] cursor-pointer"
+                  >
+                    <div className="w-full h-full rounded-[13px] overflow-hidden bg-orange-700">
+                      <img
+                        src={food.image_url}
+                        alt={getFoodName(food)}
+                        className="object-cover w-full h-full"
+                      />
                     </div>
-                  )}
+                  </div>
+                  {/*  پایان عکس کارت غذا */}
+
+                  {/* شروع متن کارت غذا */}
+                  <div className="flex flex-col mx-3 w-8/12 overflow-hidden">
+                    <div
+                      onClick={() => handleFoodClick(food)}
+                      className="cursor-pointer"
+                    >
+                      <h2 className="text-md font-semibold text-gray-800 truncate">
+                        {getFoodName(food)}
+                      </h2>
+
+                      {/* مواد تشکیل دهنده */}
+                      {getIngredients(food) && (
+                        <p className="text-gray-800 text-[13px] line-clamp-2 leading-4.5">
+                          {getIngredients(food).toString()}
+                        </p>
+                      )}
+                      {/* قیمت غذا */}
+                      <span className="text-[14px] font-bold text-yellow-600 mt-1">
+                        {food.price.toLocaleString()} {t("price")}
+                      </span>
+                    </div>
+
+                    {/* دکمه افزودن به سبد خرید */}
+                    <div className=" flex justify-end">
+                      {!food.is_available ? (
+                        <Badge
+                          variant={food.is_available ? "default" : "destructive"}
+                          className={`${food.is_available ? "" : "opacity-30"}`}
+                        >
+                          {food.is_available ? t("available") : t("notAvailable")}
+                        </Badge>
+                      ) : (
+                        <div className={`flex justify-center items-center`}>
+                          <AddToCartButton food={food} getFoodName={getFoodName} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {/* پایان متن کارت غذا */}
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8 text-gray-600">
+                {t("noFoodInCategory")}
+              </div>
+            )}
+          </div>
+        ) : (
+          // اگر "همه غذاها" انتخاب شده، دسته‌بندی‌ها را گروه‌بندی شده نشان بده
+          <div className="space-y-6">
+            {sortedCategories.map(([categorySlug, categoryFoods]) => (
+              <div key={categorySlug} className="space-y-3">
+                {/* تیتر دسته‌بندی */}
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-gray-800">
+                    {getCategoryName(categorySlug)}
+                  </h2>
+                  {/* <Badge variant="outline" className="text-sm">
+                    {categoryFoods.length} {t("itemsCount")}
+                  </Badge> */}
+                </div>
+                
+                {/* خط جداکننده */}
+                <div className="h-px bg-linear-to-r from-transparent via-gray-300 to-transparent" />
+                
+                {/* کارت‌های غذا در این دسته‌بندی */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                  {categoryFoods.map((food) => (
+                    <div
+                      dir={`${language === "en" ? "ltr" : "rtl"}`}
+                      key={food.id}
+                      className="relative flex items-center w-full h-35 backdrop-blur-xs bg-linear-to-t from-white/20 to-transparent border-b border-white/50 rounded-2xl shadow-lg hover:shadow-lg transition-all duration-200 active:scale-95"
+                    >
+                      {/*  شروع عکس کارت غذا */}
+                      <div
+                        onClick={() => handleFoodClick(food)}
+                        className="w-4/12 h-full rounded-2xl p-[2.1px] bg-[linear-gradient(135deg,#10b981_0%,transparent_35%),linear-gradient(-45deg,#10b981_0%,transparent_35%)] cursor-pointer"
+                      >
+                        <div className="w-full h-full rounded-[13px] overflow-hidden bg-orange-700">
+                          <img
+                            src={food.image_url}
+                            alt={getFoodName(food)}
+                            className="object-cover w-full h-full"
+                          />
+                        </div>
+                      </div>
+                      {/*  پایان عکس کارت غذا */}
+
+                      {/* شروع متن کارت غذا */}
+                      <div className="flex flex-col mx-3 w-8/12 overflow-hidden">
+                        <div
+                          onClick={() => handleFoodClick(food)}
+                          className="cursor-pointer"
+                        >
+                          <h2 className="text-md font-semibold text-gray-800 truncate">
+                            {getFoodName(food)}
+                          </h2>
+
+                          {/* مواد تشکیل دهنده */}
+                          {getIngredients(food) && (
+                            <p className="text-gray-800 text-[13px] line-clamp-2 leading-4.5">
+                              {getIngredients(food).toString()}
+                            </p>
+                          )}
+                          {/* قیمت غذا */}
+                          <span className="text-[14px] font-bold text-yellow-600 mt-1">
+                            {food.price.toLocaleString()} {t("price")}
+                          </span>
+                        </div>
+
+                        {/* دکمه افزودن به سبد خرید */}
+                        <div className=" flex justify-end">
+                          {!food.is_available ? (
+                            <Badge
+                              variant={food.is_available ? "default" : "destructive"}
+                              className={`${food.is_available ? "" : "opacity-30"}`}
+                            >
+                              {food.is_available ? t("available") : t("notAvailable")}
+                            </Badge>
+                          ) : (
+                            <div className={`flex justify-center items-center`}>
+                              <AddToCartButton food={food} getFoodName={getFoodName} />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {/* پایان متن کارت غذا */}
+                    </div>
+                  ))}
                 </div>
               </div>
-              {/* پایان متن کارت غذا */}
-            </div>
-          ))
-        ) : (
-          <div className="col-span-full text-center py-8 text-gray-600">
-            {selectedCategory ? t("noFoodInCategory") : t("noFoods")}
+            ))}
+            
+            {sortedCategories.length === 0 && (
+              <div className="text-center py-8 text-gray-600">
+                {t("noFoods")}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -376,7 +537,7 @@ export default function Home() {
         />
       )}
 
-      <p className="text-center text-gray-800 text-sm mt-6">
+      <p className="text-center text-gray-800 text-sm my-6">
         © 2025 Watandar Restaurant
       </p>
     </main>

@@ -22,6 +22,33 @@ import {
   HelpCircle,
   User
 } from 'lucide-react';
+import { supabase } from "@/lib/supabaseClient";
+import { toast } from "sonner";
+import { useEffect } from 'react';
+
+
+interface OrderItem {
+  id: string;
+  name_fa: string;
+  name_ar: string;
+  name_en: string;
+  price: number;
+  quantity: number;
+  image_url: string;
+}
+
+interface Order {
+  id: string;
+  created_at: string;
+  customer_name: string;
+  table_number: string;
+  deviceId: string;
+  notes: string;
+  total_price: number;
+  status: "pending" | "confirmed" | "completed" | "cancelled";
+  items: OrderItem[];
+}
+
 
 interface AdminSidebarProps {
   onLogout: () => void;
@@ -31,7 +58,37 @@ export default function AdminSidebar({ onLogout }: AdminSidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+    const [orders, setOrders] = useState<Order[]>([]);
+  
 
+  // دریافت سفارشات از دیتابیس
+    const fetchOrders = async () => {
+      try {
+        const { data, error } = await supabase.from("orders").select("*");
+  
+        if (error) throw error;
+        setOrders(data || []);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        toast.error("خطا در دریافت سفارشات");
+      }
+    };
+  
+    useEffect(() => {
+      fetchOrders();
+    }, []);
+  
+    // آمار و اطلاعات
+    const stats = {
+      total: orders.length,
+      pending: orders.filter((o) => o.status === "pending").length,
+      confirmed: orders.filter((o) => o.status === "confirmed").length,
+      completed: orders.filter((o) => o.status === "completed").length,
+      totalRevenue: orders
+        .filter((o) => o.status === "completed")
+        .reduce((sum, order) => sum + order.total_price, 0),
+    };
+  
   const username = typeof window !== 'undefined' 
     ? localStorage.getItem('admin_username') || 'ادمین' 
     : 'ادمین';
@@ -217,7 +274,7 @@ export default function AdminSidebar({ onLogout }: AdminSidebarProps) {
                         <span>{item.label}</span>
                         {item.count !== undefined && (
                           <span className="bg-blue-100 text-blue-600 text-[12px] font-medium px-2 py-1 rounded-full">
-                            {item.count}
+                            {stats.pending}
                           </span>
                         )}
                       </div>
@@ -225,7 +282,7 @@ export default function AdminSidebar({ onLogout }: AdminSidebarProps) {
 
                     {collapsed && item.count !== undefined && (
                       <div className="absolute top-2 right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                        {item.count}
+                        {stats.pending}
                       </div>
                     )}
                   </Link>

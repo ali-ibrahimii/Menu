@@ -19,6 +19,9 @@ export type Food = {
   cooking_time: number;
   serves: number;
   images: string[];
+  created_at: string;
+  category_id: string;
+  updated_at: string;
 };
 
 export type Category = {

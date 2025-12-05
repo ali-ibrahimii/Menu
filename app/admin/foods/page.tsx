@@ -362,22 +362,24 @@ export default function AdminFoodsPage() {
 
       {/* آمار */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="flex justify-center shadow-lg border-0">
+          <CardContent className="">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">کل غذاها</p>
                 <p className="text-2xl font-bold">{foods.length}</p>
               </div>
               <div className="p-2 bg-blue-100 rounded-lg">
-                <span className="text-2xl">🍽️</span>
+                <span className="">
+                  <img src="/foods.png" className="w-10 h-10" alt="" />
+                </span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="flex justify-center shadow-lg border-0">
+          <CardContent>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">غذاهای فعال</p>
@@ -386,7 +388,9 @@ export default function AdminFoodsPage() {
                 </p>
               </div>
               <div className="p-2 bg-green-100 rounded-lg">
-                <span className="text-2xl">✅</span>
+                <span className="text-2xl">
+                  <img src="/check.png" className="w-10 h-10" alt="" />
+                </span>
               </div>
             </div>
           </CardContent>

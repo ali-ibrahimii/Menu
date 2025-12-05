@@ -1,6 +1,6 @@
 export const translations = {
   fa: {
-    menu: "مینو",
+    menu: "منو",
     restaurantName: "رستوران وطندار",
     address: "بلوار امام خمینی، میدان ده دی",
     address1: "بلوار شهید مفتح، چهار راه ابوریحان",
@@ -129,7 +129,7 @@ export const translations = {
     open: "Open",
     closed: "Closed",
     categories: "Menu Categories",
-    allFoods: "all foods",
+    allFoods: "All foods",
     loading: "Loading...",
     itemsCount: "items",
     showingCategory: "Showing foods in category:",

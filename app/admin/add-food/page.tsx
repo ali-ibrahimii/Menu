@@ -448,12 +448,14 @@ export default function AddFoodPage() {
                     <SelectValue placeholder="انتخاب دسته" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="afghan">غذای افغانی</SelectItem>
-                    <SelectItem value="iranian">غذای ایرانی</SelectItem>
-                    <SelectItem value="drinks">نوشیدنی</SelectItem>
-                    <SelectItem value="dessert">دسر</SelectItem>
-                    <SelectItem value="appetizer">پیش غذا</SelectItem>
-                    <SelectItem value="main">غذای اصلی</SelectItem>
+                    <SelectItem value="Afghan foods">غذای افغانی</SelectItem>
+                    <SelectItem value="Iranian foods">غذای ایرانی</SelectItem>
+                    <SelectItem value="Drinks">دمنوش</SelectItem>
+                    <SelectItem value="Dessert">دسر</SelectItem>
+                    <SelectItem value="Cold drinks">نوشیدنی سرد</SelectItem>
+                    <SelectItem value="Hot drinks">نوشیدنی گرم</SelectItem>
+                    <SelectItem value="Breakfast">صبحانه</SelectItem>
+                    <SelectItem value="Coffee-based drinks">نوشیدنی برپایه قهوه</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
