@@ -232,10 +232,6 @@ const sortedCategories = Object.entries(groupedFoods).sort(([slugA], [slugB]) =>
     }
   }, [selectedCategory, foods]);
 
-  console.log("Categories:", categories);
-  console.log("Selected Category:", selectedCategory);
-  console.log("Filtered Foods:", filteredFoods);
-  console.log("Grouped Foods:", groupedFoods);
 
   if (loading) {
     return (

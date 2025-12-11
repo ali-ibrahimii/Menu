@@ -19,7 +19,7 @@ const RestaurantStatus = () => {
       const currentMinute = now.getMinutes();
       
       // رستوران از ۱۲ روز تا ۱۱ شب باز است
-      const isOpenNow = currentHour >= 1 && currentHour < 23;
+      const isOpenNow = currentHour >= 11 && currentHour < 23;
       
       setIsOpen(isOpenNow);
     };
@@ -34,7 +34,7 @@ const RestaurantStatus = () => {
   }, []);
 
   return (
-    <div className={`absolute left-0 top-12 flex items-center gap-1 px-3 border py-2 rounded-tr-xl rounded-br-xl font-semibold ${
+    <div className={`absolute left-0 top-15 flex items-center gap-1 px-3  py-2  font-semibold glass-btn-check-status ${
       isOpen ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
     }`}>
       <Clock size={14} />

@@ -19,10 +19,7 @@ export function useRestaurantInfo() {
         .eq('is_active', true)
         .single();
 
-      if (error) throw error;
-      
-      console.log('✅ Restaurant Info from DB:', data); // دیباگ
-      
+      if (error) throw error;      
       setRestaurantInfo(data);
     } catch (err) {
       console.error('Error fetching restaurant info:', err);
@@ -44,7 +41,6 @@ export function useRestaurantInfo() {
       return getDefaultRestaurantTranslatedInfo();
     }
 
-    console.log('🔍 Current restaurantInfo:', restaurantInfo); // دیباگ
     
     // ایمن‌سازی: اگر فیلدی وجود نداشت، از مقدار پیش‌فرض استفاده کن
     const translated = {
@@ -89,7 +85,6 @@ export function useRestaurantInfo() {
       whatsapp: restaurantInfo.whatsapp_number || '09123456789'
     };
 
-    console.log('✅ Translated Info:', translated); // دیباگ
     return translated;
   };
 
