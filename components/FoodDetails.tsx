@@ -105,16 +105,16 @@ export default function FoodDetails({
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent className="h-[90vh]">
+      <DrawerContent className="h-[90vh] glass-details">
         <div
           dir={language === "en" ? "ltr" : "rtl"}
-          className="flex-1 overflow-y-auto p-4"
+          className="flex-1 overflow-y-auto p-5 text-white"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-t-4xl overflow-hidden">
             {/* بخش تصاویر */}
-            <div className="space-y-4 relative">
+            <div className="relative mb-2 rounded-3xl overflow-hidden">
               {/* تصویر اصلی */}
-              <div className="aspect-square rounded-3xl overflow-hidden bg-gray-100 shadow-lg">
+              <div className="aspect-square">
                 <img
                   src={images[selectedImageIndex]}
                   alt={getFoodName(food)}
@@ -125,7 +125,7 @@ export default function FoodDetails({
               {/* گالری تصاویر */}
               {images.length > 1 && (
                 <div className="relative">
-                  <div className="absolute left-1/2 -bottom-4 transform -translate-x-1/2 -translate-y-1/2">
+                  <div className="absolute left-1/2 -bottom-8 transform -translate-x-1/2 -translate-y-1/2">
                     <div className="bg-black/10 backdrop-blur-[1px] rounded-xl p-1.5 mb-2.5 border border-white/20">
                       {/* اسکرول افقی فعال */}
                       <div className="w-[270px] px-2 overflow-x-auto scrollbar-hide">
@@ -170,7 +170,6 @@ export default function FoodDetails({
                   <div className="flex justify-between items-center">
                     <Badge variant="secondary">
                       {food.category}{" "}
-                      {food.category === "afghan" || "iranian" ? "foods" : ""}
                     </Badge>
 
                     {ratingStats.totalReviews > 0 && (
@@ -180,18 +179,18 @@ export default function FoodDetails({
                             size={14}
                             className="fill-yellow-400 text-yellow-400"
                           />
-                          <span className="text-[11px] font-semibold text-gray-700">
+                          <span className="text-[11px] font-semibold">
                             {ratingStats.averageRating.toFixed(1)}
                           </span>
                         </div>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs">
                           {/* ({ratingStats.totalReviews}) */}
                         </span>
                       </div>
                     )}
                   </div>
                   <div className="flex justify-between items-center">
-                    <h1 className="text-[25px] font-bold text-gray-900">
+                    <h1 className="text-[25px] font-bold">
                       {getFoodName(food)}
                     </h1>
                     <div className={`${language === 'en' ? 'text-right' : 'text-left'}`}>
@@ -213,7 +212,7 @@ export default function FoodDetails({
                   {food.is_spicy && (
                     <Badge
                       variant="outline"
-                      className="flex items-center gap-1"
+                      className="flex items-center gap-1 text-white"
                     >
                       <Flame size={14} />
                       {t("spicy")}
@@ -223,7 +222,7 @@ export default function FoodDetails({
                   {food.is_vegetarian && (
                     <Badge
                       variant="outline"
-                      className="flex items-center gap-1"
+                      className="flex items-center gap-1 text-white"
                     >
                       <Leaf size={14} />
                       {t("vegetarian")}
@@ -243,7 +242,7 @@ export default function FoodDetails({
                 </h1>
                 <div className="relative">
                   <p
-                    className={`text-gray-700 leading-relaxed text-[15px] transition-all duration-300 ${
+                    className={`leading-relaxed text-[15px] transition-all duration-300 ${
                       isExpanded ? "line-clamp-none" : "line-clamp-5"
                     }`}
                   >
@@ -272,12 +271,12 @@ export default function FoodDetails({
               {/* مشخصات فنی */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {food.cooking_time && (
-                  <div className="flex items-center justify-center gap-3 bg-gray-50 rounded-xl border py-2">
-                    <div className="p-4 rounded-full bg-accent">
+                  <div className="flex items-center justify-center gap-3 rounded-xl border py-2">
+                    <div className="p-4 rounded-full bg-accent/40">
                       <Clock className="" size={20} />
                     </div>
                     <div>
-                      <p className="text-[13px] text-gray-600">
+                      <p className="text-[13px]">
                         {t("cookingTime")}
                       </p>
                       <p className="font-medium">
@@ -288,12 +287,12 @@ export default function FoodDetails({
                 )}
 
                 {food.serves && (
-                  <div className="flex items-center justify-center gap-3 bg-gray-50 rounded-xl border py-2">
-                    <div className="p-4 rounded-full bg-accent">
+                  <div className="flex items-center justify-center gap-3  rounded-xl border py-2">
+                    <div className="p-4 rounded-full bg-accent/40">
                       <Users className="" size={20} />
                     </div>
                     <div>
-                      <p className="text-[13px] text-gray-600">{t("serves")}</p>
+                      <p className="text-[13px]">{t("serves")}</p>
                       <p className="font-medium">
                         {food.serves} {t("people")}
                       </p>
@@ -312,7 +311,9 @@ export default function FoodDetails({
             </div>
           </div>
           {/* دکمه اقدام */}
-          <div className="flex items-center justify-center space-x-4 p-2 mt-5 w-full">
+        </div>
+        <DrawerFooter className="p-0 w-full">
+          <div className="flex items-center justify-center p-2 w-full">
             <Button
               onClick={handleAddToCart}
               disabled={!food.is_available}
@@ -321,11 +322,10 @@ export default function FoodDetails({
               <ShoppingCart size={20} />
               {t("addToCart")}
             </Button>
-            <Button variant="outline" className="">
-              Cancel
-            </Button>
           </div>
-        </div>
+            
+
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   );

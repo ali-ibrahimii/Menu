@@ -41,8 +41,8 @@ export default function PhoneDrawer() {
         </button>
       </DrawerTrigger>
 
-      <DrawerContent className="h-[40vh] glass-btn-card rounded-t-2xl">
-        <div className="my-10">
+      <DrawerContent className="h-[40vh] glass-drawer">
+        <div className="py-4">
           <div className="space-y-10">
             {/* شعبه اول */}
             <div className="text-white">

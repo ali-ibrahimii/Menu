@@ -284,7 +284,7 @@ export default function Home() {
           <CheckRestaurantStatus />
         </div>
 
-        <div className="flex flex-col items-center space-y-10 w-full px-8">
+        <div className="flex flex-col items-center space-y-8 w-full px-8">
           <div className="flex-col flex items-center space-y-1">
             <div className="">
               <Image
@@ -329,7 +329,7 @@ export default function Home() {
           </div>
 
           <Link href="/menu" className="w-full flex justify-center">
-            <button className="py-3 w-full glass-btn text-lg">{t("viewMenu")}</button>
+            <button className="py-1.5 w-full glass-btn text-lg">{t("viewMenu")}</button>
           </Link>
         </div>
       </div>

@@ -197,64 +197,13 @@ export default function RatingSystem({
         )}
       </div>
 
-      {/* لیست نظرات */}
-      <div className="space-y-2">
-        <h3 className="text-xl font-bold">{t("reviews")}</h3>
-
-        {loadingReviews ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">{t("loadingReviews")}</p>
-          </div>
-        ) : reviews.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">{t("noReviews")}</div>
-        ) : (
-          <div className="space-y-4">
-            {reviews.map((review) => (
-              <div key={review.id} className="bg-white rounded-xl p-4 border">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h4 className="font-semibold">{review.customer_name}</h4>
-                    <div className="flex items-center gap-1 mt-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          size={16}
-                          className={`${
-                            star <= review.rating
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
-                      <span className="text-sm text-gray-600 mr-2">
-                        ({review.rating}.0)
-                      </span>
-                    </div>
-                  </div>
-                  <span className="text-sm text-gray-500">
-                    {new Date(review.created_at).toLocaleDateString("fa-IR")}
-                  </span>
-                </div>
-
-                {review.comment && (
-                  <p className="text-gray-700 leading-relaxed">
-                    {review.comment}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
       {/* فرم ثبت نظر */}
       {showReviewForm && (
-        <div className="bg-white rounded-xl p-6 border space-y-4">
+        <div className="text-white rounded-xl p-6 border space-y-4">
           <h3 className="text-lg font-semibold">{t("addReview")}</h3>
 
           <div className="space-y-2">
-            <Label>{t("yourRating")}</Label>
+            <Label className="text-white">{t("yourRating")}</Label>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -277,7 +226,7 @@ export default function RatingSystem({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="customerName">{t("yourName")}</Label>
+            <Label className="text-white" htmlFor="customerName ">{t("yourName")}</Label>
             <Input
               id="customerName"
               value={customerName}
@@ -293,7 +242,7 @@ export default function RatingSystem({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="comment">{t("yourComment")}</Label>
+            <Label className="text-white" htmlFor="comment">{t("yourComment")}</Label>
             <Textarea
               id="comment"
               value={comment}
@@ -306,6 +255,7 @@ export default function RatingSystem({
                   : "Write your comment..."
               }
               rows={4}
+              className="text-white"
             />
           </div>
 
@@ -319,6 +269,7 @@ export default function RatingSystem({
               {submitting ? t("submitting") : t("submit")}
             </Button>
             <Button
+            className="text-black"
               variant="outline"
               onClick={() => setShowReviewForm(false)}
               disabled={submitting}
@@ -328,6 +279,53 @@ export default function RatingSystem({
           </div>
         </div>
       )}
+
+      {/* لیست نظرات */}
+      <div className="space-y-2">
+        <h3 className="text-xl font-bold">{t("reviews")}</h3>
+
+        {loadingReviews ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">{t("loadingReviews")}</p>
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">{t("noReviews")}</div>
+        ) : (
+          <div className="space-y-4">
+            {reviews.map((review) => (
+              <div key={review.id} className="glass-rate-card p-4 text-white">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h4 className="font-semibold">{review.customer_name}</h4>
+                    <div className="flex items-center gap-1 mt-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          size={16}
+                          className={`${
+                            star <= review.rating
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                        />
+                      ))}
+                      <span className="text-sm  mr-2">({review.rating}.0)</span>
+                    </div>
+                  </div>
+                  <span className="text-sm ">
+                    {new Date(review.created_at).toLocaleDateString("fa-IR")}
+                  </span>
+                </div>
+
+                {review.comment && (
+                  <p className="leading-relaxed">{review.comment}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
