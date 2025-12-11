@@ -329,7 +329,7 @@ export default function Home() {
           </div>
 
           <Link href="/menu" className="w-full flex justify-center">
-            <button className="px-15 py-5 w-full glass-btn">{t("viewMenu")}</button>
+            <button className="py-3 w-full glass-btn text-lg">{t("viewMenu")}</button>
           </Link>
         </div>
       </div>

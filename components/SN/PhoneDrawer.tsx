@@ -42,7 +42,7 @@ export default function PhoneDrawer() {
       </DrawerTrigger>
 
       <DrawerContent className="h-[40vh] glass-btn-card rounded-t-2xl">
-        <div className="my-15">
+        <div className="my-10">
           <div className="space-y-10">
             {/* شعبه اول */}
             <div className="text-white">
