@@ -22,7 +22,7 @@ const BRANCHES = [
   }
 ];
 
-export default function QRCodePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function QRCodePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const branch = BRANCHES.find(b => b.slug === slug);
   
