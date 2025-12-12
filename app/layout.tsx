@@ -3,6 +3,7 @@ import "../styles/globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { Toaster } from "@/components/ui/sonner";
 import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
+import { BranchProvider } from "@/contexts/BranchContext";
 
 export default function RootLayout({
   children,
@@ -14,8 +15,10 @@ export default function RootLayout({
       <body>
         <LanguageProvider>
           <AdminAuthProvider>
+            <BranchProvider>
             <Toaster position="top-center" />
             {children}
+            </BranchProvider>
           </AdminAuthProvider>
         </LanguageProvider>
       </body>

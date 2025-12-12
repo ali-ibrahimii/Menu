@@ -16,8 +16,15 @@ import FoodDetails from "@/components/FoodDetails";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import Link from "next/link";
+import { BranchProvider, useBranch } from "@/contexts/BranchContext";
+import { useSearchParams } from "next/navigation";
 
 export default function Home() {
+  const searchParams = useSearchParams();
+  const { selectedBranch } = useBranch();
+
+  const branchSlug = searchParams?.get("branch");
+
   const id = useId();
   const [foods, setFoods] = useState<Food[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -27,7 +34,14 @@ export default function Home() {
   const [filteredFoods, setFilteredFoods] = useState<Food[]>([]);
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  
+
+  useEffect(() => {
+    if (branchSlug && selectedBranch?.slug !== branchSlug) {
+      // می‌توانید branch را از branches پیدا و تنظیم کنید
+      // یا اجازه دهید کاربر از context استفاده کند
+    }
+  }, [branchSlug, selectedBranch]);
+
   // search input
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -39,15 +53,15 @@ export default function Home() {
   // گروه‌بندی غذاها بر اساس دسته‌بندی
   const groupFoodsByCategory = (foodsList: Food[]) => {
     const grouped: Record<string, Food[]> = {};
-    
-    foodsList.forEach(food => {
-      const categoryKey = food.category || 'uncategorized';
+
+    foodsList.forEach((food) => {
+      const categoryKey = food.category || "uncategorized";
       if (!grouped[categoryKey]) {
         grouped[categoryKey] = [];
       }
       grouped[categoryKey].push(food);
     });
-    
+
     return grouped;
   };
 
@@ -66,38 +80,40 @@ export default function Home() {
   const groupedFoods = groupFoodsByCategory(filterFood);
 
   // وزن‌دهی برای هر slug
-const categoryWeights: Record<string, number> = {
-  'Afghan foods': 1,
-  'Iranian foods': 2,
-  'Breakfast': 3,
-  'Drinks': 4,
-  'Hot drinks': 5,
-  'Cold drinks': 6,
-  'Coffee-based drinks': 7,
-  'Dessert': 8,
-  // برای slugهای نامعلوم، وزن زیاد بده تا به انتها بروند
-  'uncategorized': 999
-};
+  const categoryWeights: Record<string, number> = {
+    "Afghan foods": 1,
+    "Iranian foods": 2,
+    Breakfast: 3,
+    Drinks: 4,
+    "Hot drinks": 5,
+    "Cold drinks": 6,
+    "Coffee-based drinks": 7,
+    Dessert: 8,
+    // برای slugهای نامعلوم، وزن زیاد بده تا به انتها بروند
+    uncategorized: 999,
+  };
 
-// سپس مرتب‌سازی ساده‌تر:
-const sortedCategories = Object.entries(groupedFoods).sort(([slugA], [slugB]) => {
-  const weightA = categoryWeights[slugA] || 100;
-  const weightB = categoryWeights[slugB] || 100;
-  
-  return weightA - weightB;
-});
+  // سپس مرتب‌سازی ساده‌تر:
+  const sortedCategories = Object.entries(groupedFoods).sort(
+    ([slugA], [slugB]) => {
+      const weightA = categoryWeights[slugA] || 100;
+      const weightB = categoryWeights[slugB] || 100;
+
+      return weightA - weightB;
+    }
+  );
 
   // گرفتن نام دسته‌بندی
   const getCategoryName = (slug: string) => {
-    const category = categories.find(cat => {
+    const category = categories.find((cat) => {
       // تطبیق slug با trim کردن فاصله‌ها
       const catSlug = cat.slug?.trim().toLowerCase();
       const foodSlug = slug?.trim().toLowerCase();
       return catSlug === foodSlug;
     });
-    
+
     if (!category) return slug;
-    
+
     switch (language) {
       case "fa":
         return category.name;
@@ -191,19 +207,21 @@ const sortedCategories = Object.entries(groupedFoods).sort(([slugA], [slugB]) =>
             await supabase.from("category").select("*").order("name");
 
           if (categoriesError2) throw categoriesError2;
-          
+
           // تمیز کردن slugها
-          const cleanedCategories = categoriesData2?.map(cat => ({
-            ...cat,
-            slug: cat.slug?.trim()
-          })) || [];
+          const cleanedCategories =
+            categoriesData2?.map((cat) => ({
+              ...cat,
+              slug: cat.slug?.trim(),
+            })) || [];
           setCategories(cleanedCategories);
         } else {
           // تمیز کردن slugها
-          const cleanedCategories = categoriesData?.map(cat => ({
-            ...cat,
-            slug: cat.slug?.trim()
-          })) || [];
+          const cleanedCategories =
+            categoriesData?.map((cat) => ({
+              ...cat,
+              slug: cat.slug?.trim(),
+            })) || [];
           setCategories(cleanedCategories);
         }
       } catch (error) {
@@ -232,7 +250,6 @@ const sortedCategories = Object.entries(groupedFoods).sort(([slugA], [slugB]) =>
     }
   }, [selectedCategory, foods]);
 
-
   if (loading) {
     return (
       <div
@@ -251,10 +268,15 @@ const sortedCategories = Object.entries(groupedFoods).sort(([slugA], [slugB]) =>
     <main className="min-h-screen px-6 py-2 pt-5 overflow-y-auto overscroll-none touch-pan-y">
       {/* دکمه برگشت به صفحه ورودی و مینو */}
       <div
-        className={`text-3xl font-bold flex justify-between items-center ${language === 'en' ? '' : 'mb-2'}`}
+        className={`text-3xl font-bold flex justify-between items-center ${
+          language === "en" ? "" : "mb-2"
+        }`}
         dir={language === "en" ? "ltr" : "rtl"}
       >
         <h1 className={`text-3xl font-bold`}>{t("menu")}</h1>
+        <h1 className="text-2xl font-bold">
+          منوی {selectedBranch ? selectedBranch.name_fa : "رستوران وطندار"}
+        </h1>
 
         <Link
           href={"/"}
@@ -269,10 +291,9 @@ const sortedCategories = Object.entries(groupedFoods).sort(([slugA], [slugB]) =>
 
       <div
         dir={language === "en" ? "ltr" : "rtl"}
-        className="flex items-center justify-center w-full space-x-1">
-        <div
-          className="*:not-first:mt-2 w-full"
-        >
+        className="flex items-center justify-center w-full space-x-1"
+      >
+        <div className="*:not-first:mt-2 w-full">
           <div dir={language === "en" ? "ltr" : "rtl"} className="relative">
             <Input
               id={id}
@@ -330,7 +351,9 @@ const sortedCategories = Object.entries(groupedFoods).sort(([slugA], [slugB]) =>
                 return (
                   <Button
                     key={category.id}
-                    variant={selectedCategory === cleanSlug ? "default" : "outline"}
+                    variant={
+                      selectedCategory === cleanSlug ? "default" : "outline"
+                    }
                     onClick={() => setSelectedCategory(cleanSlug)}
                     className="justify-start flex items-center rounded-full text-[13px]"
                   >
@@ -404,14 +427,21 @@ const sortedCategories = Object.entries(groupedFoods).sort(([slugA], [slugB]) =>
                     <div className=" flex justify-end">
                       {!food.is_available ? (
                         <Badge
-                          variant={food.is_available ? "default" : "destructive"}
+                          variant={
+                            food.is_available ? "default" : "destructive"
+                          }
                           className={`${food.is_available ? "" : "opacity-30"}`}
                         >
-                          {food.is_available ? t("available") : t("notAvailable")}
+                          {food.is_available
+                            ? t("available")
+                            : t("notAvailable")}
                         </Badge>
                       ) : (
                         <div className={`flex justify-center items-center`}>
-                          <AddToCartButton food={food} getFoodName={getFoodName} />
+                          <AddToCartButton
+                            food={food}
+                            getFoodName={getFoodName}
+                          />
                         </div>
                       )}
                     </div>
@@ -439,10 +469,10 @@ const sortedCategories = Object.entries(groupedFoods).sort(([slugA], [slugB]) =>
                     {categoryFoods.length} {t("itemsCount")}
                   </Badge> */}
                 </div>
-                
+
                 {/* خط جداکننده */}
                 <div className="h-px bg-linear-to-r from-transparent via-gray-300 to-transparent" />
-                
+
                 {/* کارت‌های غذا در این دسته‌بندی */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                   {categoryFoods.map((food) => (
@@ -492,14 +522,23 @@ const sortedCategories = Object.entries(groupedFoods).sort(([slugA], [slugB]) =>
                         <div className=" flex justify-end">
                           {!food.is_available ? (
                             <Badge
-                              variant={food.is_available ? "default" : "destructive"}
-                              className={`${food.is_available ? "" : "opacity-30"}`}
+                              variant={
+                                food.is_available ? "default" : "destructive"
+                              }
+                              className={`${
+                                food.is_available ? "" : "opacity-30"
+                              }`}
                             >
-                              {food.is_available ? t("available") : t("notAvailable")}
+                              {food.is_available
+                                ? t("available")
+                                : t("notAvailable")}
                             </Badge>
                           ) : (
                             <div className={`flex justify-center items-center`}>
-                              <AddToCartButton food={food} getFoodName={getFoodName} />
+                              <AddToCartButton
+                                food={food}
+                                getFoodName={getFoodName}
+                              />
                             </div>
                           )}
                         </div>
@@ -510,7 +549,7 @@ const sortedCategories = Object.entries(groupedFoods).sort(([slugA], [slugB]) =>
                 </div>
               </div>
             ))}
-            
+
             {sortedCategories.length === 0 && (
               <div className="text-center py-8 text-gray-600">
                 {t("noFoods")}

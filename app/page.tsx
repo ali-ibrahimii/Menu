@@ -1,3 +1,4 @@
+// app/page.tsx
 "use client";
 
 import {
@@ -11,7 +12,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, Menu, X } from "lucide-react";
+import { MapPin, Clock, Menu, X, Phone } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
@@ -26,6 +27,8 @@ import LocationDrawer from "@/components/SN/LocationDrawer";
 import ShareDrawer from "@/components/SN/ShareDrawer";
 import InstagramDrawer from "@/components/SN/InstagramDrawer";
 import ClockDrawer from "@/components/SN/ClockDrawer";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useBranch } from "@/contexts/BranchContext";
 
 export default function Home() {
   const [foods, setFoods] = useState<Food[]>([]);
@@ -48,6 +51,11 @@ export default function Home() {
   // Ref برای interval
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Branch context و routing
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { selectedBranch, setSelectedBranch, branches, clearSelectedBranch } = useBranch();
+
   const t = (key: string) => {
     const langTranslations = translations[language] as Record<string, string>;
     return langTranslations[key] || key;
@@ -56,25 +64,21 @@ export default function Home() {
   // تابع برای تغییر خودکار پس‌زمینه با انیمیشن
   useEffect(() => {
     const changeBackground = () => {
-      if (isAnimating) return; // اگر در حال انیمیشن هست، صبر کن
+      if (isAnimating) return;
       
       setIsAnimating(true);
       
-      // شروع انیمیشن و تغییر عکس
       setTimeout(() => {
         setCurrentBgIndex((prevIndex) => (prevIndex + 1) % bgImages.length);
-      }, 100); // تأخیر کوتاه قبل از تغییر عکس
+      }, 100);
       
-      // پایان انیمیشن
       setTimeout(() => {
         setIsAnimating(false);
-      }, 1000); // مدت زمان انیمیشن
+      }, 1000);
     };
 
-    // تغییر هر 10 ثانیه
     intervalRef.current = setInterval(changeBackground, 5000);
 
-    // Cleanup interval هنگام unmount
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -82,9 +86,52 @@ export default function Home() {
     };
   }, [bgImages.length, isAnimating]);
 
-  
+  // خواندن پارامتر branch از URL هنگام لود صفحه
+  useEffect(() => {
+    const branchSlug = searchParams?.get('branch');
+    if (branchSlug) {
+      const branch = branches.find(b => b.slug === branchSlug);
+      if (branch) {
+        setSelectedBranch(branch);
+      }
+    }
+  }, [searchParams, branches, setSelectedBranch]);
 
-  // بقیه توابع بدون تغییر...
+  // تابع برای گرفتن آدرس بر اساس زبان و شعبه
+  const getAddress = () => {
+    if (!selectedBranch) {
+      return {
+        address1: t("address1"),
+        address: t("address")
+      };
+    }
+    
+    switch (language) {
+      case 'fa':
+        return {
+          address1: selectedBranch.address_fa,
+          address: selectedBranch.phone
+        };
+      case 'ar':
+        return {
+          address1: selectedBranch.address_ar,
+          address: selectedBranch.phone
+        };
+      case 'en':
+        return {
+          address1: selectedBranch.address_en,
+          address: selectedBranch.phone
+        };
+      default:
+        return {
+          address1: selectedBranch.address_fa,
+          address: selectedBranch.phone
+        };
+    }
+  };
+
+  const { address1, address } = getAddress();
+
   const getFoodName = (food: Food) => {
     switch (language) {
       case "fa":
@@ -186,11 +233,11 @@ export default function Home() {
               ? "scale-105 opacity-80"
               : "scale-100 opacity-100"
           }`}
-          key={currentBgIndex} // key تغییر کند تا کامپوننت مجدد رندر شود
+          key={currentBgIndex}
         >
           <Image
             src={bgImages[currentBgIndex]}
-            alt={t("restaurantName")}
+            alt={selectedBranch ? selectedBranch.name_fa : t("restaurantName")}
             fill
             className="object-cover"
             priority
@@ -200,7 +247,28 @@ export default function Home() {
         </div>
       </div>
 
-      {/* بقیه کد بدون تغییر... */}
+      {/* نشانگر شعبه انتخاب شده */}
+      {selectedBranch && (
+        <div className="absolute top-24 left-1/2 transform -translate-x-1/2 z-30">
+          <div className="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-sm font-medium text-gray-800">
+              {selectedBranch.name_fa}
+            </span>
+            <button
+              onClick={() => {
+                clearSelectedBranch();
+                router.push('/branches');
+              }}
+              className="text-xs text-gray-500 hover:text-red-500 pr-2 border-r border-gray-300"
+            >
+              تغییر شعبه
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Header Section */}
       <div className="relative z-10 text-white pt-8 px-4">
         <div className="flex justify-between px-2 items-center mb-4">
           <Drawer direction={language === "en" ? "left" : "right"}>
@@ -261,7 +329,12 @@ export default function Home() {
                     <p className="text-sm text-gray-500">{t("noFoods")}</p>
                   )}
                 </div>
-                <Link href={"/myOrders"}>My orders</Link>
+                <Link href={"/myOrders"} className="text-blue-600 hover:text-blue-800">
+                  سفارشات من
+                </Link>
+                <Link href={"/branches"} className="text-green-600 hover:text-green-800 font-medium">
+                  انتخاب / تغییر شعبه
+                </Link>
               </div>
               <DrawerFooter>
                 <DrawerClose className="absolute top-6 left-2">
@@ -279,35 +352,41 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Main Content Card */}
       <div className="absolute bottom-0 w-full z-20 glass-btn-card">
         <div className="">
           <CheckRestaurantStatus />
         </div>
 
-        <div className="flex flex-col items-center space-y-8 w-full px-8">
+        <div className="flex flex-col items-center space-y-8 w-full px-8 pb-6">
           <div className="flex-col flex items-center space-y-1">
             <div className="">
               <Image
                 src={"/logo.png"}
-                alt={t("restaurantName")}
+                alt={selectedBranch ? selectedBranch.name_fa : t("restaurantName")}
                 width={120}
                 height={40}
                 className="object-cover"
               />
             </div>
             <div className="text-center">
-              <h1 className="text-2xl font-bold mb-2">{t("restaurantName")}</h1>
+              <h1 className="text-2xl font-bold mb-2">
+                {selectedBranch ? selectedBranch.name_fa : t("restaurantName")}
+              </h1>
               <div className="flex items-center justify-center gap-2 text-[.9em]">
                 <MapPin size={16} />
-                <span>{t("address1")}</span>
+                <span>{address1}</span>
               </div>
-              <div className="flex items-center justify-center gap-2 text-[.9em]">
-                <MapPin size={16} />
-                <span>{t("address")}</span>
-              </div>
+              {address && (
+                <div className="flex items-center justify-center gap-2 text-[.9em]">
+                  <Phone size={16} />
+                  <span>{address}</span>
+                </div>
+              )}
             </div>
           </div>
 
+          {/* Social Icons */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <button>
@@ -328,9 +407,22 @@ export default function Home() {
             </div>
           </div>
 
-          <Link href="/menu" className="w-full flex justify-center">
-            <button className="py-1.5 w-full glass-btn text-lg">{t("viewMenu")}</button>
+          {/* دکمه مشاهده منو */}
+          <Link 
+            href={selectedBranch ? `/menu?branch=${selectedBranch.slug}` : '/menu'} 
+            className="w-full flex justify-center"
+          >
+            <button className="py-3 w-full glass-btn text-lg font-semibold">
+              {t("viewMenu")}
+            </button>
           </Link>
+
+          {/* لینک تغییر شعبه (در صورتی که شعبه انتخاب نشده باشد) */}
+          {!selectedBranch && (
+            <Link href="/branches" className="text-blue-100 hover:text-white text-sm underline">
+              انتخاب شعبه رستوران
+            </Link>
+          )}
         </div>
       </div>
     </main>
