@@ -18,6 +18,7 @@ interface BranchContextType {
   selectedBranch: Branch | null;
   branches: Branch[];
   setSelectedBranch: (branch: Branch | null) => void;
+  clearSelectedBranch: () => void; // اضافه کردن این تابع
   fetchBranches: () => Promise<void>;
 }
 
@@ -38,7 +39,6 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
   const fetchBranches = async () => {
     try {
       // اینجا باید API call به سوپابیس داشته باشید
-      // یا از localStorage خوانده شود
       const storedBranch = localStorage.getItem('selectedBranch');
       if (storedBranch) {
         setSelectedBranch(JSON.parse(storedBranch));
@@ -61,12 +61,19 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // اضافه کردن تابع clearSelectedBranch
+  const clearSelectedBranch = () => {
+    setSelectedBranch(null);
+    localStorage.removeItem('selectedBranch');
+  };
+
   return (
     <BranchContext.Provider
       value={{
         selectedBranch,
         branches,
         setSelectedBranch: handleSetBranch,
+        clearSelectedBranch, // اضافه کردن به context
         fetchBranches,
       }}
     >
