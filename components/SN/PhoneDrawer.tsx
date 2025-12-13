@@ -14,6 +14,7 @@ import { useState } from "react";
 import { useRestaurantInfo } from "@/hooks/useRestaurantInfo";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/translations/translation";
+import { Separator } from "../ui/separator";
 
 export default function PhoneDrawer() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -42,11 +43,11 @@ export default function PhoneDrawer() {
       </DrawerTrigger>
 
       <DrawerContent className="h-[40vh] glass-drawer">
-        <div className="py-4">
-          <div className="space-y-10">
+        <div className="">
+          <div className="space-y-5">
             {/* شعبه اول */}
             <div className="text-white">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2">
                 <h3 className="font-bold text-lg ">
                   {translatedInfo?.branch1.name || t("branch1")}
                 </h3>
@@ -93,6 +94,8 @@ export default function PhoneDrawer() {
                 </div>
               </div>
             </div>
+
+            <Separator />
 
             {/* شعبه دوم */}
             {translatedInfo?.branch2.phone && (

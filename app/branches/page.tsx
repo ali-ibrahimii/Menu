@@ -1,116 +1,115 @@
 // app/branches/page.tsx
 "use client";
 
-import { useRouter } from 'next/navigation';
-import { useBranch } from '@/contexts/BranchContext';
-import { Button } from '@/components/ui/button';
-import { MapPin, Phone, Check } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Phone, Check } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useBranch } from "@/contexts/BranchContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import Link from "next/link";
 
 export default function BranchesPage() {
-  const router = useRouter();
-  const { branches, setSelectedBranch } = useBranch();
+  const [branches, setBranches] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { setSelectedBranch } = useBranch();
   const { language } = useLanguage();
+  const router = useRouter();
+
+  useEffect(() => {
+    fetchBranches();
+  }, []);
+
+  const fetchBranches = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('branches')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at');
+
+      if (error) throw error;
+      setBranches(data || []);
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSelectBranch = (branch: any) => {
     setSelectedBranch(branch);
-    // هدایت به صفحه اصلی با پارامتر شعبه
-    router.push(`/?branch=${branch.slug}`);
+    router.push(`/menu?branch=${branch.slug}`);
   };
 
-  const getBranchName = (branch: any) => {
-    switch (language) {
-      case 'fa': return branch.name_fa;
-      case 'ar': return branch.name_ar;
-      case 'en': return branch.name_en;
-      default: return branch.name_fa;
-    }
-  };
-
-  const getBranchAddress = (branch: any) => {
-    switch (language) {
-      case 'fa': return branch.address_fa;
-      case 'ar': return branch.address_ar;
-      case 'en': return branch.address_en;
-      default: return branch.address_fa;
-    }
-  };
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
+    <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-4xl mx-auto">
-        {/* هدر */}
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-gray-800 mb-3">
-            انتخاب شعبه رستوران وطندار
-          </h1>
-          <p className="text-gray-600">
-            لطفاً شعبه مورد نظر خود را انتخاب کنید
-          </p>
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">شعبه‌های رستوران</h1>
+          <p className="text-gray-600">لطفاً شعبه مورد نظر خود را انتخاب کنید</p>
         </div>
 
-        {/* لیست شعب */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {branches.map((branch) => (
-            <div
-              key={branch.id}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow"
-            >
-              {/* تصویر شعبه */}
-              <div className="h-48 bg-gradient-to-r from-blue-500 to-purple-600 relative">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-white text-center">
-                    <div className="text-4xl mb-2">🍽️</div>
-                    <h3 className="text-xl font-bold">{getBranchName(branch)}</h3>
+            <Card key={branch.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-xl">{branch.name_fa}</CardTitle>
+                    <CardDescription>{branch.name_ar}</CardDescription>
                   </div>
+                  <Badge variant={branch.is_active ? "default" : "destructive"}>
+                    {branch.is_active ? "فعال" : "غیرفعال"}
+                  </Badge>
                 </div>
-              </div>
-
-              {/* اطلاعات شعبه */}
-              <div className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <MapPin className="text-blue-500 mt-1 flex-shrink-0" size={20} />
-                    <p className="text-gray-700">{getBranchAddress(branch)}</p>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <Phone className="text-green-500 flex-shrink-0" size={20} />
-                    <p className="text-gray-700">{branch.phone}</p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${branch.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
-                    <span className={`text-sm ${branch.is_active ? 'text-green-600' : 'text-red-600'}`}>
-                      {branch.is_active ? 'باز' : 'بسته'}
-                    </span>
-                  </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start gap-2 text-gray-600">
+                  <MapPin className="w-5 h-5 mt-0.5" />
+                  <span>{branch.address}</span>
                 </div>
+                
+                {branch.phone && (
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Phone className="w-5 h-5" />
+                    <span>{branch.phone}</span>
+                  </div>
+                )}
 
-                {/* دکمه انتخاب */}
-                <Button
+                <Button 
                   onClick={() => handleSelectBranch(branch)}
-                  className="w-full mt-6 h-12 text-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                  className="w-full bg-blue-600 hover:bg-blue-700"
                 >
-                  <Check className="ml-2" size={20} />
+                  <Check className="w-5 h-5 ml-2" />
                   انتخاب این شعبه
                 </Button>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
-        {/* راهنمایی */}
-        <div className="mt-12 p-6 bg-blue-50 rounded-2xl border border-blue-100">
-          <h3 className="text-lg font-semibold text-blue-800 mb-3">
-            📱 نحوه استفاده از QR Code:
-          </h3>
-          <ol className="list-decimal list-inside space-y-2 text-blue-700">
-            <li>QR Code را روی میز اسکن کنید</li>
-            <li>شعبه مورد نظر خود را انتخاب کنید</li>
-            <li>در صفحه اصلی، روی دکمه "مشاهده منو" کلیک کنید</li>
-            <li>مستقیماً به منوی همان شعبه هدایت می‌شوید</li>
-          </ol>
+        {branches.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">هیچ شعبه‌ای یافت نشد</p>
+          </div>
+        )}
+
+        <div className="mt-8 text-center">
+          <Link href="/">
+            <Button variant="outline">بازگشت به صفحه اصلی</Button>
+          </Link>
         </div>
       </div>
     </div>

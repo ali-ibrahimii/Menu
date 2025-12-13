@@ -13,14 +13,14 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl">
       <body>
-        <LanguageProvider>
-          <AdminAuthProvider>
-            <BranchProvider>
-            <Toaster position="top-center" />
-            {children}
-            </BranchProvider>
-          </AdminAuthProvider>
-        </LanguageProvider>
+          <LanguageProvider>
+        <BranchProvider>
+            <AdminAuthProvider>
+              <Toaster position="top-center" />
+              {children}
+            </AdminAuthProvider>
+        </BranchProvider>
+          </LanguageProvider>
       </body>
     </html>
   );

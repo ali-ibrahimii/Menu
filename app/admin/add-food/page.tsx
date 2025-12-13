@@ -1,6 +1,7 @@
+// app/admin/add-food/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,13 +15,21 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner"
+import { toast } from "sonner";
+
+interface Branch {
+  id: string;
+  name_fa: string;
+  slug: string;
+}
+
 export default function AddFoodPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [category, setCategory] = useState("");
+  const [branches, setBranches] = useState<Branch[]>([]);
 
   const [form, setForm] = useState({
     // اطلاعات اصلی
@@ -31,6 +40,7 @@ export default function AddFoodPage() {
     description_ar: "",
     description_en: "",
     price: "",
+    branch: "", // اینجا branch_id شعبه ذخیره می‌شود
 
     // جزئیات غذا
     cooking_time: "",
@@ -47,6 +57,29 @@ export default function AddFoodPage() {
     is_vegetarian: false,
     tags: "",
   });
+
+  useEffect(() => {
+    fetchBranches();
+  }, []);
+
+  const fetchBranches = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('branches')
+        .select('id, name_fa, slug')
+        .order('created_at');
+
+      if (error) throw error;
+      setBranches(data || []);
+      
+      if (data && data.length === 0) {
+        toast.warning("ابتدا باید شعبه‌ای ایجاد کنید");
+      }
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+      toast.error('خطا در دریافت اطلاعات شعب');
+    }
+  };
 
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) {
@@ -96,8 +129,15 @@ export default function AddFoodPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.name_fa || !form.price || imageUrls.length === 0 || !category) {
+    // اعتبارسنجی فیلدهای ضروری
+    if (!form.name_fa || !form.price || imageUrls.length === 0 || !category || !form.branch) {
       toast.warning("تمام فیلدهای ضروری را پر کنید");
+      return;
+    }
+
+    // بررسی اینکه شعبه معتبر است
+    if (!branches.find(b => b.id === form.branch)) {
+      toast.warning("لطفاً یک شعبه معتبر انتخاب کنید");
       return;
     }
 
@@ -113,9 +153,10 @@ export default function AddFoodPage() {
         description_ar: form.description_ar,
         description_en: form.description_en,
         price: Number(form.price),
-        image_url: imageUrls[0], // تصویر اصلی
-        images: imageUrls, // تمام تصاویر
+        image_url: imageUrls[0],
+        images: imageUrls,
         category,
+        branch_id: form.branch, // این مهم است - باید branch_id باشد
 
         // جزئیات غذا
         cooking_time: form.cooking_time ? Number(form.cooking_time) : null,
@@ -150,6 +191,7 @@ export default function AddFoodPage() {
         description_ar: "",
         description_en: "",
         price: "",
+        branch: "",
         cooking_time: "",
         serves: "",
         ingredients_fa: "",
@@ -165,7 +207,7 @@ export default function AddFoodPage() {
       setCategory("");
     } catch (error: any) {
       console.error("Error saving food:", error);
-      alert("خطا در ذخیره غذا: " + error.message);
+      toast.error("خطا در ذخیره غذا: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -189,44 +231,53 @@ export default function AddFoodPage() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-8 bg-amber-30">
+    <div className="p-6 max-w-4xl mx-auto space-y-8">
       <h1 className="text-3xl font-bold text-center">افزودن غذای جدید</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-8 bg-amber-40">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {/* بخش ۱: اطلاعات اصلی */}
-        <div className="p-6 rounded-lg border  space-y-6">
-          
+        <div className="p-6 rounded-lg border space-y-6">
+          <h2 className="text-xl font-semibold text-green-600 border-b pb-2">
+            اطلاعات اصلی
+          </h2>
 
           {/* آپلود چند عکس */}
           <div className="space-y-4">
             <Label>
               عکس‌های غذا <span className="text-destructive">*</span>
             </Label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={(e) => handleFileUpload(e.target.files)}
-              className="border p-2 w-full rounded"
-            />
-            <Button type="button" disabled={uploadLoading} className="w-full">
-              {uploadLoading ? "در حال آپلود..." : "آپلود عکس‌ها"}
-            </Button>
+            <div className="space-y-2">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => handleFileUpload(e.target.files)}
+                className="border p-2 w-full rounded"
+                disabled={uploadLoading}
+              />
+              {uploadLoading && (
+                <p className="text-sm text-blue-600">در حال آپلود عکس...</p>
+              )}
+              <p className="text-xs text-gray-500">
+                می‌توانید چند عکس آپلود کنید. عکس اول به عنوان تصویر اصلی استفاده می‌شود.
+              </p>
+            </div>
 
             {/* پیشنمایش عکس‌ها */}
             {imageUrls.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 {imageUrls.map((url, index) => (
-                  <div key={index} className="relative">
+                  <div key={index} className="relative group">
                     <img
                       src={url}
                       alt={`غذا ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg border"
+                      className="w-full h-32 object-cover rounded-lg border group-hover:opacity-90 transition"
                     />
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition"
+                      aria-label="حذف عکس"
                     >
                       ×
                     </button>
@@ -250,7 +301,7 @@ export default function AddFoodPage() {
               <Input
                 id="name_fa"
                 name="name_fa"
-                placeholder="نام فارسی"
+                placeholder="مثلا: قورمه سبزی"
                 value={form.name_fa}
                 onChange={handleInputChange}
                 required
@@ -264,7 +315,7 @@ export default function AddFoodPage() {
               <Input
                 id="name_ar"
                 name="name_ar"
-                placeholder="نام عربی"
+                placeholder="مثلا: قورمة سبزی"
                 value={form.name_ar}
                 onChange={handleInputChange}
                 required
@@ -278,7 +329,7 @@ export default function AddFoodPage() {
               <Input
                 id="name_en"
                 name="name_en"
-                placeholder="نام انگلیسی"
+                placeholder="مثلا: Ghormeh Sabzi"
                 value={form.name_en}
                 onChange={handleInputChange}
                 required
@@ -295,7 +346,7 @@ export default function AddFoodPage() {
               <Textarea
                 id="description_fa"
                 name="description_fa"
-                placeholder="توضیحات کامل به فارسی"
+                placeholder="توضیحات کامل به فارسی (مواد، طعم، نحوه سرو)"
                 value={form.description_fa}
                 onChange={handleInputChange}
                 required
@@ -351,6 +402,7 @@ export default function AddFoodPage() {
                 placeholder="30"
                 value={form.cooking_time}
                 onChange={handleInputChange}
+                min="0"
               />
             </div>
 
@@ -363,6 +415,7 @@ export default function AddFoodPage() {
                 placeholder="2"
                 value={form.serves}
                 onChange={handleInputChange}
+                min="1"
               />
             </div>
 
@@ -378,15 +431,14 @@ export default function AddFoodPage() {
                 value={form.price}
                 onChange={handleInputChange}
                 required
+                min="0"
               />
             </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
         </div>
 
-        {/* بخش ۳ : مواد تشکیل دهنده */}
-        <div className="bg-white p-6 rounded-lg border space-y-6">
+        {/* بخش ۳: مواد تشکیل دهنده */}
+        <div className="p-6 rounded-lg border space-y-6">
           <h2 className="text-xl font-semibold text-orange-600 border-b pb-2">
             مواد تشکیل دهنده
           </h2>
@@ -402,6 +454,7 @@ export default function AddFoodPage() {
                 onChange={handleInputChange}
                 rows={3}
               />
+              <p className="text-xs text-gray-500">مواد را با کاما جدا کنید</p>
             </div>
 
             <div className="space-y-2">
@@ -430,7 +483,6 @@ export default function AddFoodPage() {
           </div>
         </div>
         
-
         {/* بخش ۴: تنظیمات و دسته‌بندی */}
         <div className="p-6 rounded-lg border space-y-6">
           <h2 className="text-xl font-semibold text-purple-600 border-b pb-2">
@@ -439,6 +491,7 @@ export default function AddFoodPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
+              {/* فیلد دسته‌بندی */}
               <div className="space-y-2">
                 <Label htmlFor="category">
                   دسته‌بندی <span className="text-destructive">*</span>
@@ -459,13 +512,70 @@ export default function AddFoodPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* فیلد اصلاح شده: انتخاب شعبه */}
+              <div className="space-y-2">
+                <Label htmlFor="branch">
+                  شعبه <span className="text-destructive">*</span>
+                </Label>
+                <Select 
+                  value={form.branch} 
+                  onValueChange={(value) => 
+                    setForm(prev => ({ ...prev, branch: value }))
+                  } 
+                  required
+                  disabled={branches.length === 0}
+                >
+                  <SelectTrigger id="branch">
+                    <SelectValue placeholder={
+                      branches.length === 0 
+                        ? "در حال دریافت شعب..." 
+                        : "انتخاب شعبه"
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {branches.map((branch) => (
+                      <SelectItem key={branch.id} value={branch.id}>
+                        {branch.name_fa}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {branches.length === 0 && (
+                  <p className="text-xs text-red-500">
+                    ابتدا باید شعبه‌ای ایجاد کنید
+                  </p>
+                )}
+                <p className="text-xs text-gray-500">
+                  غذای اضافه شده به کدام شعبه تعلق دارد؟
+                </p>
+              </div>
+
+              {/* تگ‌ها */}
+              <div className="space-y-2">
+                <Label htmlFor="tags">تگ‌ها (اختیاری)</Label>
+                <Input
+                  id="tags"
+                  name="tags"
+                  placeholder="پرفروش, جدید, ویژه"
+                  value={form.tags}
+                  onChange={handleInputChange}
+                />
+                <p className="text-xs text-gray-500">
+                  تگ‌ها را با کاما جدا کنید (مثلا: پرفروش, جدید)
+                </p>
+              </div>
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="is_available" className="cursor-pointer">
-                  موجود است
-                </Label>
+              {/* سوئیچ‌های تنظیمات */}
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <Label htmlFor="is_available" className="cursor-pointer font-medium">
+                    موجود است
+                  </Label>
+                  <p className="text-xs text-gray-500">غذا در منو نمایش داده شود</p>
+                </div>
                 <Switch
                   id="is_available"
                   checked={form.is_available}
@@ -475,10 +585,13 @@ export default function AddFoodPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="is_spicy" className="cursor-pointer">
-                  تند است
-                </Label>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <Label htmlFor="is_spicy" className="cursor-pointer font-medium">
+                    تند است
+                  </Label>
+                  <p className="text-xs text-gray-500">برای مشتریان حساس به تندی</p>
+                </div>
                 <Switch
                   id="is_spicy"
                   checked={form.is_spicy}
@@ -488,10 +601,13 @@ export default function AddFoodPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="is_vegetarian" className="cursor-pointer">
-                  گیاهی است
-                </Label>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <Label htmlFor="is_vegetarian" className="cursor-pointer font-medium">
+                    گیاهی است
+                  </Label>
+                  <p className="text-xs text-gray-500">فاقد گوشت و محصولات حیوانی</p>
+                </div>
                 <Switch
                   id="is_vegetarian"
                   checked={form.is_vegetarian}
@@ -505,14 +621,32 @@ export default function AddFoodPage() {
         </div>
 
         {/* دکمه ثبت */}
-        <Button
-          type="submit"
-          disabled={loading || imageUrls.length === 0}
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg text-lg font-semibold"
-          size="lg"
-        >
-          {loading ? "در حال ثبت غذا..." : "ثبت غذای جدید"}
-        </Button>
+        <div className="sticky bottom-0 bg-white pt-4 border-t">
+          <div className="max-w-4xl mx-auto">
+            <Button
+              type="submit"
+              disabled={loading || imageUrls.length === 0 || branches.length === 0}
+              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 rounded-lg text-lg font-semibold shadow-lg"
+              size="lg"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
+                  در حال ثبت غذا...
+                </span>
+              ) : (
+                "ثبت غذای جدید"
+              )}
+            </Button>
+            
+            {/* راهنمایی */}
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-700 text-center">
+                <strong>توجه:</strong> پس از ثبت، غذا در منوی شعبه انتخاب شده نمایش داده می‌شود.
+              </p>
+            </div>
+          </div>
+        </div>
       </form>
     </div>
   );

@@ -22,6 +22,7 @@ export type Food = {
   created_at: string;
   category_id: string;
   updated_at: string;
+  branch_id: string;
 };
 
 export type Category = {
