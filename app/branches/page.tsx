@@ -214,7 +214,7 @@ export default function BranchesPage() {
                     />
 
                     {/* Gradient overlay برای خوانایی متن */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30"></div>
+                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/50 to-black/30"></div>
 
                     {/* نقاط نشانگر */}
                     <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex gap-1.5 z-20">
