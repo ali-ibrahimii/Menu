@@ -41,7 +41,7 @@ export default function PhoneDrawer() {
         </button>
       </DrawerTrigger>
 
-      <DrawerContent className="h-[50vh] bg-gradient-to-b from-white to-gray-50 rounded-t-2xl">
+      <DrawerContent className="h-[50vh] glass-drawer">
         <div className="flex-1 overflow-y-auto px-6 pb-6">
           <div className="space-y-6">
             {/* شعبه اول */}
@@ -103,7 +103,6 @@ export default function PhoneDrawer() {
                       <MapPin size={16} className="text-red-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm text-gray-600">{t("address")}</p>
                       <p className="text-gray-700 leading-relaxed">
                         {translatedInfo.branch1.address}
                       </p>

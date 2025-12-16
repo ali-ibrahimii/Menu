@@ -311,7 +311,7 @@ export default function MenuPage() {
         <h1 className={`text-3xl font-bold`}>{t("menu")}</h1>
         
         <div className="flex items-center gap-2">
-          {/* نشانگر شعبه */}
+          {/* نشانگر شعبه
           {selectedBranch && (
             <div className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -319,7 +319,7 @@ export default function MenuPage() {
                 {selectedBranch.name_fa}
               </span>
             </div>
-          )}
+          )} */}
           
           <Link
             href={"/"}

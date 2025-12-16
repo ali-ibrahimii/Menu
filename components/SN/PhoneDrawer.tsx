@@ -33,7 +33,7 @@ export default function PhoneDrawer() {
 
   return (
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <DrawerTrigger asChild className="">
+      <DrawerTrigger asChild>
         <button
           className="glass-btn glass-small flex items-center justify-center"
           onClick={() => setIsDrawerOpen(true)}

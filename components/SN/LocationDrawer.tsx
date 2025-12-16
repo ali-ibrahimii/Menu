@@ -41,7 +41,7 @@ export default function PhoneDrawer() {
         </button>
       </DrawerTrigger>
 
-      <DrawerContent className="h-[50vh] bg-gradient-to-b from-white to-gray-50 rounded-t-2xl">
+      <DrawerContent className="h-[50vh] glass-drawer">
         <div className="flex-1 overflow-y-auto px-6 pb-6">
           <div className="space-y-6">
             {/* شعبه اول */}

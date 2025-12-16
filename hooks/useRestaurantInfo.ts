@@ -76,9 +76,7 @@ export function useRestaurantInfo() {
         phone2: restaurantInfo.branch2_phone2 || '',
         
         // اصلاح این خط - استفاده از branch2_address_fa به جای branch2_address
-        address: restaurantInfo[`branch2_address_${language}` as keyof RestaurantInfo] as string || 
-                restaurantInfo.branch2_address_fa || // تغییر اینجا
-                'تهران، میدان ونک، برج ونک',
+        address: restaurantInfo[`branch2_address_${language}` as keyof RestaurantInfo] as string
       },
       
       instagram: restaurantInfo.instagram_url || 'https://instagram.com/vatandar.restaurant',

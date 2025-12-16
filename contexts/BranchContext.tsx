@@ -9,8 +9,11 @@ interface Branch {
   name_fa: string;
   name_ar: string;
   name_en: string;
-  address: string;
-  phone: string;
+  address_fa: string;
+  address_ar: string;
+  address_en: string;
+  phone_1: string;
+  phone_2: string;
   is_active: boolean;
 }
 
@@ -18,7 +21,7 @@ interface BranchContextType {
   selectedBranch: Branch | null;
   branches: Branch[];
   setSelectedBranch: (branch: Branch | null) => void;
-  clearSelectedBranch: () => void; // اضافه کردن این تابع
+  clearSelectedBranch: () => void;
   fetchBranches: () => Promise<void>;
 }
 
@@ -36,21 +39,23 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
   const [branches, setBranches] = useState<Branch[]>([]);
 
-  const fetchBranches = async () => {
-    try {
-      // اینجا باید API call به سوپابیس داشته باشید
-      const storedBranch = localStorage.getItem('selectedBranch');
-      if (storedBranch) {
-        setSelectedBranch(JSON.parse(storedBranch));
-      }
-    } catch (error) {
-      console.error('Error fetching branches:', error);
-    }
-  };
-
   useEffect(() => {
-    fetchBranches();
+    // بارگذاری شعبه از localStorage هنگام لود اولیه
+    const storedBranch = localStorage.getItem('selectedBranch');
+    if (storedBranch) {
+      try {
+        setSelectedBranch(JSON.parse(storedBranch));
+      } catch (error) {
+        console.error('Error parsing stored branch:', error);
+        localStorage.removeItem('selectedBranch');
+      }
+    }
   }, []);
+
+  const fetchBranches = async () => {
+    // اینجا می‌توانید از سوپابیس شعبه‌ها را بگیرید
+    // فعلاً خالی می‌گذاریم
+  };
 
   const handleSetBranch = (branch: Branch | null) => {
     setSelectedBranch(branch);
@@ -61,7 +66,6 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // اضافه کردن تابع clearSelectedBranch
   const clearSelectedBranch = () => {
     setSelectedBranch(null);
     localStorage.removeItem('selectedBranch');
@@ -73,7 +77,7 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
         selectedBranch,
         branches,
         setSelectedBranch: handleSetBranch,
-        clearSelectedBranch, // اضافه کردن به context
+        clearSelectedBranch,
         fetchBranches,
       }}
     >

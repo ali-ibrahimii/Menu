@@ -12,7 +12,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, Menu, X, Phone } from "lucide-react";
+import { MapPin, Clock, Menu, X, Phone, Store } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
@@ -30,6 +30,26 @@ import ClockDrawer from "@/components/SN/ClockDrawer";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useBranch } from "@/contexts/BranchContext";
 
+// گالری عکس‌های هر شعبه
+const branchImageGalleries: Record<string, string[]> = {
+  main: ["/bg.jpg", "/bg1.jpg", "/bg2.jpg", "/bg3.jpg"],
+  branch2: [
+    "/branche2/1.jpg",
+    "/branche2/2.jpg",
+    "/branche2/3.jpg",
+    "/branche2/4.jpg",
+    "/branche2/5.jpg",
+    "/branche2/6.jpg",
+    "/branche2/7.jpg",
+  ],
+  default: ["/bg.jpg", "/bg1.jpg", "/bg2.jpg", "/bg3.jpg"]
+};
+
+// تابع برای گرفتن گالری عکس مناسب برای هر شعبه
+const getBranchImageGallery = (branchSlug: string) => {
+  return branchImageGalleries[branchSlug] || branchImageGalleries["default"];
+};
+
 export default function Home() {
   const [foods, setFoods] = useState<Food[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -41,12 +61,7 @@ export default function Home() {
   // State برای مدیریت پس‌زمینه‌های متغیر
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [bgImages] = useState<string[]>([
-    "/bg.jpg",
-    "/bg1.jpg",
-    "/bg2.jpg",
-    "/bg3.jpg",
-  ]);
+  const [bgImages, setBgImages] = useState<string[]>([]);
   
   // Ref برای interval
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -54,24 +69,85 @@ export default function Home() {
   // Branch context و routing
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { selectedBranch, setSelectedBranch, branches, clearSelectedBranch } = useBranch();
+  const { selectedBranch, setSelectedBranch, clearSelectedBranch } = useBranch();
+
+  // State برای بررسی اینکه آیا در حال redirect هستیم یا نه
+  const [isRedirecting, setIsRedirecting] = useState(true);
 
   const t = (key: string) => {
     const langTranslations = translations[language] as Record<string, string>;
     return langTranslations[key] || key;
   };
 
+  // بررسی شعبه هنگام لود صفحه
+  useEffect(() => {
+    const checkBranch = async () => {
+      // تاخیر برای UX بهتر
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const branchSlug = searchParams?.get("branch");
+
+      // اگر branch در URL وجود دارد
+      if (branchSlug) {
+        // گرفتن شعبه از دیتابیس
+        try {
+          const { data, error } = await supabase
+            .from("branches")
+            .select("*")
+            .eq("slug", branchSlug)
+            .eq("is_active", true)
+            .single();
+
+          if (!error && data) {
+            setSelectedBranch(data);
+            // تنظیم عکس‌های این شعبه
+            const gallery = getBranchImageGallery(data.slug);
+            setBgImages(gallery);
+            setIsRedirecting(false);
+            return;
+          }
+        } catch (error) {
+          console.error("Error fetching branch from URL:", error);
+        }
+      }
+
+      // اگر شعبه در localStorage وجود دارد
+      const storedBranch = localStorage.getItem("selectedBranch");
+      if (storedBranch) {
+        try {
+          const branch = JSON.parse(storedBranch);
+          setSelectedBranch(branch);
+          // تنظیم عکس‌های این شعبه
+          const gallery = getBranchImageGallery(branch.slug);
+          setBgImages(gallery);
+          setIsRedirecting(false);
+          return;
+        } catch (error) {
+          console.error("Error parsing stored branch:", error);
+        }
+      }
+
+      // اگر شعبه انتخاب نشده، به صفحه انتخاب شعبه هدایت کن
+      setIsRedirecting(false);
+      router.push("/branches");
+    };
+
+    checkBranch();
+  }, [searchParams, setSelectedBranch, router]);
+
   // تابع برای تغییر خودکار پس‌زمینه با انیمیشن
   useEffect(() => {
+    if (isRedirecting || bgImages.length === 0) return;
+
     const changeBackground = () => {
       if (isAnimating) return;
-      
+
       setIsAnimating(true);
-      
+
       setTimeout(() => {
         setCurrentBgIndex((prevIndex) => (prevIndex + 1) % bgImages.length);
       }, 100);
-      
+
       setTimeout(() => {
         setIsAnimating(false);
       }, 1000);
@@ -84,98 +160,30 @@ export default function Home() {
         clearInterval(intervalRef.current);
       }
     };
-  }, [bgImages.length, isAnimating]);
+  }, [bgImages, isAnimating, isRedirecting]);
 
-  // خواندن پارامتر branch از URL هنگام لود صفحه
+  // خواندن اطلاعات رستوران و غذاها
   useEffect(() => {
-    const branchSlug = searchParams?.get('branch');
-    if (branchSlug) {
-      const branch = branches.find(b => b.slug === branchSlug);
-      if (branch) {
-        setSelectedBranch(branch);
-      }
-    }
-  }, [searchParams, branches, setSelectedBranch]);
+    if (isRedirecting || !selectedBranch) return;
 
-  // تابع برای گرفتن آدرس بر اساس زبان و شعبه
-  const getAddress = () => {
-    if (!selectedBranch) {
-      return {
-        address1: t("address1"),
-        address: t("address")
-      };
-    }
-    
-    switch (language) {
-      case 'fa':
-        return {
-          address1: selectedBranch.address_fa,
-          address: selectedBranch.phone
-        };
-      case 'ar':
-        return {
-          address1: selectedBranch.address_ar,
-          address: selectedBranch.phone
-        };
-      case 'en':
-        return {
-          address1: selectedBranch.address_en,
-          address: selectedBranch.phone
-        };
-      default:
-        return {
-          address1: selectedBranch.address_fa,
-          address: selectedBranch.phone
-        };
-    }
-  };
-
-  const { address1, address } = getAddress();
-
-  const getFoodName = (food: Food) => {
-    switch (language) {
-      case "fa":
-        return food.name_fa;
-      case "ar":
-        return food.name_ar;
-      case "en":
-        return food.name_en;
-      default:
-        return food.name_fa;
-    }
-  };
-
-  const getFoodDescription = (food: Food) => {
-    switch (language) {
-      case "fa":
-        return food.description_fa;
-      case "ar":
-        return food.description_ar;
-      case "en":
-        return food.description_en;
-      default:
-        return food.description_fa;
-    }
-  };
-
-  // گرفتن اطلاعات غذاها و دسته‌بندی‌ها از دیتابیس
-  useEffect(() => {
     const fetchData = async () => {
       try {
+        // گرفتن غذاهای این شعبه
         const { data: foodsData, error: foodsError } = await supabase
           .from("foods")
-          .select("*");
+          .select("*")
+          .eq("branch_id", selectedBranch.id);
 
         if (foodsError) throw foodsError;
         setFoods(foodsData || []);
 
+        // گرفتن دسته‌بندی‌ها
         const { data: categoriesData, error: categoriesError } = await supabase
           .from("categories")
           .select("*")
           .order("name");
 
         if (categoriesError) {
-          console.error("Error fetching categories:", categoriesError);
           const { data: categoriesData2, error: categoriesError2 } =
             await supabase.from("category").select("*").order("name");
 
@@ -192,7 +200,7 @@ export default function Home() {
     };
 
     fetchData();
-  }, []);
+  }, [selectedBranch, isRedirecting]);
 
   // فیلتر کردن غذاها
   useEffect(() => {
@@ -205,18 +213,36 @@ export default function Home() {
     }
   }, [selectedCategory, foods]);
 
+  // اگر در حال هدایت هستیم، لودینگ نشان بده
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-green-900 to-green-800">
+        <div className="text-center text-white">
+          <Store className="w-16 h-16 animate-pulse mx-auto mb-4" />
+          <p className="text-lg font-medium">در حال بارگذاری شعبه...</p>
+          <p className="text-sm text-green-200 mt-2">لطفاً کمی صبر کنید</p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div
         dir={language === "en" ? "ltr" : "rtl"}
-        className="flex justify-center items-center min-h-screen"
+        className="flex justify-center items-center min-h-screen bg-gradient-to-b from-green-900 to-green-800"
       >
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t("loading")}</p>
+        <div className="text-center text-white">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-300 mx-auto mb-4"></div>
+          <p className="text-gray-200">{t("loading")}</p>
         </div>
       </div>
     );
+  }
+
+  // اگر شعبه انتخاب نشده (این حالت نباید اتفاق بیفتد چون قبلاً redirect کردیم)
+  if (!selectedBranch || bgImages.length === 0) {
+    return null;
   }
 
   return (
@@ -229,15 +255,13 @@ export default function Home() {
         {/* تصویر اصلی با انیمیشن */}
         <div
           className={`absolute inset-0 transition-all duration-2000 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-            isAnimating
-              ? "scale-105 opacity-80"
-              : "scale-100 opacity-100"
+            isAnimating ? "scale-105 opacity-80" : "scale-100 opacity-100"
           }`}
           key={currentBgIndex}
         >
           <Image
             src={bgImages[currentBgIndex]}
-            alt={selectedBranch ? selectedBranch.name_fa : t("restaurantName")}
+            alt={selectedBranch.name_fa}
             fill
             className="object-cover"
             priority
@@ -246,27 +270,6 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
       </div>
-
-      {/* نشانگر شعبه انتخاب شده */}
-      {selectedBranch && (
-        <div className="absolute top-24 left-1/2 transform -translate-x-1/2 z-30">
-          <div className="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span className="text-sm font-medium text-gray-800">
-              {selectedBranch.name_fa}
-            </span>
-            <button
-              onClick={() => {
-                clearSelectedBranch();
-                router.push('/branches');
-              }}
-              className="text-xs text-gray-500 hover:text-red-500 pr-2 border-r border-gray-300"
-            >
-              تغییر شعبه
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Header Section */}
       <div className="relative z-10 text-white pt-8 px-4">
@@ -277,64 +280,49 @@ export default function Home() {
                 <Menu color="#000" />
               </Button>
             </DrawerTrigger>
-            <DrawerContent>
+            <DrawerContent className="glass-side">
               <DrawerHeader>
                 <DrawerTitle>
-                  <div className="flex flex-col gap-5 justify-center items-center mt-10">
+                  <div className="flex flex-col gap-5 justify-center p-5 rounded-3xl bg-gray-100/5 border-[0.1px] border-gray-500/60 items-center mt-10">
                     <Image
                       src="/logo.png"
-                      alt="Vatandar logo"
+                      alt="Watandar logo"
                       width={80}
                       height={50}
                       className="object-cover"
                     />
-                    <div className="">
-                      <Image
-                        src="/line.png"
-                        alt="Vatandar logo"
-                        width={200}
-                        height={100}
-                        className="object-cover"
-                      />
-                    </div>
                   </div>
                 </DrawerTitle>
                 <DrawerDescription></DrawerDescription>
               </DrawerHeader>
               <div className="flex flex-col gap-3 p-4">
-                <div className="">
-                  <Button
-                    variant={selectedCategory === null ? "default" : "outline"}
-                    onClick={() => setSelectedCategory(null)}
-                    className="justify-start w-40 flex items-center"
-                  >
-                    {t("allFoods")}
-                  </Button>
-                  {categories.length > 0 ? (
-                    categories.map((category) => (
-                      <Button
-                        key={category.id}
-                        variant={
-                          selectedCategory === category.slug
-                            ? "default"
-                            : "outline"
-                        }
-                        onClick={() => setSelectedCategory(category.slug)}
-                        className="justify-start w-40 flex items-center"
-                      >
-                        {category.name}
-                      </Button>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500">{t("noFoods")}</p>
-                  )}
+                <div className="text-center mb-4">
+                  <div className="flex items-center flex-col justify-center gap-2 mb-2">
+                    <h1 className="font-bold text-2xl">
+                      {t("restaurantName")}
+                    </h1>
+                    <span className="font-medium">
+                      {language === "en"
+                        ? selectedBranch.name_en || selectedBranch.name_fa
+                        : language === "ar"
+                        ? selectedBranch.name_ar || selectedBranch.name_fa
+                        : selectedBranch.name_fa}
+                    </span>
+                  </div>
                 </div>
-                <Link href={"/myOrders"} className="text-blue-600 hover:text-blue-800">
-                  سفارشات من
-                </Link>
-                <Link href={"/branches"} className="text-green-600 hover:text-green-800 font-medium">
-                  انتخاب / تغییر شعبه
-                </Link>
+
+                <div className="mt-4 space-y-2">
+                  <Link href={"/myOrders"} className="block text-center">
+                    سفارشات من
+                  </Link>
+                  <Link
+                    href={"/branches"}
+                    className="block font-medium text-center"
+                    onClick={() => clearSelectedBranch()}
+                  >
+                    انتخاب / تغییر شعبه
+                  </Link>
+                </div>
               </div>
               <DrawerFooter>
                 <DrawerClose className="absolute top-6 left-2">
@@ -353,8 +341,8 @@ export default function Home() {
       </div>
 
       {/* Main Content Card */}
-      <div className="absolute bottom-0 w-full z-20 glass-btn-card">
-        <div className="">
+      <div className="absolute bottom-0 w-full z-20 glass-card">
+        <div className="glass-check-status absolute left-0 top-20">
           <CheckRestaurantStatus />
         </div>
 
@@ -363,26 +351,35 @@ export default function Home() {
             <div className="">
               <Image
                 src={"/logo.png"}
-                alt={selectedBranch ? selectedBranch.name_fa : t("restaurantName")}
+                alt={selectedBranch.name_fa}
                 width={120}
                 height={40}
                 className="object-cover"
               />
             </div>
             <div className="text-center">
-              <h1 className="text-2xl font-bold mb-2">
-                {selectedBranch ? selectedBranch.name_fa : t("restaurantName")}
-              </h1>
-              <div className="flex items-center justify-center gap-2 text-[.9em]">
-                <MapPin size={16} />
-                <span>{address1}</span>
-              </div>
-              {address && (
-                <div className="flex items-center justify-center gap-2 text-[.9em]">
-                  <Phone size={16} />
-                  <span>{address}</span>
+              <h1 className="text-2xl font-bold mb-2">{t("restaurantName")}</h1>
+              <h1 className="text-xl mb-2">{language === 'ar' ? selectedBranch.name_ar : language === 'en'? selectedBranch.name_en : selectedBranch.name_fa}</h1>
+              {/* <div className="flex items-center justify-center gap-2 text-[.9em]">
+                <div className="p-2 bg-accent/20 rounded-md">
+                  <MapPin size={16} />
                 </div>
-              )}
+                <span>
+                  {language === "en"
+                    ? selectedBranch.address_en || selectedBranch.address
+                    : language === "fa"
+                    ? selectedBranch.address_fa || selectedBranch.address
+                    : selectedBranch.address_ar || selectedBranch.address}
+                </span>
+              </div> */}
+              {/* {selectedBranch.phone_1 && (
+                <div className="flex items-center justify-center gap-2 text-[.9em]">
+                  <div className="p-2 bg-accent/20 rounded-md">
+                    <Phone size={16} />
+                  </div>
+                  <span>{selectedBranch.phone_1}</span>
+                </div>
+              )} */}
             </div>
           </div>
 
@@ -407,22 +404,15 @@ export default function Home() {
             </div>
           </div>
 
-          {/* دکمه مشاهده منو */}
-          <Link 
-            href={selectedBranch ? `/menu?branch=${selectedBranch.slug}` : '/menu'} 
+          {/* دکمه اصلی مشاهده منو */}
+          <Link
+            href={`/menu?branch=${selectedBranch.slug}`}
             className="w-full flex justify-center"
           >
             <button className="py-3 w-full glass-btn text-lg font-semibold">
               {t("viewMenu")}
             </button>
           </Link>
-
-          {/* لینک تغییر شعبه (در صورتی که شعبه انتخاب نشده باشد) */}
-          {!selectedBranch && (
-            <Link href="/branches" className="text-blue-100 hover:text-white text-sm underline">
-              انتخاب شعبه رستوران
-            </Link>
-          )}
         </div>
       </div>
     </main>

@@ -26,7 +26,7 @@ export const translations = {
     serves: "مناسب",
     minutes: "دقیقه",
     category: "دسته",
-    
+
     items: "مورد",
     cookingTime: "زمان پخت و پز",
     total: "جمع کل",
@@ -56,11 +56,17 @@ export const translations = {
     available: "موجود",
     notAvailable: "ناموجود",
 
-    contactInformation: 'اطلاعات تماس',
-    branch1: 'شعبه مرکزی',
-    branch2: 'شعبه دوم',
-    phone: 'تلفن',
-    phone2: 'تلفن دوم',
+    contactInformation: "اطلاعات تماس",
+    branch1: "شعبه مرکزی",
+    branch2: "شعبه دوم",
+    phone: "تلفن",
+    phone2: "تلفن دوم",
+
+    // app/branches
+    selectBranch: "انتخاب شعبه",
+    acitve: "فعال",
+    notAcitve: "بسته",
+    selectBranchReq: "لطفاً شعبه مورد نظر خود را انتخاب کنید",
   },
   ar: {
     menu: "قائمة الطعام",
@@ -90,7 +96,7 @@ export const translations = {
     cookingTime: "وقت الطبخ",
     minutes: "دقائق",
     category: "فئة",
-    
+
     items: "عنصر",
     total: "المجموع",
     notes: "ملاحظات",
@@ -114,11 +120,17 @@ export const translations = {
     available: "متاح",
     notAvailable: "غير موجود",
 
-    contactInformation: 'معلومات الاتصال',
-    branch1: 'الفرع الرئيسي',
-    branch2: 'الفرع الثاني',
-    phone: 'هاتف',
-    phone2: 'الهاتف الثاني',
+    contactInformation: "معلومات الاتصال",
+    branch1: "الفرع الرئيسي",
+    branch2: "الفرع الثاني",
+    phone: "هاتف",
+    phone2: "الهاتف الثاني",
+
+    // app/branches
+    selectBranch: "اختيار الفرع",
+    acitve: "نشيط",
+    notAcitve: "غير نشط",
+    selectBranchReq: "يرجى اختيار الفرع الذي ترغب به.",
   },
   en: {
     menu: "Menu",
@@ -172,10 +184,16 @@ export const translations = {
     available: "available",
     notAvailable: "not available",
 
-    contactInformation: 'Contact Information',
-    branch1: 'Main Branch',
-    branch2: 'Second Branch',
-    phone: 'Phone',
-    phone2: 'Phone 2',
+    contactInformation: "Contact Information",
+    branch1: "Main Branch",
+    branch2: "Second Branch",
+    phone: "Phone",
+    phone2: "Phone 2",
+
+    // app/branches
+    selectBranch: "Branch selection",
+    acitve: "Active",
+    notAcitve: "Not active",
+    selectBranchReq: "Please select your desired branch.",
   },
 };
