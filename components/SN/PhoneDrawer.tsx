@@ -8,18 +8,41 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { PhoneCall, MapPin, Building, Phone } from "lucide-react";
+import { PhoneCall, MapPin, Building, Phone, Map } from "lucide-react";
 import { Button } from "../ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRestaurantInfo } from "@/hooks/useRestaurantInfo";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/translations/translation";
 import { Separator } from "../ui/separator";
+import { useBranch } from "@/contexts/BranchContext";
+import { useSearchParams, useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
+import { Branch } from "@/types/index";
+import { Label } from "../ui/label";
 
 export default function PhoneDrawer() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { translatedInfo, loading } = useRestaurantInfo();
   const { language } = useLanguage();
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const { selectedBranch, setSelectedBranch, clearSelectedBranch } =
+    useBranch();
+  const searchParams = useSearchParams();
+  const branchSlug = searchParams?.get("branch");
+
+  useEffect(() => {
+    if (
+      branchSlug &&
+      branches.length > 0 &&
+      selectedBranch?.slug !== branchSlug
+    ) {
+      const branchFromUrl = branches.find((b) => b.slug === branchSlug);
+      if (branchFromUrl) {
+        // می‌توانید از context برای تنظیم شعبه استفاده کنید
+        // یا در اینجا پیام نشان دهید که باید شعبه انتخاب شود
+      }
+    }
+  }, [branchSlug, branches, selectedBranch]);
 
   const t = (key: string) => {
     const langTranslations = translations[language] as Record<string, string>;
@@ -43,110 +66,47 @@ export default function PhoneDrawer() {
       </DrawerTrigger>
 
       <DrawerContent className="h-[40vh] glass-drawer">
-        <div className="">
-          <div className="space-y-5">
-            {/* شعبه اول */}
-            <div className="text-white">
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-lg ">
-                  {translatedInfo?.branch1.name || t("branch1")}
-                </h3>
-              </div>
-
-              <div className="flex flex-row">
-                {/* شماره تلفن‌ها */}
-                <div className="flex space-x-10 justify-center items-center">
-                  {translatedInfo?.branch1.phone && (
-                    <div className="flex items-center gap-3">
-                      
-                      <div className="">
-                        <p className="text-sm">{t("phone")}</p>
-                        <a
-                          href={`tel:${translatedInfo.branch1.phone.replace(
-                            /[^0-9]/g,
-                            ""
-                          )}`}
-                          className="text-base font-semibold hover:text-green-600 transition-colors"
-                        >
-                          {formatPhoneNumber(translatedInfo.branch1.phone)}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-
-                  {translatedInfo?.branch1.phone2 && (
-                    <div className="flex items-center gap-3 ml-2">
-                      
-                      <div className="flex-1">
-                        <p className="text-sm ">{t("phone2")}</p>
-                        <a
-                          href={`tel:${translatedInfo.branch1.phone2.replace(
-                            /[^0-9]/g,
-                            ""
-                          )}`}
-                          className="text-base font-semibold hover:text-blue-600 transition-colors"
-                        >
-                          {formatPhoneNumber(translatedInfo.branch1.phone2)}
-                        </a>
-                      </div>
-                    </div>
-                  )}
+        <div className="flex-1 space-y-5 overflow-y-auto px-6 pb-6">
+          <div className="flex justify-center mt-3">
+            <h1 className="font-bold text-xl">
+              {language === "ar"
+                ? selectedBranch?.name_ar
+                : language === "fa"
+                ? selectedBranch?.name_fa
+                : selectedBranch?.name_en}
+            </h1>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="inline-flex p-2 rounded-md bg-accent/10">
+              <MapPin size={18} />
+            </div>
+            <p className="text-[12px]">
+              {language === "en"
+                ? selectedBranch?.address_en
+                : language === "ar"
+                ? selectedBranch?.address_ar
+                : selectedBranch?.address_fa}
+            </p>
+          </div>
+          <div className="flex flex-col space-y-3">
+            <div className="space-y-4">
+              <Label className="text-white">شماره تماس ۱</Label>
+              <div className="flex items-center space-x-2">
+                <div className="inline-flex p-2 rounded-md bg-accent/10">
+                  <PhoneCall size={18} />
                 </div>
+                <h2>{selectedBranch?.phone_1}</h2>
               </div>
             </div>
-
-            <Separator />
-
-            {/* شعبه دوم */}
-            {translatedInfo?.branch2.phone && (
-              <div className="text-white shadow-sm">
-                <div className="flex items-center gap-2 mb-3">
-                  <h3 className="font-bold text-lg ">
-                    {translatedInfo?.branch2.name || t("branch2")}
-                  </h3>
+            <div>
+              <div className="flex items-center space-x-2">
+                <div className="inline-flex p-2 rounded-md bg-accent/10">
+                  <PhoneCall size={18} />
                 </div>
 
-                <div className="space-y-3">
-                  {/* شماره تلفن‌ها */}
-                  <div className="flex space-x-10">
-                    {translatedInfo?.branch2.phone && (
-                      <div className="flex items-center gap-3">
-                        
-                        <div className="flex-1">
-                          <p className="text-sm ">{t("phone")}</p>
-                          <a
-                            href={`tel:${translatedInfo.branch2.phone.replace(
-                              /[^0-9]/g,
-                              ""
-                            )}`}
-                            className="text-base font-semibold  hover:text-green-600 transition-colors"
-                          >
-                            {formatPhoneNumber(translatedInfo.branch2.phone)}
-                          </a>
-                        </div>
-                      </div>
-                    )}
-
-                    {translatedInfo?.branch2.phone2 && (
-                      <div className="flex items-center gap-3 ml-2">
-                        <div className="flex-1">
-                          <p className="text-sm">{t("phone2")}</p>
-                          <a
-                            href={`tel:${translatedInfo.branch2.phone2.replace(
-                              /[^0-9]/g,
-                              ""
-                            )}`}
-                            className="text-base font-semibold hover:text-blue-600 transition-colors"
-                          >
-                            {formatPhoneNumber(translatedInfo.branch2.phone2)}
-                          </a>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <h2>{selectedBranch?.phone_2}</h2>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </DrawerContent>

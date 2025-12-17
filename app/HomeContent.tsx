@@ -383,7 +383,7 @@ export default function HomeContent() {
             href={`/menu?branch=${selectedBranch.slug}`}
             className="w-full flex justify-center"
           >
-            <button className="py-3 w-full glass-btn text-lg font-semibold">
+            <button className="py-2 w-full glass-btn text-lg font-semibold">
               {t("viewMenu")}
             </button>
           </Link>

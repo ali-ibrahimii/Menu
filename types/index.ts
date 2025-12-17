@@ -33,6 +33,21 @@ export type Category = {
   created_at?: string;
 };
 
+
+export type Branch = {
+  id: string;
+  slug: string;
+  name_fa: string;
+  name_ar: string;
+  name_en: string;
+  address_fa: string;
+  address_ar: string;
+  address_en: string;
+  phone_1: string;
+  phone_2: string;
+  is_active: boolean;
+};
+
 export type Language = 'fa' | 'ar' | 'en';
 
 export interface RestaurantInfo {

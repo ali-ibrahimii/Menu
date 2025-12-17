@@ -4,7 +4,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { MapPin, Phone, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useBranch } from "@/contexts/BranchContext";
@@ -13,6 +12,7 @@ import { translations } from "@/translations/translation";
 import Image from "next/image";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CheckRestaurantStatus from "@/components/CheckRestaurantStatus";
+import {Branch} from '@/types/index'
 
 // لیست عکس‌های هر شعبه
 const branchImageGalleries: Record<string, string[]> = {
@@ -49,7 +49,7 @@ const getBranchImageGallery = (branchSlug: string) => {
 };
 
 export default function BranchesPage() {
-  const [branches, setBranches] = useState<any[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(true);
   const { setSelectedBranch } = useBranch();
   const { language } = useLanguage();
@@ -109,7 +109,7 @@ export default function BranchesPage() {
     }
   };
 
-  const handleSelectBranch = (branch: any) => {
+  const handleSelectBranch = (branch: Branch) => {
     // ذخیره شعبه
     setSelectedBranch(branch);
     // هدایت به صفحه اصلی
@@ -247,7 +247,7 @@ export default function BranchesPage() {
                         </div>
                       </div>
 
-                      <div className="glass-check-status">
+                      <div className="glass-check-status-branch text-[11px]">
                         <CheckRestaurantStatus />
                       </div>
                     </div>
@@ -278,18 +278,6 @@ export default function BranchesPage() {
                           </p>
                         </div>
                       )}
-
-                      {/* شماره تماس دوم */}
-                      {/* {branch.phone_1 && (
-                        <div className="flex items-center gap-2">
-                          <div className="p-2 rounded-sm bg-accent/15 backdrop-blur-[2px]">
-                            <Phone className="w-4 h-4 text-green-300 flex-shrink-0" />
-                          </div>
-                          <p className="text-sm text-white/90">
-                            {branch.phone_1}
-                          </p>
-                        </div>
-                      )} */}
                     </div>
 
                     {/* بخش پایینی: دکمه */}

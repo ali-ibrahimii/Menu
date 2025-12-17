@@ -37,7 +37,7 @@ const RestaurantStatus = () => {
   return (
     <div
       // variant={isOpen ? "default" : "destructive"}
-      className={`flex items-center gap-1 ${isOpen ? "text-gray-300" : "text-red-600 "} font-semibold pb-1 px-4`}
+      className={`flex items-center gap-1 ${isOpen ? "text-gray-300" : "text-red-600 "} font-semibold pb-0.5 px-3`}
     >
       {isOpen ? (
         <div className="w-2 h-2 bg-green-400 mt-1 rounded-full animate-pulse"></div>

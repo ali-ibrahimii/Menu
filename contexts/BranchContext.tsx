@@ -2,20 +2,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-interface Branch {
-  id: string;
-  slug: string;
-  name_fa: string;
-  name_ar: string;
-  name_en: string;
-  address_fa: string;
-  address_ar: string;
-  address_en: string;
-  phone_1: string;
-  phone_2: string;
-  is_active: boolean;
-}
+import { Branch } from '@/types';
 
 interface BranchContextType {
   selectedBranch: Branch | null;
