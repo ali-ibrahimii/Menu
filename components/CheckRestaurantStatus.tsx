@@ -20,7 +20,7 @@ const RestaurantStatus = () => {
       const currentMinute = now.getMinutes();
 
       // رستوران از ۱۲ روز تا ۱۱ شب باز است
-      const isOpenNow = currentHour >= 1 && currentHour < 23;
+      const isOpenNow = currentHour >= 11 && currentHour < 23;
 
       setIsOpen(isOpenNow);
     };
