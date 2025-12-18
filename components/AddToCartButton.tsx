@@ -61,7 +61,7 @@ export default function AddToCartButton({
           size="sm"
           onClick={handleDecrement}
           disabled={quantity === 0}
-          className="h-8 w-8 p-0 glass-btn"
+          className="h-8 w-8 p-0"
         >
           <Minus size={14} />
         </Button>
@@ -73,7 +73,7 @@ export default function AddToCartButton({
         <Button
           size="sm"
           onClick={handleIncrement}
-          className="h-8 w-8 p-0 glass-btn"
+          className="h-8 w-8 p-0"
         >
           <Plus size={14} />
         </Button>
@@ -85,7 +85,7 @@ export default function AddToCartButton({
     <Button
       size="sm"
       onClick={handleAddToCart}
-      className="w-full mt-2 glass-btn"
+      className="mt-2"
     >
       <Plus size={14} className="" />
       {t("addToCart")}
