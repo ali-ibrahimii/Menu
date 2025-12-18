@@ -377,6 +377,7 @@ export default function Home() {
     <main className="min-h-screen px-6 py-2 pt-5 overflow-y-auto  overscroll-none touch-pan-y">
 
       <div className="w-screen fixed inset-0 -z-10">
+        <div className="absolute top-0 bg-black/20 backdrop-blur-[2px] w-full h-full"></div>
         <img src="/sonati-bg.jpg" alt="" className="w-full h-full" />
       </div>
       
@@ -391,7 +392,7 @@ export default function Home() {
 
         <Link
           href={"/"}
-          className="active:scale-95 glass-category p-2"
+          className="active:scale-95 glass-category-default text-white p-2"
         >
           <ChevronLeft
             size={20}
@@ -408,7 +409,7 @@ export default function Home() {
           <div dir={language === "en" ? "ltr" : "rtl"} className="relative">
             <Input
               id={id}
-              className="peer ps-10 pe-9 focus:text-white glass-category-default border-none text-sm"
+              className="peer ps-10 pe-9 py-[20px] text-gray-200 focus:text-gray-200 glass-category-default border-none text-md"
               placeholder={t("search")}
               type="search"
               value={searchTerm}
@@ -495,7 +496,7 @@ export default function Home() {
                   />
                 ))
               ) : (
-                <div className="col-span-full text-center py-8 text-gray-600">
+                <div className="col-span-full text-center py-8 text-gray-200">
                   {selectedBranch
                     ? language === "en"
                       ? `No food items in this category for ${
@@ -544,10 +545,10 @@ export default function Home() {
                 </div>
               ))
             ) : (
-              <div className="text-center py-8 text-gray-600">
+              <div className="text-center py-8 text-gray-300">
                 {selectedBranch
                   ? language === "en"
-                    ? `No food items available for ${
+                    ? `No items available for ${
                         selectedBranch.name_en || selectedBranch.name_fa
                       }`
                     : language === "ar"
@@ -575,7 +576,8 @@ export default function Home() {
         />
       )}
 
-      <p className="text-center text-gray-200 text-sm mt-6 pb-6">
+      <p className="text-center text-gray-200 text-sm mt-6 pb-6 absolute bottom-0 left-0 w-full
+      ">
         <p>
           {selectedBranch &&
             `${
