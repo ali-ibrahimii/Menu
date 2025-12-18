@@ -31,6 +31,7 @@ export type Category = {
   name_ar: string;
   slug: string;
   created_at?: string;
+  order_number: number | null
 };
 
 
