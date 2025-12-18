@@ -376,22 +376,22 @@ export default function Home() {
   return (
     <main className="min-h-screen px-6 py-2 pt-5 overflow-y-auto  overscroll-none touch-pan-y">
 
-      <div className="w-screen h-screen absolute inset-0 -z-10">
-        <img src="/sonati-bg.jpg" alt="" className="w-screen h-screen" />
+      <div className="w-screen fixed inset-0 -z-10">
+        <img src="/sonati-bg.jpg" alt="" className="w-full h-full" />
       </div>
       
       {/* دکمه برگشت به صفحه ورودی و مینو */}
       <div
         className={`text-3xl font-bold flex justify-between items-center ${
-          language === "en" ? "" : "mb-2"
+          language === "en" ? "mb-1" : "mb-2"
         }`}
         dir={language === "en" ? "ltr" : "rtl"}
       >
-        <h1 className={`text-3xl font-bold`}>{t("menu")}</h1>
+        <h1 className={`text-3xl font-bold text-gray-200`}>{t("menu")}</h1>
 
         <Link
           href={"/"}
-          className="flex justify-center active:scale-95 glass-btn items-center rounded-full border bg-accent p-2 border backdrop-blur-[2px]"
+          className="active:scale-95 glass-category p-2"
         >
           <ChevronLeft
             size={20}
@@ -408,20 +408,20 @@ export default function Home() {
           <div dir={language === "en" ? "ltr" : "rtl"} className="relative">
             <Input
               id={id}
-              className="peer ps-9 pe-9 rounded-full w-full h-10 text-md"
+              className="peer ps-10 pe-9 focus:text-white glass-category-default border-none text-sm"
               placeholder={t("search")}
               type="search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-4 pt-1 text-muted-foreground/80 peer-disabled:opacity-50">
+            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-4 pt-1 text-gray-400 peer-disabled:opacity-50">
               <SearchIcon
                 size={16}
                 className={`${language === "en" ? "" : "rotate-90"}`}
               />
             </div>
             <button
-              className="absolute inset-y-0 end-1 flex h-full w-9 items-center justify-center rounded-e-md text-muted-foreground/80 transition-[color,box-shadow] outline-none hover:text-foreground focus:z-10 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="absolute inset-y-0 end-1 flex h-full w-9 items-center justify-center rounded-e-md text-gray-400 transition-[color,box-shadow] outline-none hover:text-foreground focus:z-10 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Submit search"
               type="submit"
             >
@@ -433,7 +433,7 @@ export default function Home() {
             </button>
           </div>
         </div>
-        <div className="flex">
+        <div className="flex text-white">
           <LanguageSwitcher />
           <CartDrawer />
         </div>
@@ -448,9 +448,8 @@ export default function Home() {
           <div className="flex space-x-2 pb-2">
             {/* دکمه نمایش همه غذاها */}
             <Button
-              variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => setSelectedCategory(null)}
-              className="justify-start flex items-center rounded-full text-[13px] min-w-[100px]"
+              className={`${selectedCategory === null ? "glass-category" : "glass-category-default"} glass-category text-[13px] min-w-max`}
             >
               {t("allFoods")}
             </Button>
@@ -462,18 +461,15 @@ export default function Home() {
                 return (
                   <Button
                     key={category.id}
-                    variant={
-                      selectedCategory === cleanSlug ? "default" : "outline"
-                    }
                     onClick={() => setSelectedCategory(cleanSlug)}
-                    className="justify-start flex items-center text-wjhite rounded-full text-[13px] min-w-max"
+                    className={`${selectedCategory === cleanSlug ? "glass-category" : "glass-category-default"} glass-category text-[13px] min-w-max`}
                   >
                     {getCategoryButtonName(category)}
                   </Button>
                 );
               })
             ) : (
-              <p className="text-sm text-gray-500 px-4">{t("noFoods")}</p>
+              <p className="text-sm text-gray-200 px-4">{t("noFoods")}</p>
             )}
           </div>
           <ScrollBar orientation="horizontal" />
@@ -523,13 +519,13 @@ export default function Home() {
                 <div key={categorySlug} className="space-y-4">
                   {/* تیتر دسته‌بندی */}
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-gray-800">
+                    <h2 className="text-xl font-bold text-gray-200">
                       {getCategoryName(categorySlug)}
                     </h2>
                   </div>
 
                   {/* خط جداکننده */}
-                  <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+                  <div className="h-px bg-linear-to-r from-transparent via-gray-300 to-transparent" />
 
                   {/* کارت‌های غذا در این دسته‌بندی */}
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -579,7 +575,7 @@ export default function Home() {
         />
       )}
 
-      <p className="text-center text-gray-800 text-sm mt-6 pb-6">
+      <p className="text-center text-gray-200 text-sm mt-6 pb-6">
         <p>
           {selectedBranch &&
             `${
@@ -616,7 +612,7 @@ function FoodCard({
     <div
       dir={`${language === "en" ? "ltr" : "rtl"}`}
       key={food.id}
-      className="relative flex items-center w-full glass-card-menu h-35 backdrop-blur-xs bg-linear-to-t from-orange-700/20 to-transparent border-b border-white/50 rounded-2xl shadow-lg hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer"
+      className="relative flex items-center w-full glass-card-menu h-35  rounded-2xl hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer"
       onClick={() => handleFoodClick(food)}
     >
       {/* شروع عکس کارت غذا */}
