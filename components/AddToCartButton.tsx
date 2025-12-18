@@ -58,11 +58,10 @@ export default function AddToCartButton({
     return (
       <div className="flex items-center justify-between gap-2 mt-2">
         <Button
-          variant="outline"
           size="sm"
           onClick={handleDecrement}
           disabled={quantity === 0}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 glass-btn"
         >
           <Minus size={14} />
         </Button>
@@ -72,10 +71,9 @@ export default function AddToCartButton({
         </span>
 
         <Button
-          variant="outline"
           size="sm"
           onClick={handleIncrement}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 glass-btn"
         >
           <Plus size={14} />
         </Button>
@@ -85,10 +83,9 @@ export default function AddToCartButton({
 
   return (
     <Button
-      variant="outline"
       size="sm"
       onClick={handleAddToCart}
-      className="w-full mt-2"
+      className="w-full mt-2 glass-btn"
     >
       <Plus size={14} className="" />
       {t("addToCart")}

@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, Check } from "lucide-react";
+import { MapPin, Phone, Check, Building2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useBranch } from "@/contexts/BranchContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -146,7 +146,7 @@ export default function BranchesPage() {
     return (
       <div className="relative min-h-screen flex items-center justify-center">
         <div className="fixed inset-0 -z-10">
-          <img src="/sonati-bg.jpg" alt="" />
+          <img src="/sonati-bg.jpg" alt="" className="h-full w-full" />
         </div>
         <div className="text-center text-white">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-300 mx-auto mb-4"></div>
@@ -300,7 +300,7 @@ export default function BranchesPage() {
           {/* اگر شعبه‌ای وجود نداشت */}
           {branches.length === 0 && (
             <div className="text-center py-12">
-              <div className="text-5xl mb-4">🏪</div>
+              <div className="text-5xl mb-4 p-6 bg-accent/10 text-white rounded-full inline-flex"><Building2 size={50} /></div>
               <h3 className="text-2xl font-bold text-white mb-3">
                 هیچ شعبه فعالی یافت نشد
               </h3>

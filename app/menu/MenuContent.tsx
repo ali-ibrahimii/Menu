@@ -270,7 +270,11 @@ export default function MenuContent() {
   }
 
   return (
-    <main className="min-h-screen px-6 py-2 pt-5 overflow-y-auto overscroll-none touch-pan-y">
+    <main className="min-h-screen px-6 text-white py-2 pt-5 overflow-y-auto overscroll-none touch-pan-y">
+        <div className="fixed inset-0 -z-10">
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/50 to-black/30"></div>{" "}
+          <img src="/sonati-bg.jpg" alt="" className="h-full w-full" />
+        </div>
       {/* دکمه برگشت و عنوان */}
       <div
         className={`text-3xl font-bold flex justify-between items-center ${
@@ -283,7 +287,7 @@ export default function MenuContent() {
         <div className="flex items-center gap-2">
           <Link
             href={"/"}
-            className="flex justify-center active:scale-95 items-center rounded-full border bg-accent p-2 border backdrop-blur-[2px]"
+            className="flex justify-center text-white glass-btn active:scale-95 items-center rounded-full bg-accent p-2 backdrop-blur-[2px]"
           >
             <ChevronLeft
               size={20}
@@ -380,23 +384,13 @@ export default function MenuContent() {
                 );
               })
             ) : (
-              <p className="text-sm text-gray-500">{t("noFoods")}</p>
+              <p className="text-sm">{t("noFoods")}</p>
             )}
           </div>
           <ScrollBar orientation="horizontal" className="hidden" />
         </ScrollArea>
       </div>
       {/* پایان دسته بندی */}
-
-      {/* نمایش تعداد غذاها */}
-      {selectedBranch && (
-        <div className="my-3 text-sm text-gray-700 text-center">
-          <p>
-            {selectedBranch.name_fa} • {filterFood.length}{" "}
-            {t("itemsCount") || "غذا"}
-          </p>
-        </div>
-      )}
 
       {/* شروع کارت غذا */}
       <div className="mt-3">
@@ -431,13 +425,10 @@ export default function MenuContent() {
                   <h2 className="text-lg font-bold text-gray-800">
                     {getCategoryName(categorySlug)}
                   </h2>
-                  <Badge variant="outline" className="text-sm">
-                    {categoryFoods.length} {t("itemsCount")}
-                  </Badge>
                 </div>
 
                 {/* خط جداکننده */}
-                <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+                <div className="h-px bg-linear-to-r from-transparent via-gray-300 to-transparent" />
 
                 {/* کارت‌های غذا در این دسته‌بندی */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -509,7 +500,7 @@ function FoodCard({
     <div
       dir={`${language === "en" ? "ltr" : "rtl"}`}
       key={food.id}
-      className="relative flex items-center w-full h-35 backdrop-blur-xs bg-linear-to-t from-white/20 to-transparent border-b border-white/50 rounded-2xl shadow-lg hover:shadow-lg transition-all duration-200 active:scale-95"
+      className="relative glass-card-menu flex items-center w-full h-35 backdrop-blur-xs bg-linear-to-t from-white/20 to-transparent border-b border-white/50 rounded-2xl shadow-lg hover:shadow-lg transition-all duration-200 active:scale-95"
     >
       {/* شروع عکس کارت غذا */}
       <div
@@ -529,13 +520,13 @@ function FoodCard({
       {/* شروع متن کارت غذا */}
       <div className="flex flex-col mx-3 w-8/12 overflow-hidden">
         <div onClick={() => handleFoodClick(food)} className="cursor-pointer">
-          <h2 className="text-md font-semibold text-gray-800 truncate">
+          <h2 className="text-md font-semibold] truncate">
             {getFoodName(food)}
           </h2>
 
           {/* مواد تشکیل دهنده */}
           {getIngredients(food) && (
-            <p className="text-gray-800 text-[13px] line-clamp-2 leading-4.5">
+            <p className="text-[13px] line-clamp-2 leading-4.5">
               {getIngredients(food).toString()}
             </p>
           )}
@@ -546,7 +537,7 @@ function FoodCard({
         </div>
 
         {/* دکمه افزودن به سبد خرید */}
-        <div className="flex justify-end mt-2">
+        <div className="absolute left-2 bottom-2">
           {!food.is_available ? (
             <Badge
               variant={food.is_available ? "default" : "destructive"}
