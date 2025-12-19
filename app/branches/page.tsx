@@ -16,15 +16,15 @@ import {Branch} from '@/types/index'
 
 // لیست عکس‌های هر شعبه
 const branchImageGalleries: Record<string, string[]> = {
-  main: ["/bg.jpg", "/bg1.jpg", "/bg2.jpg", "/bg3.jpg"],
+  main: ["/branch1/1.jpg", "/branch1/2.jpg", "/branch1/3.jpg", "/branch1/4.jpg"],
   branch2: [
-    "/branche2/1.jpg",
-    "/branche2/2.jpg",
-    "/branche2/3.jpg",
-    "/branche2/4.jpg",
-    "/branche2/5.jpg",
-    "/branche2/6.jpg",
-    "/branche2/7.jpg",
+    "/branch2/1.jpg",
+    "/branch2/2.jpg",
+    "/branch2/3.jpg",
+    "/branch2/4.jpg",
+    "/branch2/5.jpg",
+    "/branch2/6.jpg",
+    "/branch2/7.jpg",
   ],
 
   // عکس‌های پیش‌فرض برای شعبه‌های دیگر
@@ -146,6 +146,7 @@ export default function BranchesPage() {
     return (
       <div className="relative min-h-screen flex items-center justify-center">
         <div className="fixed inset-0 -z-10">
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/50 to-black/30"></div>{" "}
           <img src="/sonati-bg.jpg" alt="" className="h-full w-full" />
         </div>
         <div className="text-center text-white">
@@ -164,13 +165,13 @@ export default function BranchesPage() {
       <div className="fixed inset-0 -z-10 overflow-hidden w-screen h-screen">
         <img src="/sonati-bg.jpg" className="h-full w-full" />
       </div>
-      <div className="z-10 px-4 py-8">
+      <div className="z-10 px-4 py-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-white">
             <LanguageSwitcher />
           </div>
           {/* هدر */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center">
               <div className="relative w-30 h-30">
                 <Image

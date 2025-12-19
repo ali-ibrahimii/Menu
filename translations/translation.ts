@@ -28,7 +28,7 @@ export const translations = {
     category: "دسته",
 
     items: "مورد",
-    cookingTime: "زمان پخت و پز",
+    cookingTime: "زمان آماده‌سازی",
     total: "جمع کل",
     notes: "یادداشت",
     notesPlaceholder: "توضیحات سفارش...",

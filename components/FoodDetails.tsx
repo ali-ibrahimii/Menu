@@ -22,6 +22,7 @@ import {
   ShoppingCart,
   ChevronDown,
   ChevronUp,
+  Tag,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCartStore } from "@/stores/cartStore";
@@ -105,7 +106,7 @@ export default function FoodDetails({
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent className="h-[90vh] glass-details">
+      <DrawerContent className="h-[90vh] glass-drawer">
         <div
           dir={language === "en" ? "ltr" : "rtl"}
           className="flex-1 overflow-y-auto p-5 text-white"
@@ -163,13 +164,13 @@ export default function FoodDetails({
             </div>
 
             {/* بخش اطلاعات */}
-            <div className="space-y-3">
+            <div className="space-y-8">
               {/* عنوان و قیمت */}
               <div>
-                <div className="">
+                <div className="mb-3">
                   <div className="flex justify-between items-center">
-                    <Badge variant="secondary">
-                      {food.category}{" "}
+                    <Badge variant="secondary" className="text-[11px]">
+                      {food.category}
                     </Badge>
 
                     {ratingStats.totalReviews > 0 && (
@@ -195,12 +196,12 @@ export default function FoodDetails({
                     </h1>
                     <div className={`${language === 'en' ? 'text-right' : 'text-left'}`}>
                     <Badge
-                      variant={food.is_available ? "default" : "destructive"}
+                      variant={food.is_available ? "secondary" : "destructive"}
                       className=""
                     >
                       {food.is_available ? t("available") : t("notAvailable")}
                     </Badge>
-                    <div className="text-sm font-bold text-green-600">
+                    <div className="text-sm font-bold text-yellow-300">
                       {food.price.toLocaleString()} {t("price")}
                     </div>
                   </div>
@@ -211,8 +212,8 @@ export default function FoodDetails({
                 <div className="flex flex-wrap gap-2">
                   {food.is_spicy && (
                     <Badge
-                      variant="outline"
-                      className="flex items-center gap-1 text-white"
+                      // variant="secondary"
+                      className="flex items-center bg-red-400/20 gap-1 text-[12px]"
                     >
                       <Flame size={14} />
                       {t("spicy")}
@@ -221,11 +222,21 @@ export default function FoodDetails({
 
                   {food.is_vegetarian && (
                     <Badge
-                      variant="outline"
-                      className="flex items-center gap-1 text-white"
+                      // variant="secondary"
+                      className="flex items-center bg-green-400/20 gap-1 text-[12px]"
                     >
                       <Leaf size={14} />
                       {t("vegetarian")}
+                    </Badge>
+                  )}
+
+                  {food.tags && (
+                    <Badge
+                      // variant="secondary"
+                      className="flex items-center bg-amber-300/20 gap-1 text-[12px]"
+                    >
+                      <Tag size={14} />
+                      {food.tags.join(", ")}
                     </Badge>
                   )}
                 </div>
@@ -271,11 +282,11 @@ export default function FoodDetails({
               {/* مشخصات فنی */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {food.cooking_time && (
-                  <div className="flex items-center justify-center gap-3 rounded-xl border py-2">
-                    <div className="p-4 rounded-full bg-accent/40">
+                  <div className="gap-3 glass-card-menu py-3">
+                    <div className="p-4 rounded-full bg-indigo-400/20 text-gray-300">
                       <Clock className="" size={20} />
                     </div>
-                    <div>
+                    <div className="text-gray-300">
                       <p className="text-[13px]">
                         {t("cookingTime")}
                       </p>
@@ -287,8 +298,8 @@ export default function FoodDetails({
                 )}
 
                 {food.serves && (
-                  <div className="flex items-center justify-center gap-3  rounded-xl border py-2">
-                    <div className="p-4 rounded-full bg-accent/40">
+                  <div className="gap-3 glass-card-menu py-3">
+                    <div className="p-4 rounded-full bg-fuchsia-400/20">
                       <Users className="" size={20} />
                     </div>
                     <div>

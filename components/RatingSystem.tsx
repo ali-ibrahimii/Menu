@@ -199,7 +199,7 @@ export default function RatingSystem({
 
       {/* فرم ثبت نظر */}
       {showReviewForm && (
-        <div className="text-white rounded-xl p-6 border space-y-4">
+        <div className="text-white glass-rate-card p-6 space-y-4">
           <h3 className="text-lg font-semibold">{t("addReview")}</h3>
 
           <div className="space-y-2">
@@ -238,6 +238,7 @@ export default function RatingSystem({
                   ? "أدخل اسمك"
                   : "Enter your name"
               }
+              className="glass-rate-card border-none"
             />
           </div>
 
@@ -255,7 +256,7 @@ export default function RatingSystem({
                   : "Write your comment..."
               }
               rows={4}
-              className="text-white"
+              className="text-white glass-rate-card border-none"
             />
           </div>
 
@@ -294,7 +295,7 @@ export default function RatingSystem({
         ) : (
           <div className="space-y-4">
             {reviews.map((review) => (
-              <div key={review.id} className="glass-rate-card p-4 text-white">
+              <div key={review.id} className="glass-rate-card p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h4 className="font-semibold">{review.customer_name}</h4>

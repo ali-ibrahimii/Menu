@@ -361,13 +361,14 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div
-        dir={language === "en" ? "ltr" : "rtl"}
-        className="flex justify-center items-center min-h-screen"
-      >
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t("loading")}</p>
+      <div className="relative min-h-screen flex items-center justify-center">
+        <div className="fixed inset-0 -z-10">
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/50 to-black/30"></div>{" "}
+          <img src="/sonati-bg.jpg" alt="" className="h-full w-full" />
+        </div>
+        <div className="text-center text-white">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-300 mx-auto mb-4"></div>
+          <p className="text-gray-200">{t("loading")}</p>
         </div>
       </div>
     );
@@ -473,7 +474,7 @@ export default function Home() {
               <p className="text-sm text-gray-200 px-4">{t("noFoods")}</p>
             )}
           </div>
-          <ScrollBar orientation="horizontal" />
+          <ScrollBar orientation="horizontal" className="hidden" />
         </ScrollArea>
       </div>
       {/* پایان دسته بندی */}

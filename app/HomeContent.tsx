@@ -32,15 +32,15 @@ import { useBranch } from "@/contexts/BranchContext";
 
 // گالری عکس‌های هر شعبه
 const branchImageGalleries: Record<string, string[]> = {
-  main: ["/bg.jpg", "/bg1.jpg", "/bg2.jpg", "/bg3.jpg"],
+  main: ["/branch1/1.jpg", "/branch1/2.jpg", "/branch1/3.jpg", "/branch1/4.jpg"],
   branch2: [
-    "/branche2/1.jpg",
-    "/branche2/2.jpg",
-    "/branche2/3.jpg",
-    "/branche2/4.jpg",
-    "/branche2/5.jpg",
-    "/branche2/6.jpg",
-    "/branche2/7.jpg",
+    "/branch2/1.jpg",
+    "/branch2/2.jpg",
+    "/branch2/3.jpg",
+    "/branch2/4.jpg",
+    "/branch2/5.jpg",
+    "/branch2/6.jpg",
+    "/branch2/7.jpg",
   ],
   default: ["/bg.jpg", "/bg1.jpg", "/bg2.jpg", "/bg3.jpg"]
 };
@@ -264,7 +264,7 @@ export default function HomeContent() {
         <div className="flex justify-between px-2 items-center mb-4">
           <Drawer direction={language === "en" ? "left" : "right"}>
             <DrawerTrigger>
-              <Button variant={"outline"}>
+              <Button className="p-2 bg-accent/70">
                 <Menu color="#000" />
               </Button>
             </DrawerTrigger>
@@ -381,9 +381,9 @@ export default function HomeContent() {
           {/* دکمه اصلی مشاهده منو */}
           <Link
             href={`/menu?branch=${selectedBranch.slug}`}
-            className="w-full flex justify-center"
+            className="w-full flex justify-center glass-btn"
           >
-            <button className="py-2 w-full glass-btn text-lg font-semibold">
+            <button className="py-2 w-full text-lg font-semibold">
               {t("viewMenu")}
             </button>
           </Link>

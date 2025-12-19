@@ -16,6 +16,7 @@ export type Food = {
   ingredients_en: Text;
   is_spicy: Text;
   is_vegetarian: Text;
+  tags: Text;
   cooking_time: number;
   serves: number;
   images: string[];
