@@ -230,7 +230,7 @@ export default function FoodDetails({
                     </Badge>
                   )}
 
-                  {food.tags && (
+                  {food.tags.join(", ") && (
                     <Badge
                       // variant="secondary"
                       className="flex items-center bg-amber-300/20 gap-1 text-[12px]"
