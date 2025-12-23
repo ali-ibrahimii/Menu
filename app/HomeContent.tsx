@@ -215,7 +215,7 @@ export default function HomeContent() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center">
+      <div dir={language === 'en' ? 'left' : 'right'} className="relative min-h-screen flex items-center justify-center">
         <div className="fixed inset-0 -z-10">
           <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/50 to-black/30"></div>{" "}
           <img src="/sonati-bg.jpg" alt="" className="h-full w-full" />
@@ -264,11 +264,11 @@ export default function HomeContent() {
         <div className="flex justify-between px-2 items-center mb-4">
           <Drawer direction={language === "en" ? "left" : "right"}>
             <DrawerTrigger>
-              <Button className="p-2 bg-accent/70">
-                <Menu color="#000" />
+              <Button className="p-2 glass-cart-btn text-gray-300">
+                <Menu />
               </Button>
             </DrawerTrigger>
-            <DrawerContent className="glass-side">
+            <DrawerContent className={`glass-side ${language === "en" ? "rounded-r-[55px]" : "rounded-l-[55px]"}`}>
               <DrawerHeader>
                 <DrawerTitle>
                   <div className="flex flex-col gap-5 justify-center p-5 rounded-3xl bg-gray-100/5 border-[0.1px] border-gray-500/60 items-center mt-10">
@@ -358,25 +358,25 @@ export default function HomeContent() {
           </div>
 
           {/* Social Icons */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <button>
+          {/* <div className="flex items-center gap-4"> */}
+            <div className="flex items-center gap-3 z-50 inset-0">
+              <>
                 <ShareDrawer />
-              </button>
-              <button>
+              </>
+              <>
                 <InstagramDrawer />
-              </button>
-              <button>
+              </>
+              <>
                 <ClockDrawer />
-              </button>
-              <button>
+              </>
+              <>
                 <LocationDrawer />
-              </button>
-              <button>
+              </>
+              <>
                 <PhoneDrawer />
-              </button>
+              </>
             </div>
-          </div>
+          {/* </div> */}
 
           {/* دکمه اصلی مشاهده منو */}
           <Link

@@ -376,12 +376,11 @@ export default function Home() {
 
   return (
     <main className="min-h-screen px-6 py-2 pt-5 overflow-y-auto  overscroll-none touch-pan-y">
-
       <div className="w-screen fixed inset-0 -z-10">
         <div className="absolute top-0 bg-black/20 backdrop-blur-[2px] w-full h-full"></div>
-        <img src="/sonati-bg.jpg" alt="" className="w-full h-full" />
+        <img src="/bg6.jpg" alt="" className="w-full h-full" />
       </div>
-      
+
       {/* دکمه برگشت به صفحه ورودی و مینو */}
       <div
         className={`text-3xl font-bold flex justify-between items-center ${
@@ -451,7 +450,11 @@ export default function Home() {
             {/* دکمه نمایش همه غذاها */}
             <Button
               onClick={() => setSelectedCategory(null)}
-              className={`${selectedCategory === null ? "glass-category" : "glass-category-default"} glass-category text-[13px] min-w-max`}
+              className={`${
+                selectedCategory === null
+                  ? "glass-category"
+                  : "glass-category-default"
+              } glass-category text-[13px] min-w-max`}
             >
               {t("allFoods")}
             </Button>
@@ -464,7 +467,11 @@ export default function Home() {
                   <Button
                     key={category.id}
                     onClick={() => setSelectedCategory(cleanSlug)}
-                    className={`${selectedCategory === cleanSlug ? "glass-category" : "glass-category-default"} glass-category text-[13px] min-w-max`}
+                    className={`${
+                      selectedCategory === cleanSlug
+                        ? "glass-category"
+                        : "glass-category-default"
+                    } glass-category text-[13px] min-w-max`}
                   >
                     {getCategoryButtonName(category)}
                   </Button>
@@ -577,8 +584,7 @@ export default function Home() {
         />
       )}
 
-      <p className="text-center text-gray-200 text-sm mt-6 pb-6 absolute bottom-0 left-0 w-full
-      ">
+      <p className="text-center text-gray-200 text-sm mt-4 pb-6 w-full">
         <p>
           {selectedBranch &&
             `${
@@ -657,7 +663,9 @@ function FoodCard({
             </Badge>
           ) : (
             <div
-              className={`absolute bottom-3 ${language === 'en' ? "right-3" : "left-3"}`}
+              className={`absolute bottom-3 ${
+                language === "en" ? "right-3" : "left-3"
+              }`}
               onClick={(e) => e.stopPropagation()}
             >
               <AddToCartButton food={food} getFoodName={getFoodName} />

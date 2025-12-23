@@ -109,13 +109,13 @@ export default function FoodDetails({
       <DrawerContent className="h-[90vh] glass-drawer">
         <div
           dir={language === "en" ? "ltr" : "rtl"}
-          className="flex-1 overflow-y-auto p-5 text-white"
+          className="flex-1 overflow-y-auto text-white"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-t-4xl overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden">
             {/* بخش تصاویر */}
-            <div className="relative mb-2 rounded-3xl overflow-hidden">
+            <div className="relative mb-2 p-2 rounded-3xl overflow-hidden">
               {/* تصویر اصلی */}
-              <div className="aspect-square">
+              <div className="w-full h-90 rounded-3xl overflow-hidden">
                 <img
                   src={images[selectedImageIndex]}
                   alt={getFoodName(food)}
@@ -164,7 +164,7 @@ export default function FoodDetails({
             </div>
 
             {/* بخش اطلاعات */}
-            <div className="space-y-8">
+            <div className="space-y-8 px-6">
               {/* عنوان و قیمت */}
               <div>
                 <div className="mb-3">
@@ -191,7 +191,7 @@ export default function FoodDetails({
                     )}
                   </div>
                   <div className="flex justify-between items-center">
-                    <h1 className="text-[25px] font-bold">
+                    <h1 className="text-[26px] font-bold">
                       {getFoodName(food)}
                     </h1>
                     <div className={`${language === 'en' ? 'text-right' : 'text-left'}`}>
@@ -230,7 +230,8 @@ export default function FoodDetails({
                     </Badge>
                   )}
 
-                  {food.tags && ( 
+                  {food.tags && (
+
                     <Badge
                       // variant="secondary"
                       className="flex items-center bg-amber-300/20 gap-1 text-[12px]"
@@ -253,7 +254,7 @@ export default function FoodDetails({
                 </h1>
                 <div className="relative">
                   <p
-                    className={`leading-relaxed text-[15px] transition-all duration-300 ${
+                    className={`leading-tight text-[15px] transition-all duration-300 ${
                       isExpanded ? "line-clamp-none" : "line-clamp-5"
                     }`}
                   >
@@ -265,7 +266,7 @@ export default function FoodDetails({
                     <div className="flex justify-start mt-3">
                       <button
                         onClick={toggleDescription}
-                        className="flex items-center gap-1.5 text-green-600 hover:text-green-700 text-sm font-medium transition-colors bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-full"
+                        className="flex items-center gap-1.5 text-gray-300 text-sm font-medium transition-colors glass-btn px-3 py-1 rounded-full"
                       >
                         {getDescriptionButtonText()}
                         {isExpanded ? (
@@ -313,7 +314,7 @@ export default function FoodDetails({
               </div>
 
               {/* سیستم امتیازدهی */}
-              <div>
+              <div className="mb-6">
                 <RatingSystem
                   foodId={food.id}
                   onRatingStatsChange={handleRatingStatsChange}
@@ -323,20 +324,6 @@ export default function FoodDetails({
           </div>
           {/* دکمه اقدام */}
         </div>
-        <DrawerFooter className="p-0 w-full">
-          <div className="flex items-center justify-center p-2 w-full">
-            <Button
-              onClick={handleAddToCart}
-              disabled={!food.is_available}
-              className="flex w-8/12 bg-green-600 hover:bg-green-700 text-white py-3 font-bold text-md"
-            >
-              <ShoppingCart size={20} />
-              {t("addToCart")}
-            </Button>
-          </div>
-            
-
-        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   );

@@ -49,13 +49,8 @@ export default function PhoneDrawer() {
     return langTranslations[key] || key;
   };
 
-  // تابع برای فرمت کردن شماره تلفن
-  const formatPhoneNumber = (phone: string) => {
-    return phone.replace(/(\d{2})(\d{4})(\d{4})/, "$1-$2-$3");
-  };
-
   return (
-    <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+    <Drawer direction="right" open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <DrawerTrigger asChild>
         <button
           className="glass-btn glass-small flex items-center justify-center"
@@ -77,7 +72,7 @@ export default function PhoneDrawer() {
             </h1>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="inline-flex p-2 rounded-md bg-accent/10">
+            <div className="glass-cart-btn p-2">
               <MapPin size={18} />
             </div>
             <p className="text-[12px]">
@@ -90,9 +85,9 @@ export default function PhoneDrawer() {
           </div>
           <div className="flex flex-col space-y-3">
             <div className="space-y-4">
-              <Label className="text-white">شماره تماس ۱</Label>
+              <Label className="text-gray-300">شماره تماس ۱</Label>
               <div className="flex items-center space-x-2">
-                <div className="inline-flex p-2 rounded-md bg-accent/10">
+                <div className="glass-cart-btn p-2">
                   <PhoneCall size={18} />
                 </div>
                 <h2>{selectedBranch?.phone_1}</h2>
@@ -100,7 +95,7 @@ export default function PhoneDrawer() {
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <div className="inline-flex p-2 rounded-md bg-accent/10">
+                <div className="glass-cart-btn p-2">
                   <PhoneCall size={18} />
                 </div>
 

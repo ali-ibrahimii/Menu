@@ -155,7 +155,7 @@ export default function CartDrawer() {
 
   return (
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <DrawerTrigger asChild >
+      <DrawerTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
@@ -174,50 +174,18 @@ export default function CartDrawer() {
         </Button>
       </DrawerTrigger>
 
-      <DrawerContent className="h-[90vh]" dir={language === 'en' ? 'ltr' : 'rtl'}>
+      <DrawerContent
+        className="h-[90vh] glass-drawer"
+        dir={language === "en" ? "ltr" : "rtl"}
+      >
         <DrawerHeader>
-          <DrawerTitle className="flex items-center justify-center">
+          <DrawerTitle className="flex items-center justify-center text-white">
             {t("shoppingCart")}
-            {/* <ShoppingCart size={20} />
-            {t("shoppingCart")}
-            {getTotalItems() > 0 && (
-              <Badge variant="secondary">
-                {getTotalItems()} {t("items")}
-              </Badge>
-            )} */}
           </DrawerTitle>
-          {/* <DrawerDescription>{t("cartDescription")}</DrawerDescription> */}
+          <DrawerDescription>{t("cartDescription")}</DrawerDescription>
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {/* اطلاعات مشتری */}
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <label className="text-[13px] font-medium flex items-center gap-1">
-                <User size={14} />
-                {t("customerName")} <span className="text-destructive">*</span>
-              </label>
-              <Input
-                placeholder={t("customerNamePlaceholder")}
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[13px] font-medium flex items-center gap-1">
-                <Hash size={14} />
-                {t("tableNumber")}
-              </label>
-              <Input
-                placeholder={t("tableNumberPlaceholder")}
-                value={tableNumber}
-                onChange={(e) => setTableNumber(e.target.value)}
-              />
-            </div>
-          </div>
-
           {/* آیتم‌های سبد خرید */}
           {items.length === 0 ? (
             <div className="text-center text-gray-500 py-8">
@@ -230,7 +198,7 @@ export default function CartDrawer() {
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center gap-3 p-3 border rounded-lg"
+                    className="glass-card-menu w-full p-3 gap-2"
                   >
                     <img
                       src={item.image_url}
@@ -249,12 +217,11 @@ export default function CartDrawer() {
 
                     <div className="flex items-center gap-2">
                       <Button
-                        variant="outline"
                         size="sm"
                         onClick={() =>
                           updateQuantity(item.id, item.quantity - 1)
                         }
-                        className="h-7 w-7 p-0"
+                        className="h-7 w-7 p-0 glass-cart-btn"
                       >
                         <Minus size={14} />
                       </Button>
@@ -264,12 +231,11 @@ export default function CartDrawer() {
                       </span>
 
                       <Button
-                        variant="outline"
                         size="sm"
                         onClick={() =>
                           updateQuantity(item.id, item.quantity + 1)
                         }
-                        className="h-7 w-7 p-0"
+                        className="h-7 w-7 p-0 glass-cart-btn"
                       >
                         <Plus size={14} />
                       </Button>
@@ -287,58 +253,41 @@ export default function CartDrawer() {
                 ))}
               </div>
 
-              {/* جمع کل و یادداشت */}
-              <div className="border-t pt-4 space-y-4">
+              {/*  خط جدا کننده  */}
+              <div className="h-px bg-linear-to-r from-transparent via-gray-300 to-transparent" />
+
+              {/* جمع کل   */}
+              <div className="pt-2">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">{t("total")}:</span>
                   <span className="text-sm font-bold text-green-600">
                     {getTotalPrice().toLocaleString()} {t("price")}
                   </span>
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium flex items-center gap-2">
-                    <Notebook size={16} />
-                    {t("notes")}
-                  </label>
-                  <Textarea
-                    placeholder={t("notesPlaceholder")}
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                  />
-                </div>
               </div>
             </>
           )}
         </div>
 
-        <DrawerFooter className="flex-row gap-3">
+        <DrawerFooter className="flex flex-row w-full items-center justify-center space-x-12 backdrop-blur-2xl pt-4">
           {items.length > 0 && (
             <>
               <Button
-                variant="outline"
+                // variant="outline"
                 onClick={clearCart}
-                className="flex-1"
+                className="glass-cart-btn px-14"
                 disabled={isSubmitting}
               >
                 <Trash2 size={16} className="ml-1" />
                 {t("clearCart")}
-              </Button>
-
-              <Button
-                onClick={handleSaveOrder}
-                disabled={isSubmitting || !customerName.trim()}
-                className="flex-1 bg-green-600 hover:bg-green-700"
-              >
-                {isSubmitting ? t("submitting") : t("saveOrder")}
               </Button>
             </>
           )}
 
           <DrawerClose asChild>
             <Button
-              variant="outline"
-              className="flex-1"
+              // variant="outline"
+              className="glass-cart-btn px-4"
               disabled={isSubmitting}
             >
               {t("close")}
