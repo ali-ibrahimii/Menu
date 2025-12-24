@@ -514,7 +514,7 @@ export default function Home() {
                       ? `لا توجد أطعمة في هذه الفئة لـ ${
                           selectedBranch.name_ar || selectedBranch.name_fa
                         }`
-                      : `هیچ غذایی در این دسته‌بندی برای شعبه ${selectedBranch.name_fa} وجود ندارد`
+                      : `هیچ غذایی در این دسته‌بندی برای  ${selectedBranch.name_fa} وجود ندارد`
                     : t("noFoodInCategory")}
                 </div>
               )}
@@ -563,7 +563,7 @@ export default function Home() {
                     ? `لا توجد أطعمة متاحة لـ ${
                         selectedBranch.name_ar || selectedBranch.name_fa
                       }`
-                    : `هیچ غذایی برای شعبه ${selectedBranch.name_fa} وجود ندارد`
+                    : `هیچ غذایی برای ${selectedBranch.name_fa} وجود ندارد`
                   : t("noFoods")}
               </div>
             )}
@@ -584,7 +584,7 @@ export default function Home() {
         />
       )}
 
-      <p className="text-center text-gray-200 text-sm mt-4 pb-6 w-full">
+      <div className="text-center text-gray-300 text-sm py-6 w-full">
         <p>
           {selectedBranch &&
             `${
@@ -596,7 +596,7 @@ export default function Home() {
             }`}
         </p>
         © 2025 Watandar Restaurant
-      </p>
+      </div>
     </main>
   );
 }
@@ -626,7 +626,7 @@ function FoodCard({
     >
       {/* شروع عکس کارت غذا */}
       <div className="w-4/12 h-full rounded-2xl p-[2.1px] bg-[linear-gradient(135deg,#10b981_0%,transparent_35%),linear-gradient(-45deg,#10b981_0%,transparent_35%)]">
-        <div className="w-full h-full rounded-[13px] overflow-hidden bg-orange-700">
+        <div className="w-full h-full rounded-[13px] overflow-hidden">
           <img
             src={food.image_url}
             alt={getFoodName(food)}
