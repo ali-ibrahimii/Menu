@@ -12,7 +12,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, Menu, X, Phone, Store } from "lucide-react";
+import { MapPin, Clock, Menu, X, Phone, Store, Instagram } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
@@ -32,7 +32,12 @@ import { useBranch } from "@/contexts/BranchContext";
 
 // گالری عکس‌های هر شعبه
 const branchImageGalleries: Record<string, string[]> = {
-  main: ["/branch1/1.jpg", "/branch1/2.jpg", "/branch1/3.jpg", "/branch1/4.jpg"],
+  main: [
+    "/branch1/1.jpg",
+    "/branch1/2.jpg",
+    "/branch1/3.jpg",
+    "/branch1/4.jpg",
+  ],
   branch2: [
     "/branch2/1.jpg",
     "/branch2/2.jpg",
@@ -42,7 +47,7 @@ const branchImageGalleries: Record<string, string[]> = {
     "/branch2/6.jpg",
     "/branch2/7.jpg",
   ],
-  default: ["/bg.jpg", "/bg1.jpg", "/bg2.jpg", "/bg3.jpg"]
+  default: ["/bg.jpg", "/bg1.jpg", "/bg2.jpg", "/bg3.jpg"],
 };
 
 // تابع برای گرفتن گالری عکس مناسب برای هر شعبه
@@ -57,19 +62,20 @@ export default function HomeContent() {
   const { language } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filteredFoods, setFilteredFoods] = useState<Food[]>([]);
-  
+
   // State برای مدیریت پس‌زمینه‌های متغیر
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [bgImages, setBgImages] = useState<string[]>([]);
-  
+
   // Ref برای interval
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Branch context و routing
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { selectedBranch, setSelectedBranch, clearSelectedBranch } = useBranch();
+  const { selectedBranch, setSelectedBranch, clearSelectedBranch } =
+    useBranch();
 
   // State برای بررسی اینکه آیا در حال redirect هستیم یا نه
   const [isRedirecting, setIsRedirecting] = useState(true);
@@ -215,14 +221,13 @@ export default function HomeContent() {
 
   if (loading) {
     return (
-      <div dir={language === 'en' ? 'left' : 'right'} className="relative min-h-screen flex items-center justify-center">
-        <div className="fixed inset-0 -z-10">
-          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/50 to-black/30"></div>{" "}
-          <img src="/sonati-bg.jpg" alt="" className="h-full w-full" />
-        </div>
-        <div className="text-center text-white">
+      <div
+        dir={language === "en" ? "ltr" : "rtl"}
+        className="relative min-h-screen flex items-center justify-center"
+      >
+        <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-300 mx-auto mb-4"></div>
-          <p className="text-gray-200">{t("loading")}</p>
+          <p className="">{t("loading")}</p>
         </div>
       </div>
     );
@@ -268,7 +273,11 @@ export default function HomeContent() {
                 <Menu />
               </Button>
             </DrawerTrigger>
-            <DrawerContent className={`glass-side ${language === "en" ? "rounded-r-[55px]" : "rounded-l-[55px]"}`}>
+            <DrawerContent
+              className={`glass-side ${
+                language === "en" ? "rounded-r-[55px]" : "rounded-l-[55px]"
+              }`}
+            >
               <DrawerHeader>
                 <DrawerTitle>
                   <div className="flex flex-col gap-5 justify-center p-5 rounded-3xl bg-gray-100/5 border-[0.1px] border-gray-500/60 items-center mt-10">
@@ -348,10 +357,10 @@ export default function HomeContent() {
             <div className="text-center">
               <h1 className="text-2xl font-bold mb-2">{t("restaurantName")}</h1>
               <h1 className="text-xl mb-2">
-                {language === 'ar' 
-                  ? selectedBranch.name_ar 
-                  : language === 'en'
-                  ? selectedBranch.name_en 
+                {language === "ar"
+                  ? selectedBranch.name_ar
+                  : language === "en"
+                  ? selectedBranch.name_en
                   : selectedBranch.name_fa}
               </h1>
             </div>
@@ -359,23 +368,31 @@ export default function HomeContent() {
 
           {/* Social Icons */}
           {/* <div className="flex items-center gap-4"> */}
-            <div className="flex items-center gap-3 z-50 inset-0">
-              <>
-                <ShareDrawer />
-              </>
-              <>
-                <InstagramDrawer />
-              </>
-              <>
-                <ClockDrawer />
-              </>
-              <>
-                <LocationDrawer />
-              </>
-              <>
-                <PhoneDrawer />
-              </>
-            </div>
+          <div className="flex items-center gap-3 z-50 inset-0">
+            <>
+              <ShareDrawer />
+            </>
+            <>
+            <Link href="https://www.instagram.com/vatandar_restaurant?igsh=N3R3a3VlOXUwYXF6ZQ==" target="_blank" rel="noopener noreferrer" >
+              <button
+                className="glass-btn glass-small flex items-center justify-center"
+                
+                >
+                <Instagram size={20} />
+              </button>
+              </Link>
+                
+            </>
+            <>
+              <ClockDrawer />
+            </>
+            <>
+              <LocationDrawer />
+            </>
+            <>
+              <PhoneDrawer />
+            </>
+          </div>
           {/* </div> */}
 
           {/* دکمه اصلی مشاهده منو */}

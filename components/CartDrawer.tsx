@@ -175,20 +175,20 @@ export default function CartDrawer() {
       </DrawerTrigger>
 
       <DrawerContent
-        className="h-[90vh] glass-drawer"
+        className="h-[95vh] glass-drawer"
         dir={language === "en" ? "ltr" : "rtl"}
       >
         <DrawerHeader>
-          <DrawerTitle className="flex items-center justify-center text-white">
+          <DrawerTitle className="flex items-center justify-center text-gray-300">
             {t("shoppingCart")}
           </DrawerTitle>
           <DrawerDescription>{t("cartDescription")}</DrawerDescription>
         </DrawerHeader>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-3 w-full py-4 space-y-4">
           {/* آیتم‌های سبد خرید */}
           {items.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-gray-400 py-8">
               <ShoppingCart size={48} className="mx-auto mb-4 opacity-50" />
               <p>{t("emptyCart")}</p>
             </div>
@@ -254,12 +254,12 @@ export default function CartDrawer() {
               </div>
 
               {/*  خط جدا کننده  */}
-              <div className="h-px bg-linear-to-r from-transparent via-gray-300 to-transparent" />
+              <div className="h-px bg-linear-to-r from-transparent via-white to-transparent" />
 
               {/* جمع کل   */}
-              <div className="pt-2">
+              <div className="pt-2 px-6">
                 <div className="flex justify-between items-center">
-                  <span className="font-medium">{t("total")}:</span>
+                  <span className="font-medium text-gray-300">{t("total")}:</span>
                   <span className="text-sm font-bold text-green-600">
                     {getTotalPrice().toLocaleString()} {t("price")}
                   </span>
@@ -269,7 +269,7 @@ export default function CartDrawer() {
           )}
         </div>
 
-        <DrawerFooter className="flex flex-row w-full items-center justify-center space-x-12 backdrop-blur-2xl pt-4">
+        <DrawerFooter className="flex flex-row w-full pt-4">
           {items.length > 0 && (
             <>
               <Button

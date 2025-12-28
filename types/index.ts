@@ -47,6 +47,7 @@ export type Branch = {
   address_en: string;
   phone_1: string;
   phone_2: string;
+  Instagram: string;
   is_active: boolean;
 };
 

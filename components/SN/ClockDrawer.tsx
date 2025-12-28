@@ -21,7 +21,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { Branch } from "@/types/index";
 import { Label } from "../ui/label";
 
-export default function PhoneDrawer() {
+export default function ClockDrawer() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { language } = useLanguage();
   const [branches, setBranches] = useState<Branch[]>([]);

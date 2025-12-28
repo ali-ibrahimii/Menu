@@ -104,7 +104,7 @@ export default function PhoneDrawer() {
                   <PhoneCall size={18} />
                 </div>
 
-                <h2>{selectedBranch?.phone_2}</h2>
+                <h2>{selectedBranch?.Instagram}</h2>
               </div>
             </div>
           </div>
