@@ -48,6 +48,8 @@ export type Branch = {
   phone_1: string;
   phone_2: string;
   Instagram: string;
+  latitude: string;
+  longitude: string;
   is_active: boolean;
 };
 

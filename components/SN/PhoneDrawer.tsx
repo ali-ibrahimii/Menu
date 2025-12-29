@@ -8,7 +8,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { PhoneCall, MapPin, Building, Phone, Map } from "lucide-react";
+import { PhoneCall, MapPin, Building, Phone, Map, Link } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -138,38 +138,6 @@ export default function PhoneDrawer() {
               </button>
             </div>
 
-            {/* شماره تماس ۲ */}
-            <div className="flex flex-col space-y-2">
-              <Label className="text-gray-300">
-                {language === "en"
-                  ? "Phone Number 2"
-                  : language === "ar"
-                  ? "رقم الهاتف ۲"
-                  : "شماره تماس ۲"}
-              </Label>
-
-              <button
-                onClick={() => handlePhoneCall(selectedBranch?.phone_2)}
-                className={`glass-phone-card px-6 py-3 ${
-                  language === "en" ? "text-left" : "text-right"
-                }`}
-                disabled={!selectedBranch?.phone_2}
-              >
-                <div className="glass-cart-btn p-2">
-                  <PhoneCall size={16} />
-                </div>
-                <h2 className="flex-1">
-                  {selectedBranch?.phone_2
-                    ? getDisplayPhone(selectedBranch?.phone_2)
-                    : language === "en"
-                    ? "Not available"
-                    : language === "ar"
-                    ? "غير متاح"
-                    : "موجود نیست"}
-                </h2>
-              </button>
-            </div>
-            
             {/* شماره تماس ۲ */}
             <div className="flex flex-col space-y-2">
               <Label className="text-gray-300">
