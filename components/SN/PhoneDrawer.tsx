@@ -12,53 +12,73 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useBranch } from "@/contexts/BranchContext";
 import { toast } from "sonner";
 
+// تعریف نوع برای ترجمه‌ها
+type TranslationKey = 'call' | 'copy' | 'copied' | 'sendMessage' | 'shareNumber' | 
+  'phoneNumber1' | 'phoneNumber2' | 'notAvailable' | 'contactInfo';
+
+type TranslationSet = Record<TranslationKey, string>;
+
+type Translations = {
+  en: TranslationSet;
+  ar: TranslationSet;
+  fa: TranslationSet;
+};
+
 export default function PhoneDrawer() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
   const { language } = useLanguage();
   const { selectedBranch } = useBranch();
 
-  const t = (key: string) => {
-    const translations = {
-      en: {
-        call: "Call",
-        copy: "Copy",
-        copied: "Copied!",
-        sendMessage: "Send Message",
-        shareNumber: "Share Number",
-        phoneNumber1: "Main Number",
-        phoneNumber2: "Secondary Number",
-        notAvailable: "Not Available",
-        contactInfo: "Contact Information"
-      },
-      ar: {
-        call: "اتصال",
-        copy: "نسخ",
-        copied: "تم النسخ!",
-        sendMessage: "إرسال رسالة",
-        shareNumber: "مشاركة الرقم",
-        phoneNumber1: "الرقم الرئيسي",
-        phoneNumber2: "الرقم الثانوي",
-        notAvailable: "غير متاح",
-        contactInfo: "معلومات الاتصال"
-      },
-      fa: {
-        call: "تماس",
-        copy: "کپی",
-        copied: "کپی شد!",
-        sendMessage: "ارسال پیام",
-        shareNumber: "اشتراک شماره",
-        phoneNumber1: "شماره اصلی",
-        phoneNumber2: "شماره دوم",
-        notAvailable: "موجود نیست",
-        contactInfo: "اطلاعات تماس"
-      }
-    };
-    return translations[language as keyof typeof translations]?.[key] || key;
+  // ترجمه‌ها با نوع مشخص
+  const translations: Translations = {
+    en: {
+      call: "Call",
+      copy: "Copy",
+      copied: "Copied!",
+      sendMessage: "Send Message",
+      shareNumber: "Share Number",
+      phoneNumber1: "Main Number",
+      phoneNumber2: "Secondary Number",
+      notAvailable: "Not Available",
+      contactInfo: "Contact Information"
+    },
+    ar: {
+      call: "اتصال",
+      copy: "نسخ",
+      copied: "تم النسخ!",
+      sendMessage: "إرسال رسالة",
+      shareNumber: "مشاركة الرقم",
+      phoneNumber1: "الرقم الرئيسي",
+      phoneNumber2: "الرقم الثانوي",
+      notAvailable: "غير متاح",
+      contactInfo: "معلومات الاتصال"
+    },
+    fa: {
+      call: "تماس",
+      copy: "کپی",
+      copied: "کپی شد!",
+      sendMessage: "ارسال پیام",
+      shareNumber: "اشتراک شماره",
+      phoneNumber1: "شماره اصلی",
+      phoneNumber2: "شماره دوم",
+      notAvailable: "موجود نیست",
+      contactInfo: "اطلاعات تماس"
+    }
+  };
+
+  // تابع ترجمه با نوع صحیح
+  const t = (key: TranslationKey): string => {
+    const lang = language as keyof Translations;
+    if (translations[lang] && key in translations[lang]) {
+      return translations[lang][key];
+    }
+    // Fallback به انگلیسی
+    return translations.en[key] || key;
   };
 
   // تابع برای فرمت‌بندی شماره تلفن
-  const formatPhoneNumber = (phone: string | undefined | null) => {
+  const formatPhoneNumber = (phone: string | undefined | null): string => {
     if (!phone) return "";
     
     const cleaned = phone.replace(/\D/g, "");
@@ -73,7 +93,7 @@ export default function PhoneDrawer() {
   };
 
   // تابع برای باز کردن صفحه تماس
-  const handlePhoneCall = (phoneNumber: string | undefined | null) => {
+  const handlePhoneCall = (phoneNumber: string | undefined | null): void => {
     if (!phoneNumber) return;
     
     const cleanedNumber = phoneNumber.replace(/\D/g, "");
@@ -81,7 +101,7 @@ export default function PhoneDrawer() {
   };
 
   // تابع برای ارسال پیام
-  const handleSendMessage = (phoneNumber: string | undefined | null) => {
+  const handleSendMessage = (phoneNumber: string | undefined | null): void => {
     if (!phoneNumber) return;
     
     const cleanedNumber = phoneNumber.replace(/\D/g, "");
@@ -89,7 +109,7 @@ export default function PhoneDrawer() {
   };
 
   // تابع برای کپی شماره
-  const handleCopyPhone = (phoneNumber: string) => {
+  const handleCopyPhone = (phoneNumber: string): void => {
     const cleanedNumber = phoneNumber.replace(/\D/g, "");
     navigator.clipboard.writeText(cleanedNumber);
     setCopiedPhone(cleanedNumber);
@@ -100,7 +120,7 @@ export default function PhoneDrawer() {
   };
 
   // تابع برای اشتراک‌گذاری شماره
-  const handleSharePhone = async (phoneNumber: string) => {
+  const handleSharePhone = async (phoneNumber: string): Promise<void> => {
     const cleanedNumber = phoneNumber.replace(/\D/g, "");
     const shareData = {
       title: selectedBranch?.name_fa || "رستوران وطندار",
@@ -137,7 +157,7 @@ export default function PhoneDrawer() {
     const isCopied = copiedPhone === cleanedNumber;
 
     return (
-      <div className={`border rounded-2xl p-5 mb-4 ${
+      <div className={`rounded-2xl border p-5 mb-4 ${
         isPrimary ? 'border-l-4 border-green-500' : 'border-l-4 border-blue-500'
       }`}>
         <div className="flex items-center justify-between mb-3">
@@ -177,7 +197,7 @@ export default function PhoneDrawer() {
             size="sm"
           >
             <PhoneCall size={16} />
-            {/* <span className="text-xs">{t("call")}</span> */}
+            <span className="text-xs">{t("call")}</span>
           </Button>
 
           <Button
@@ -188,7 +208,7 @@ export default function PhoneDrawer() {
             size="sm"
           >
             {isCopied ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
-            {/* <span className="text-xs">{isCopied ? t("copied") : t("copy")}</span> */}
+            <span className="text-xs">{isCopied ? t("copied") : t("copy")}</span>
           </Button>
 
           <Button
@@ -197,7 +217,7 @@ export default function PhoneDrawer() {
             size="sm"
           >
             <MessageCircle size={16} />
-            {/* <span className="text-xs">{t("sendMessage")}</span> */}
+            <span className="text-xs">{t("sendMessage")}</span>
           </Button>
 
           <Button
@@ -206,7 +226,7 @@ export default function PhoneDrawer() {
             size="sm"
           >
             <Share2 size={16} />
-            {/* <span className="text-xs">{t("shareNumber")}</span> */}
+            <span className="text-xs">{t("shareNumber")}</span>
           </Button>
         </div>
       </div>
