@@ -19,7 +19,9 @@ import {
   Minus,
   Trash2,
   Notebook,
+  NotebookText,
   User,
+  Heart,
   Hash,
 } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
@@ -162,7 +164,7 @@ export default function CartDrawer() {
           className="relative"
           onClick={handleDrawerOpen}
         >
-          <ShoppingCart className="opacity-60" size={20} />
+          <NotebookText className="opacity-60" size={20} />
           {getTotalItems() > 0 && (
             <Badge
               variant="destructive"
@@ -179,17 +181,17 @@ export default function CartDrawer() {
         dir={language === "en" ? "ltr" : "rtl"}
       >
         <DrawerHeader>
-          <DrawerTitle className="flex items-center justify-center text-gray-300">
+          <DrawerTitle className="flex items-center justify-center text-gray-200">
             {t("shoppingCart")}
           </DrawerTitle>
-          <DrawerDescription>{t("cartDescription")}</DrawerDescription>
+          <DrawerDescription className="text-gray-400">{t("cartDescription")}</DrawerDescription>
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-3 w-full py-4 space-y-4">
           {/* آیتم‌های سبد خرید */}
           {items.length === 0 ? (
-            <div className="text-center text-gray-400 py-8">
-              <ShoppingCart size={48} className="mx-auto mb-4 opacity-50" />
+            <div className="text-center text-gray-200 py-10">
+              <NotebookText size={48} className="mx-auto mb-4 opacity-60" />
               <p>{t("emptyCart")}</p>
             </div>
           ) : (
@@ -269,13 +271,13 @@ export default function CartDrawer() {
           )}
         </div>
 
-        <DrawerFooter className="flex flex-row w-full pt-4">
+        <DrawerFooter className="flex flex-row w-full">
           {items.length > 0 && (
             <>
               <Button
                 // variant="outline"
                 onClick={clearCart}
-                className="glass-cart-btn px-14"
+                className="glass-cart-btn w-full"
                 disabled={isSubmitting}
               >
                 <Trash2 size={16} className="ml-1" />
@@ -284,15 +286,15 @@ export default function CartDrawer() {
             </>
           )}
 
-          <DrawerClose asChild>
+          {/* <DrawerClose asChild>
             <Button
               // variant="outline"
-              className="glass-cart-btn px-4"
+              className="glass-cart-btn w-full"
               disabled={isSubmitting}
             >
               {t("close")}
             </Button>
-          </DrawerClose>
+          </DrawerClose> */}
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

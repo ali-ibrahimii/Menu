@@ -362,13 +362,9 @@ export default function Home() {
   if (loading) {
     return (
       <div className="relative min-h-screen flex items-center justify-center">
-        <div className="fixed inset-0 -z-10">
-          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/50 to-black/30"></div>{" "}
-          <img src="/sonati-bg.jpg" alt="" className="h-full w-full" />
-        </div>
-        <div className="text-center text-white">
+        <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-300 mx-auto mb-4"></div>
-          <p className="text-gray-200">{t("loading")}</p>
+          <p className="">{t("loading")}</p>
         </div>
       </div>
     );
@@ -478,7 +474,7 @@ export default function Home() {
                 );
               })
             ) : (
-              <p className="text-sm text-gray-200 px-4">{t("noFoods")}</p>
+              <p className="glass-category px-3">{t("noFoodInCategory")}</p>
             )}
           </div>
           <ScrollBar orientation="horizontal" className="hidden" />
@@ -487,7 +483,7 @@ export default function Home() {
       {/* پایان دسته بندی */}
 
       {/* شروع کارت غذا */}
-      <div className="mt-3 pb-20">
+      <div className="mt-3">
         {selectedCategory ? (
           <div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -504,18 +500,8 @@ export default function Home() {
                   />
                 ))
               ) : (
-                <div className="col-span-full text-center py-8 text-gray-200">
-                  {selectedBranch
-                    ? language === "en"
-                      ? `No food items in this category for ${
-                          selectedBranch.name_en || selectedBranch.name_fa
-                        }`
-                      : language === "ar"
-                      ? `لا توجد أطعمة في هذه الفئة لـ ${
-                          selectedBranch.name_ar || selectedBranch.name_fa
-                        }`
-                      : `هیچ غذایی در این دسته‌بندی برای  ${selectedBranch.name_fa} وجود ندارد`
-                    : t("noFoodInCategory")}
+                <div className="col-span-full border text-center py-8 text-gray-200">
+                  {t("noFoodInCategory")}
                 </div>
               )}
             </div>
@@ -554,17 +540,7 @@ export default function Home() {
               ))
             ) : (
               <div className="text-center py-8 text-gray-300">
-                {selectedBranch
-                  ? language === "en"
-                    ? `No items available for ${
-                        selectedBranch.name_en || selectedBranch.name_fa
-                      }`
-                    : language === "ar"
-                    ? `لا توجد أطعمة متاحة لـ ${
-                        selectedBranch.name_ar || selectedBranch.name_fa
-                      }`
-                    : `هیچ غذایی برای ${selectedBranch.name_fa} وجود ندارد`
-                  : t("noFoods")}
+                {t("noFoods")}
               </div>
             )}
           </div>
@@ -621,12 +597,12 @@ function FoodCard({
     <div
       dir={`${language === "en" ? "ltr" : "rtl"}`}
       key={food.id}
-      className="relative flex items-center w-full glass-card-menu h-35  rounded-2xl hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer"
+      className="relative flex items-center w-full glass-card-menu h-34  rounded-2xl hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer"
       onClick={() => handleFoodClick(food)}
     >
       {/* شروع عکس کارت غذا */}
-      <div className="w-4/12 h-full rounded-2xl p-[2.1px] bg-[linear-gradient(135deg,#10b981_0%,transparent_35%),linear-gradient(-45deg,#10b981_0%,transparent_35%)]">
-        <div className="w-full h-full rounded-[13px] overflow-hidden">
+      <div className="w-4/12 h-full rounded-2xl p-[1.5px] bg-[linear-gradient(130deg,#d62828_0%,transparent_35%),linear-gradient(-45deg,#d62828_0%,transparent_35%)]">
+        <div className="w-full h-full rounded-[16px] overflow-hidden">
           <img
             src={food.image_url}
             alt={getFoodName(food)}
@@ -638,33 +614,33 @@ function FoodCard({
 
       {/* شروع متن کارت غذا */}
       <div className="flex flex-col mx-3 w-8/12 overflow-hidden py-2">
-        <div>
-          <h2 className="text-md font-semibold text-gray-200 truncate">
+        <div className="mb-5">
+          <h2 className="text-md font-bold text-gray-200 truncate">
             {getFoodName(food)}
           </h2>
 
           {/* مواد تشکیل دهنده */}
           {getIngredients(food) && (
-            <p className="text-gray-200 text-[13px] line-clamp-2 leading-4.5">
+            <p className="text-gray-200 text-[12px] line-clamp-2 leading-4.5">
               {getIngredients(food).toString()}
             </p>
           )}
           {/* قیمت غذا */}
-          <span className="text-[14px] font-bold text-yellow-600 mt-1 inline-block">
+          <span className="text-[13px] font-bold text-yellow-600 mt-1 inline-block">
             {food.price.toLocaleString()} {t("price")}
           </span>
         </div>
 
         {/* دکمه افزودن به سبد خرید */}
-        <div className="mt-2">
+        <div>
           {!food.is_available ? (
             <Badge variant="destructive" className="opacity-80">
               {t("notAvailable")}
             </Badge>
           ) : (
             <div
-              className={`absolute bottom-3 ${
-                language === "en" ? "right-3" : "left-3"
+              className={`absolute bottom-2 ${
+                language === "en" ? "right-2" : "left-2"
               }`}
               onClick={(e) => e.stopPropagation()}
             >
