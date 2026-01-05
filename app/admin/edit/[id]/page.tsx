@@ -419,7 +419,7 @@ export default function EditFoodPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => document.querySelector('input[type="file"]')?.click()}
+                  onClick={() => (document.querySelector('input[type="file"]') as HTMLInputElement | null)?.click()}
                   disabled={uploadLoading}
                   className="whitespace-nowrap"
                 >
