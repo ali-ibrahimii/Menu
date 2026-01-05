@@ -210,10 +210,6 @@ export default function ClockDrawer() {
           onClick={() => setIsDrawerOpen(true)}
         >
           <Clock size={20} />
-          {/* نشانگر کوچک وضعیت روی آیکون */}
-          {remainingTime.isOpen && (
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-          )}
         </button>
       </DrawerTrigger>
 

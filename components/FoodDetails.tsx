@@ -262,21 +262,24 @@ export default function FoodDetails({
                   </p>
 
                   {/* دکمه نمایش بیشتر/کمتر */}
-                  {getFoodDescription(food).length > 120 && (
-                    <div className="flex justify-start mt-3">
-                      <button
-                        onClick={toggleDescription}
-                        className="flex items-center gap-1.5 text-gray-300 text-sm font-medium transition-colors glass-btn px-3 py-1 rounded-full"
-                      >
-                        {getDescriptionButtonText()}
-                        {isExpanded ? (
-                          <ChevronUp size={14} />
-                        ) : (
-                          <ChevronDown size={14} />
-                        )}
-                      </button>
-                    </div>
-                  )}
+                  {getFoodDescription(food).length > 200 && (
+                  <button
+                    onClick={toggleDescription}
+                    className="flex items-center gap-1.5 mt-2 text-amber-300 hover:text-amber-200 font-medium transition-colors"
+                  >
+                    {isExpanded ? (
+                      <>
+                        <ChevronUp size={16} />
+                        {t("showLess")}
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown size={16} />
+                        {t("showMore")}
+                      </>
+                    )}
+                  </button>
+                )}
                 </div>
               </div>
 
@@ -322,7 +325,6 @@ export default function FoodDetails({
               </div>
             </div>
           </div>
-          {/* دکمه اقدام */}
         </div>
       </DrawerContent>
     </Drawer>

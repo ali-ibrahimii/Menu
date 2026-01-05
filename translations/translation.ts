@@ -32,7 +32,7 @@ export const translations = {
     total: "جمع کل",
     notes: "یادداشت",
     notesPlaceholder: "توضیحات سفارش...",
-    clearCart: "پاک کردن سبد",
+    clearCart: "پاک کردن یادداشت",
     saveOrder: "ذخیره سفارش",
     close: "بستن",
     orderSaved: "سفارش با موفقیت ذخیره شد",
