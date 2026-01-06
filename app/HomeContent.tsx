@@ -12,7 +12,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, Menu, X, Phone, Store, Instagram } from "lucide-react";
+import { Building2, Clock, Menu, X, Phone, Store, Instagram } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
@@ -309,12 +309,9 @@ export default function HomeContent() {
                 </div>
 
                 <div className="mt-4 space-y-2">
-                  <Link href={"/myOrders"} className="block text-center">
-                    سفارشات من
-                  </Link>
                   <Link
                     href={"/branches"}
-                    className="block font-medium text-center"
+                    className="block font-medium p-2 bg-gray-600/20 rounded-md text-center text-white/80"
                     onClick={() => clearSelectedBranch()}
                   >
                     انتخاب / تغییر شعبه
@@ -343,8 +340,8 @@ export default function HomeContent() {
           <CheckRestaurantStatus />
         </div>
 
-        <div className="flex flex-col items-center space-y-8 w-full px-8 pb-6">
-          <div className="flex-col flex items-center space-y-1">
+        <div className="flex flex-col items-center space-y-5 w-full px-8 ">
+          <div className="flex-col flex items-center">
             <div className="">
               <Image
                 src={"/logo.png"}
@@ -356,7 +353,7 @@ export default function HomeContent() {
             </div>
             <div className="text-center">
               <h1 className="text-2xl font-bold mb-2">{t("restaurantName")}</h1>
-              <h1 className="text-xl mb-2">
+              <h1 className="text-lg">
                 {language === "ar"
                   ? selectedBranch.name_ar
                   : language === "en"
@@ -370,7 +367,11 @@ export default function HomeContent() {
           {/* <div className="flex items-center gap-4"> */}
           <div className="flex items-center gap-3 z-50 inset-0">
             <>
-              <ShareDrawer />
+            <Link href="/branches">
+            <button className="glass-btn glass-small flex items-center justify-center">
+              <Building2 />
+            </button>
+            </Link>
             </>
             <>
             <Link href="https://www.instagram.com/vatandar_restaurant?igsh=N3R3a3VlOXUwYXF6ZQ==" target="_blank" rel="noopener noreferrer" >

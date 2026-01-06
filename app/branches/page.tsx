@@ -145,10 +145,6 @@ export default function BranchesPage() {
   if (loading) {
     return (
       <div className="relative min-h-screen flex items-center justify-center">
-        <div className="fixed inset-0 -z-10">
-          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/50 to-black/30"></div>{" "}
-          <img src="/sonati-bg.jpg" alt="" className="h-full w-full" />
-        </div>
         <div className="text-center text-white">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-300 mx-auto mb-4"></div>
           <p className="text-gray-200">{t("loading")}</p>

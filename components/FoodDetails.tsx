@@ -286,8 +286,8 @@ export default function FoodDetails({
               {/* مشخصات فنی */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {food.cooking_time && (
-                  <div className="gap-3 glass-card-menu py-3">
-                    <div className="p-4 rounded-full bg-indigo-400/20 text-gray-300">
+                  <div className="bg-gray-600/10 rounded-2xl flex py-3">
+                    <div className="p-4 text-gray-300">
                       <Clock className="" size={20} />
                     </div>
                     <div className="text-gray-300">
@@ -302,8 +302,8 @@ export default function FoodDetails({
                 )}
 
                 {food.serves && (
-                  <div className="gap-3 glass-card-menu py-3">
-                    <div className="p-4 rounded-full bg-fuchsia-400/20">
+                  <div className="bg-gray-600/10 flex rounded-2xl py-3">
+                    <div className="p-4">
                       <Users className="" size={20} />
                     </div>
                     <div>

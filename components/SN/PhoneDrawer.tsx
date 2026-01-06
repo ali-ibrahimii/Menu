@@ -130,7 +130,7 @@ export default function PhoneDrawer() {
         <div className="flex gap-2">
           <button
             onClick={() => handlePhoneCall(phoneNumber)}
-            className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-2 rounded text-sm flex items-center justify-center gap-1 transition"
+            className="flex-1 text-white/80 py-2 px-2 rounded-sm bg-gray-500/20 text-sm flex items-center justify-center gap-1 transition"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -139,20 +139,8 @@ export default function PhoneDrawer() {
           </button>
 
           <button
-            onClick={() => handleCopyPhone(phoneNumber)}
-            className={`flex-1 py-2 px-2 rounded text-sm flex items-center justify-center gap-1 transition ${
-              isCopied 
-                ? "bg-green-500/20 text-green-400 border border-green-500/30" 
-                : "bg-white/10 hover:bg-white/20 text-gray-300"
-            }`}
-          >
-            {isCopied ? <Check size={16} /> : <Copy size={16} />}
-            <span>{isCopied ? t("copied") : t("copy")}</span>
-          </button>
-
-          <button
             onClick={() => handleSendMessage(phoneNumber)}
-            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-2 rounded text-sm flex items-center justify-center gap-1 transition"
+            className="flex-1 bg-gray-500/20 rounded-sm text-white/80 py-2 px-2 text-sm flex items-center justify-center gap-1 transition"
           >
             <MessageCircle size={16} />
             <span>{t("sendMessage")}</span>
@@ -165,19 +153,17 @@ export default function PhoneDrawer() {
   return (
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <DrawerTrigger asChild>
-        <button className="p-2.5 bg-white/10 hover:bg-white/20 rounded-lg transition">
+        <button className="p-2.5 glass-btn transition">
           <Phone size={20} className="text-white" />
         </button>
       </DrawerTrigger>
 
-      <DrawerContent className="bg-gray-900 border-t border-gray-700 max-h-[80vh]">
-        <div className="p-4">
+      <DrawerContent className="border glass-drawer max-h-[80vh]">
+        <div className="w-full px-10 pb-10">
           {/* هدر ساده */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center  justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500/20 rounded-lg">
-                <Phone size={20} className="text-green-400" />
-              </div>
+              
               <div>
                 <h1 className="font-bold text-white">
                   {language === "ar"
@@ -189,13 +175,6 @@ export default function PhoneDrawer() {
                 <p className="text-sm text-gray-400">{t("contactInfo")}</p>
               </div>
             </div>
-            
-            <button
-              onClick={() => setIsDrawerOpen(false)}
-              className="p-2 hover:bg-white/10 rounded-lg transition"
-            >
-              <X size={20} className="text-gray-400" />
-            </button>
           </div>
 
           {/* لیست شماره‌ها */}
@@ -226,29 +205,7 @@ export default function PhoneDrawer() {
             )}
           </div>
 
-          {/* ساعات تماس */}
-          <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/10">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-300">
-                {language === "en" ? "Hours" : language === "ar" ? "ساعات" : "ساعات تماس"}
-              </span>
-              <span className="text-xs text-gray-400">8 AM - 10 PM</span>
-            </div>
-            <div className="w-full bg-gray-700 rounded-full h-1">
-              <div 
-                className="bg-green-500 h-1 rounded-full" 
-                style={{ width: "60%" }}
-              ></div>
-            </div>
-          </div>
-
-          {/* دکمه بستن */}
-          <button
-            onClick={() => setIsDrawerOpen(false)}
-            className="w-full mt-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition font-medium"
-          >
-            {t("close")}
-          </button>
+          
         </div>
       </DrawerContent>
     </Drawer>

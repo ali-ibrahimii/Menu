@@ -183,14 +183,13 @@ export default function RatingSystem({
 
   return (
     <div className="space-y-6 relative">
-      {/* ✅ حذف بخش آمار کلی از اینجا */}
 
       {/* دکمه ثبت نظر */}
       <div className="flex justify-center">
         {!showReviewForm && (
           <Button
             onClick={() => setShowReviewForm(true)}
-            className="bg-green-600 hover:bg-green-700 w-full"
+            className="glass-rate-card w-full"
           >
             {t("addReview")}
           </Button>
