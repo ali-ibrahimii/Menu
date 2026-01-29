@@ -16,7 +16,7 @@ export default function LoginPage() {
   // اطلاعات ثابت ادمین
   const ADMIN_CREDENTIALS = {
     username: 'admin',
-    password: 'admin123'
+    password: '5515896'
   };
 
   // چک کن اگر قبلاً لاگین کرده
@@ -76,7 +76,7 @@ export default function LoginPage() {
             <Users size={40} className="text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            پنل مدیریت رستوران
+            پنل مدیریت  منو رستوران
           </h1>
           <p className="text-gray-600">
             لطفاً برای ادامه وارد شوید

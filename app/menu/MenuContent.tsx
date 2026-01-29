@@ -626,7 +626,7 @@ function FoodCard({
             </p>
           )}
           {/* قیمت غذا */}
-          <span className="text-[13px] font-bold text-yellow-600 mt-1 inline-block">
+          <span className="text-[13px] font-bold text-yellow-500 mt-1 inline-block">
             {food.price.toLocaleString()} {t("price")}
           </span>
         </div>

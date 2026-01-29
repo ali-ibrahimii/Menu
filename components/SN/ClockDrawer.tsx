@@ -206,7 +206,7 @@ export default function ClockDrawer() {
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <DrawerTrigger asChild>
         <button
-          className="glass-btn glass-small flex items-center justify-center relative"
+          className="bg-white/5 rounded-full p-3 border border-white/10"
           onClick={() => setIsDrawerOpen(true)}
         >
           <Clock size={20} />

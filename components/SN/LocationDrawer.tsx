@@ -4,14 +4,20 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { MapPin, Navigation } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState, useEffect } from "react";
+import { useBranch } from "@/contexts/BranchContext";
+
 
 export default function LocationDrawer() {
   const [open, setOpen] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
-  
-  const coords = { lat: 36.284732, lng: 59.596773 };
+    const { selectedBranch } = useBranch();
 
+  
+  // const coords = { lat: 36.299265340575474, lng: 59.640879444238244 };
+
+  
+  
   useEffect(() => {
     // تشخیص دستگاه بعد از رندر اولیه
     const userAgent = navigator.userAgent || navigator.vendor;
@@ -19,28 +25,28 @@ export default function LocationDrawer() {
     setIsAndroid(/android/i.test(userAgent));
   }, []);
 
-  const mapUrl = `https://maps.google.com/maps?q=${coords.lat},${coords.lng}&hl=fa&z=16&output=embed`;
+  const mapUrl = `https://maps.google.com/maps?q=${selectedBranch?.latitude},${selectedBranch?.longitude}&hl=fa&z=16&output=embed`;
 
   // تعریف لینک‌های مسیریابی
   const getNavigationLink = () => {
     if (isIOS) {
       // لینک Apple Maps
-      return `https://maps.apple.com/?daddr=${coords.lat},${coords.lng}&dirflg=d`;
+      return `https://maps.apple.com/?daddr=${selectedBranch?.latitude},${selectedBranch?.longitude}&dirflg=d`;
     } else {
       // لینک Google Maps (پیش‌فرض)
-      return `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}&travelmode=driving`;
+      return `https://www.google.com/maps/dir/?api=1&destination=${selectedBranch?.latitude},${selectedBranch?.longitude}&travelmode=driving`;
     }
   };
 
   // متن دکمه بر اساس دستگاه
   const getButtonText = () => {
-    if (isIOS) return "مسیریابی با Apple Maps";
-    return "مسیریابی با Google Maps";
+    if (isIOS) return "Apple Maps";
+    return "Google Maps";
   };
 
   // آیکون بر اساس دستگاه
   const getButtonIcon = () => {
-    return <Navigation size={18} className="ml-2" />;
+    return <Navigation size={18} className="" />;
   };
 
   const handleNavigation = () => {
@@ -51,7 +57,7 @@ export default function LocationDrawer() {
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <button 
-          className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition duration-200"
+          className="bg-white/5 rounded-full p-3 border border-white/10"
           aria-label="نمایش موقعیت و مسیریابی"
         >
           <MapPin size={20} />

@@ -368,15 +368,15 @@ export default function HomeContent() {
           <div className="flex items-center gap-3 z-50 inset-0">
             <>
             <Link href="/branches">
-            <button className="glass-btn glass-small flex items-center justify-center">
-              <Building2 />
+            <button className="bg-white/5 rounded-full p-3 border border-white/10">
+              <Building2 size={20} />
             </button>
             </Link>
             </>
             <>
             <Link href="https://www.instagram.com/vatandar_restaurant?igsh=N3R3a3VlOXUwYXF6ZQ==" target="_blank" rel="noopener noreferrer" >
               <button
-                className="glass-btn glass-small flex items-center justify-center"
+                className="bg-white/5 rounded-full p-3 border border-white/10"
                 
                 >
                 <Instagram size={20} />
@@ -399,7 +399,7 @@ export default function HomeContent() {
           {/* دکمه اصلی مشاهده منو */}
           <Link
             href={`/menu?branch=${selectedBranch.slug}`}
-            className="w-full flex justify-center glass-btn"
+            className="w-full flex justify-center bg-white/4 glass-button"
           >
             <button className="py-2 w-full text-lg font-semibold">
               {t("viewMenu")}

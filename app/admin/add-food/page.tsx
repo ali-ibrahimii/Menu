@@ -621,7 +621,7 @@ export default function AddFoodPage() {
         </div>
 
         {/* دکمه ثبت */}
-        <div className="sticky bottom-0 bg-white pt-4 border-t">
+        <div className=" bg-white pt-4 border-t">
           <div className="max-w-4xl mx-auto">
             <Button
               type="submit"
@@ -639,12 +639,7 @@ export default function AddFoodPage() {
               )}
             </Button>
             
-            {/* راهنمایی */}
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-700 text-center">
-                <strong>توجه:</strong> پس از ثبت، غذا در منوی شعبه انتخاب شده نمایش داده می‌شود.
-              </p>
-            </div>
+            
           </div>
         </div>
       </form>

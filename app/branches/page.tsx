@@ -145,9 +145,9 @@ export default function BranchesPage() {
   if (loading) {
     return (
       <div className="relative min-h-screen flex items-center justify-center">
-        <div className="text-center text-white">
+        <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-300 mx-auto mb-4"></div>
-          <p className="text-gray-200">{t("loading")}</p>
+          <p className="">{t("loading")}</p>
         </div>
       </div>
     );
@@ -159,7 +159,7 @@ export default function BranchesPage() {
       className="relative min-h-screen overflow-hidden "
     >
       <div className="fixed inset-0 -z-10 overflow-hidden w-screen h-screen">
-        <img src="/sonati-bg.jpg" className="h-full w-full" />
+        <img src="/bg6.jpg" className="h-full w-full" />
       </div>
       <div className="z-10 px-4 py-6">
         <div className="max-w-6xl mx-auto">
@@ -198,6 +198,10 @@ export default function BranchesPage() {
                 <div
                   key={branch.id}
                   className="group relative rounded-3xl overflow-hidden cursor-pointer h-64 mx-4" // ارتفاع کم
+                  onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectBranch(branch);
+                  }}
                 >
                   {/* عکس پس‌زمینه */}
                   <div className="absolute inset-0">

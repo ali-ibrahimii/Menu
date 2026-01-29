@@ -189,7 +189,7 @@ export default function RatingSystem({
         {!showReviewForm && (
           <Button
             onClick={() => setShowReviewForm(true)}
-            className="glass-rate-card w-full"
+            className="w-full bg-white/5 rounded-md p-3 border border-white/10"
           >
             {t("addReview")}
           </Button>
@@ -198,7 +198,7 @@ export default function RatingSystem({
 
       {/* فرم ثبت نظر */}
       {showReviewForm && (
-        <div className="text-white glass-rate-card p-6 space-y-4">
+        <div className="text-gray-200 bg-white/5 rounded-xl border border-white/10 p-6 space-y-4">
           <h3 className="text-lg font-semibold">{t("addReview")}</h3>
 
           <div className="space-y-2">
@@ -237,7 +237,7 @@ export default function RatingSystem({
                   ? "أدخل اسمك"
                   : "Enter your name"
               }
-              className="glass-rate-card border-none"
+              className="bg-white/5 rounded-sm p-3 border border-white/10"
             />
           </div>
 
@@ -255,7 +255,7 @@ export default function RatingSystem({
                   : "Write your comment..."
               }
               rows={4}
-              className="text-white glass-rate-card border-none"
+              className="bg-white/5 rounded-md p-3 border border-white/10"
             />
           </div>
 
@@ -263,14 +263,14 @@ export default function RatingSystem({
             <Button
               onClick={submitReview}
               disabled={submitting}
-              className="flex-1 bg-green-600 hover:bg-green-700"
+              className="flex-1 bg-white/5 rounded-md p-3 border border-white/10"
             >
               <Send size={16} className="" />
               {submitting ? t("submitting") : t("submit")}
             </Button>
             <Button
-            className="text-black"
-              variant="outline"
+            className="bg-white/5 rounded-md p-3 border border-white/10"
+              
               onClick={() => setShowReviewForm(false)}
               disabled={submitting}
             >
@@ -294,7 +294,7 @@ export default function RatingSystem({
         ) : (
           <div className="space-y-4">
             {reviews.map((review) => (
-              <div key={review.id} className="glass-rate-card p-4">
+              <div key={review.id} className="bg-white/5 rounded-lg border border-white/10 p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h4 className="font-semibold">{review.customer_name}</h4>

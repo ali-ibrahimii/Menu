@@ -213,7 +213,7 @@ export default function FoodDetails({
                   {food.is_spicy && (
                     <Badge
                       // variant="secondary"
-                      className="flex items-center bg-red-400/20 gap-1 text-[12px]"
+                      className="flex items-center rounded-full border border-white/10 bg-red-300/15 gap-1 text-[12px]"
                     >
                       <Flame size={14} />
                       {t("spicy")}
@@ -223,7 +223,7 @@ export default function FoodDetails({
                   {food.is_vegetarian && (
                     <Badge
                       // variant="secondary"
-                      className="flex items-center bg-green-400/20 gap-1 text-[12px]"
+                      className="flex items-center rounded-full border border-white/10 bg-green-400/20 gap-1 text-[12px]"
                     >
                       <Leaf size={14} />
                       {t("vegetarian")}
@@ -234,7 +234,7 @@ export default function FoodDetails({
 
                     <Badge
                       // variant="secondary"
-                      className="flex items-center bg-amber-300/20 gap-1 text-[12px]"
+                      className="flex items-center rounded-full border border-white/10 bg-amber-300/15 gap-1 text-[12px]"
                     >
                       <Tag size={14} />
                       {food.tags.join(", ")}
@@ -265,7 +265,7 @@ export default function FoodDetails({
                   {getFoodDescription(food).length > 200 && (
                   <button
                     onClick={toggleDescription}
-                    className="flex items-center gap-1.5 mt-2 text-amber-300 hover:text-amber-200 font-medium transition-colors"
+                    className="flex items-center gap-1.5 mt-2 text-green-300 hover:text-green-200 font-medium transition-colors"
                   >
                     {isExpanded ? (
                       <>
@@ -286,7 +286,7 @@ export default function FoodDetails({
               {/* مشخصات فنی */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {food.cooking_time && (
-                  <div className="bg-gray-600/10 rounded-2xl flex py-3">
+                  <div className="bg-white/5 rounded-2xl p-3 border border-white/10 flex py-3">
                     <div className="p-4 text-gray-300">
                       <Clock className="" size={20} />
                     </div>
@@ -302,7 +302,7 @@ export default function FoodDetails({
                 )}
 
                 {food.serves && (
-                  <div className="bg-gray-600/10 flex rounded-2xl py-3">
+                  <div className="bg-white/5 rounded-2xl p-3 border border-white/10 flex py-3">
                     <div className="p-4">
                       <Users className="" size={20} />
                     </div>
