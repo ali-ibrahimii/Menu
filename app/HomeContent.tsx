@@ -353,13 +353,13 @@ export default function HomeContent() {
             </div>
             <div className="text-center">
               <h1 className="text-2xl font-bold mb-2">{t("restaurantName")}</h1>
-              <h1 className="text-lg">
+              {/* <h1 className="text-lg">
                 {language === "ar"
                   ? selectedBranch.name_ar
                   : language === "en"
                   ? selectedBranch.name_en
                   : selectedBranch.name_fa}
-              </h1>
+              </h1> */}
             </div>
           </div>
 
