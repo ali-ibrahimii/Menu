@@ -13,6 +13,7 @@ import Image from "next/image";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CheckRestaurantStatus from "@/components/CheckRestaurantStatus";
 import {Branch} from '@/types/index'
+import CustomStyleQRCode from "@/components/CustomStyleQRCode";
 
 // لیست عکس‌های هر شعبه
 const branchImageGalleries: Record<string, string[]> = {
