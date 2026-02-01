@@ -13,7 +13,7 @@ import Image from "next/image";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CheckRestaurantStatus from "@/components/CheckRestaurantStatus";
 import {Branch} from '@/types/index'
-import CustomStyleQRCode from "@/components/CustomStyleQRCode";
+import Loader from "@/components/Loader";
 
 // لیست عکس‌های هر شعبه
 const branchImageGalleries: Record<string, string[]> = {
@@ -145,9 +145,12 @@ export default function BranchesPage() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-300 mx-auto mb-4"></div>
+      <div
+        dir={language === "en" ? "ltr" : "rtl"}
+        className="relative min-h-screen flex items-center justify-center"
+      >
+        <div className="flex items-center justify-center flex-col">
+          <Loader />
           <p className="">{t("loading")}</p>
         </div>
       </div>
@@ -168,11 +171,11 @@ export default function BranchesPage() {
             <LanguageSwitcher />
           </div>
           {/* هدر */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-8 text-white/80">
             <div className="inline-flex items-center justify-center">
               <div className="relative w-30 h-30">
                 <Image
-                  src="/logo.png"
+                  src="/logo1.png"
                   alt="رستوران وطندار"
                   fill
                   className="object-contain"
@@ -180,10 +183,10 @@ export default function BranchesPage() {
                 />
               </div>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-200 mb-3">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">
               {t("restaurantName")}
             </h1>
-            <p className="text-lg text-gray-200 max-w-2xl mx-auto">
+            <p className="text-lg max-w-2xl mx-auto">
               {t("selectBranchReq")}
             </p>
           </div>

@@ -29,6 +29,7 @@ import InstagramDrawer from "@/components/SN/InstagramDrawer";
 import ClockDrawer from "@/components/SN/ClockDrawer";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useBranch } from "@/contexts/BranchContext";
+import Loader from "@/components/Loader";
 
 // گالری عکس‌های هر شعبه
 const branchImageGalleries: Record<string, string[]> = {
@@ -225,8 +226,8 @@ export default function HomeContent() {
         dir={language === "en" ? "ltr" : "rtl"}
         className="relative min-h-screen flex items-center justify-center"
       >
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-300 mx-auto mb-4"></div>
+        <div className="flex items-center justify-center flex-col">
+          <Loader />
           <p className="">{t("loading")}</p>
         </div>
       </div>
@@ -280,12 +281,12 @@ export default function HomeContent() {
             >
               <DrawerHeader>
                 <DrawerTitle>
-                  <div className="flex flex-col gap-5 justify-center p-5 rounded-3xl bg-gray-100/5 border-[0.1px] border-gray-500/60 items-center mt-10">
+                  <div className="flex flex-col gap-5 justify-center p-2 rounded-3xl bg-gray-100/5 border-[0.1px] border-gray-500/60 items-center mt-10">
                     <Image
-                      src="/logo.png"
+                      src="/logo1.png"
                       alt="Watandar logo"
-                      width={80}
-                      height={50}
+                      width={120}
+                      height={30}
                       className="object-cover"
                     />
                   </div>
@@ -344,22 +345,22 @@ export default function HomeContent() {
           <div className="flex-col flex items-center">
             <div className="">
               <Image
-                src={"/logo.png"}
+                src={"/logo1.png"}
                 alt={selectedBranch.name_fa}
-                width={120}
+                width={140}
                 height={40}
                 className="object-cover"
               />
             </div>
             <div className="text-center">
               <h1 className="text-2xl font-bold mb-2">{t("restaurantName")}</h1>
-              <h1 className="text-lg">
+              {/* <h1 className="text-lg">
                 {language === "ar"
                   ? selectedBranch.name_ar
                   : language === "en"
                   ? selectedBranch.name_en
                   : selectedBranch.name_fa}
-              </h1>
+              </h1> */}
             </div>
           </div>
 

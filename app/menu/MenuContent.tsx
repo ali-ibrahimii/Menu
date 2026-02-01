@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import Link from "next/link";
 import { useBranch } from "@/contexts/BranchContext";
+import Loader from "@/components/Loader";
 
 export default function Home() {
   const id = useId();
@@ -361,9 +362,12 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-300 mx-auto mb-4"></div>
+      <div
+        dir={language === "en" ? "ltr" : "rtl"}
+        className="relative min-h-screen flex items-center justify-center"
+      >
+        <div className="flex items-center justify-center flex-col">
+          <Loader />
           <p className="">{t("loading")}</p>
         </div>
       </div>
@@ -371,10 +375,10 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen px-6 py-2 pt-5 overflow-y-auto  overscroll-none touch-pan-y">
-      <div className="w-screen fixed inset-0 -z-10">
-        <div className="absolute top-0 bg-black/20 backdrop-blur-[2px] w-full h-full"></div>
-        <img src="/bg6.jpg" alt="" className="w-full h-full" />
+    <main className="w-full min-h-screen px-6 py-2 pt-5 overflow-y-auto overscroll-none touch-pan-y">
+      <div className="w-full min-h-screen fixed inset-0 -z-10">
+        <div className="absolute top-0 bg-black/10 backdrop-blur-[1px] w-full h-full"></div>
+        <img src="/bg6.jpg" alt="" className="w-full min-h-screen" />
       </div>
 
       {/* دکمه برگشت به صفحه ورودی و مینو */}

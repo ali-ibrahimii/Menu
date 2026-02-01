@@ -25,8 +25,8 @@ export default function PhoneDrawer() {
         copy: "Copy",
         copied: "Copied",
         sendMessage: "Message",
-        contactInfo: "Contact",
-        mainNumber: "Main",
+        contactInfo: "Contact numbers",
+        mainNumber: "First",
         secondaryNumber: "Secondary",
         notAvailable: "No number",
         close: "Close",
@@ -36,8 +36,8 @@ export default function PhoneDrawer() {
         copy: "نسخ",
         copied: "تم النسخ",
         sendMessage: "رسالة",
-        contactInfo: "اتصال",
-        mainNumber: "رئيسي",
+        contactInfo: "أرقام الاتصال",
+        mainNumber: "أولاً",
         secondaryNumber: "ثانوي",
         notAvailable: "لا يوجد",
         close: "إغلاق",
@@ -47,8 +47,8 @@ export default function PhoneDrawer() {
         copy: "کپی",
         copied: "کپی شد",
         sendMessage: "پیام",
-        contactInfo: "تماس",
-        mainNumber: "اصلی",
+        contactInfo: "شماره های تماس",
+        mainNumber: "اول",
         secondaryNumber: "دوم",
         notAvailable: "ندارد",
         close: "بستن",
@@ -113,12 +113,6 @@ export default function PhoneDrawer() {
             <Phone size={16} className="text-gray-300" />
             <span className="text-sm text-gray-300">{label}</span>
           </div>
-          
-          {isPrimary && (
-            <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-400 rounded-full">
-              {t("mainNumber")}
-            </span>
-          )}
         </div>
 
         <div className="mb-3">
@@ -161,20 +155,9 @@ export default function PhoneDrawer() {
       <DrawerContent className="border glass-drawer max-h-[80vh]">
         <div className="w-full px-10 pb-10">
           {/* هدر ساده */}
-          <div className="flex items-center  justify-between mb-4">
-            <div className="flex items-center gap-3">
-              
-              <div>
-                <h1 className="font-bold text-white">
-                  {language === "ar"
-                    ? selectedBranch?.name_ar
-                    : language === "fa"
-                    ? selectedBranch?.name_fa
-                    : selectedBranch?.name_en}
-                </h1>
-                <p className="text-sm text-gray-400">{t("contactInfo")}</p>
-              </div>
-            </div>
+          <div className="flex items-center justify-center mb-4">
+              <p className="text-white font-medium">{t("contactInfo")}</p>
+            
           </div>
 
           {/* لیست شماره‌ها */}

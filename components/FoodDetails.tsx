@@ -73,14 +73,14 @@ export default function FoodDetails({
       return language === "fa"
         ? "نمایش کمتر"
         : language === "ar"
-        ? "عرض أقل"
-        : "Show Less";
+          ? "عرض أقل"
+          : "Show Less";
     } else {
       return language === "fa"
         ? "مشاهده بیشتر"
         : language === "ar"
-        ? "عرض المزيد"
-        : "Read More";
+          ? "عرض المزيد"
+          : "Read More";
     }
   };
 
@@ -164,7 +164,7 @@ export default function FoodDetails({
             </div>
 
             {/* بخش اطلاعات */}
-            <div className="space-y-8 px-6">
+            <div className="space-y-5 px-6">
               {/* عنوان و قیمت */}
               <div>
                 <div className="mb-3">
@@ -190,21 +190,25 @@ export default function FoodDetails({
                       </div>
                     )}
                   </div>
-                  <div className="flex justify-between items-center">
-                    <h1 className="text-[26px] font-bold">
+                  <div className="flex justify-between items-center text-white/80">
+                    <h1 className="text-2xl font-bold">
                       {getFoodName(food)}
                     </h1>
-                    <div className={`${language === 'en' ? 'text-right' : 'text-left'}`}>
-                    <Badge
-                      variant={food.is_available ? "secondary" : "destructive"}
-                      className=""
+                    <div
+                      className={`${language === "en" ? "text-right" : "text-left"}`}
                     >
-                      {food.is_available ? t("available") : t("notAvailable")}
-                    </Badge>
-                    <div className="text-sm font-bold text-yellow-300">
-                      {food.price.toLocaleString()} {t("price")}
+                      <Badge
+                        variant={
+                          food.is_available ? "secondary" : "destructive"
+                        }
+                        className=""
+                      >
+                        {food.is_available ? t("available") : t("notAvailable")}
+                      </Badge>
+                      <div className="text-sm font-bold text-yellow-300">
+                        {food.price.toLocaleString()} {t("price")}
+                      </div>
                     </div>
-                  </div>
                   </div>
                 </div>
 
@@ -231,7 +235,6 @@ export default function FoodDetails({
                   )}
 
                   {food.tags && (
-
                     <Badge
                       // variant="secondary"
                       className="flex items-center rounded-full border border-white/10 bg-amber-300/15 gap-1 text-[12px]"
@@ -244,18 +247,18 @@ export default function FoodDetails({
               </div>
 
               {/* توضیحات */}
-              <div className="prose max-w-none">
-                <h1 className="font-bold text-lg my-1">
+              <div className="prose max-w-none text-white/80">
+                <h1 className="font-bold text-md">
                   {language === "fa"
-                    ? "توضیحات"
+                    ? "توضیحات:"
                     : language === "ar"
-                    ? "الوصف"
-                    : "Description"}
+                      ? "الوصف:"
+                      : "Description:"}
                 </h1>
-                <div className="relative">
+                <div className="relative ">
                   <p
-                    className={`leading-tight text-[15px] transition-all duration-300 ${
-                      isExpanded ? "line-clamp-none" : "line-clamp-5"
+                    className={`leading-tight text-[13px] transition-all duration-300 ${
+                      isExpanded ? "line-clamp-none" : "line-clamp-4"
                     }`}
                   >
                     {getFoodDescription(food)}
@@ -263,38 +266,37 @@ export default function FoodDetails({
 
                   {/* دکمه نمایش بیشتر/کمتر */}
                   {getFoodDescription(food).length > 200 && (
-                  <button
-                    onClick={toggleDescription}
-                    className="flex items-center gap-1.5 mt-2 text-green-300 hover:text-green-200 font-medium transition-colors"
-                  >
-                    {isExpanded ? (
-                      <>
-                        <ChevronUp size={16} />
-                        {t("showLess")}
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown size={16} />
-                        {t("showMore")}
-                      </>
-                    )}
-                  </button>
-                )}
+                    <button
+                      onClick={toggleDescription}
+                      className="flex items-center gap-1.5 mt-2 text-green-300 hover:text-green-200 font-medium transition-colors"
+                    >
+                      {isExpanded ? (
+                        <>
+                          <ChevronUp size={16} />
+                          {t("showLess")}
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown size={16} />
+                          {t("showMore")}
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
 
               {/* مشخصات فنی */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-white/80">
+
                 {food.cooking_time && (
-                  <div className="bg-white/5 rounded-2xl p-3 border border-white/10 flex py-3">
-                    <div className="p-4 text-gray-300">
-                      <Clock className="" size={20} />
+                  <div className="flex justify-center items-center p-2 space-x-3 bg-white/5 rounded-md border border-white/10">
+                    <div className="">
+                      <Clock className="" size={18} />
                     </div>
-                    <div className="text-gray-300">
-                      <p className="text-[13px]">
-                        {t("cookingTime")}
-                      </p>
-                      <p className="font-medium">
+                    <div className="">
+                      <p className="text-xs">{t("cookingTime")}</p>
+                      <p className="font-bold text-sm">
                         {food.cooking_time} {t("minutes")}
                       </p>
                     </div>
@@ -302,13 +304,13 @@ export default function FoodDetails({
                 )}
 
                 {food.serves && (
-                  <div className="bg-white/5 rounded-2xl p-3 border border-white/10 flex py-3">
-                    <div className="p-4">
-                      <Users className="" size={20} />
+                  <div className="flex justify-center items-center p-2 space-x-3 bg-white/5 rounded-md border border-white/10">
+                    <div className="">
+                      <Users className="" size={18} />
                     </div>
-                    <div>
-                      <p className="text-[13px]">{t("serves")}</p>
-                      <p className="font-medium">
+                    <div className="">
+                      <p className="text-xs">{t("serves")}</p>
+                      <p className="font-bold text-sm">
                         {food.serves} {t("people")}
                       </p>
                     </div>
@@ -316,8 +318,23 @@ export default function FoodDetails({
                 )}
               </div>
 
+              <div className="text-white/80">
+                <h1 className="font-bold text-md my-1">
+                  {language === "fa"
+                    ? "مواد تشکیل‌دهنده:"
+                    : language === "ar"
+                      ? "المكونات:"
+                      : "Ingredients:"}
+                </h1>
+                {getIngredients(food) && (
+                  <p className="text-gray-200 text-[13px] leading-tight">
+                    {getIngredients(food).toString()}
+                  </p>
+                )}
+              </div>
+
               {/* سیستم امتیازدهی */}
-              <div className="mb-6">
+              <div className="mb-6 text-white/80">
                 <RatingSystem
                   foodId={food.id}
                   onRatingStatsChange={handleRatingStatsChange}

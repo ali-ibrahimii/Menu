@@ -20,6 +20,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { Branch } from "@/types/index";
 import { Badge } from "../ui/badge";
+// import type { BadgeVariant } from "../ui/badge";
 
 export default function ClockDrawer() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -100,7 +101,7 @@ export default function ClockDrawer() {
     const totalMinutes = TOTAL_HOURS * 60;
     const percentage = Math.min(
       100,
-      (currentTotalMinutes / totalMinutes) * 100
+      (currentTotalMinutes / totalMinutes) * 100,
     );
 
     setRemainingTime({
@@ -114,7 +115,6 @@ export default function ClockDrawer() {
 
   // به‌روزرسانی زمان هر ثانیه
   useEffect(() => {
-    calculateRemainingTime(); // محاسبه اولیه
     const interval = setInterval(calculateRemainingTime, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -132,34 +132,11 @@ export default function ClockDrawer() {
       return {
         message:
           language === "en"
-            ? "Closed - Opens at 8:00 AM"
+            ? "Closed"
             : language === "ar"
-            ? "مغلق - يفتح الساعة 8:00 صباحًا"
-            : "بسته است - ساعت ۸:۰۰ صبح باز می‌شود",
+              ? "مغلق"
+              : "بسته است",
         color: "destructive",
-      };
-    }
-
-    // پیام‌های مختلف بر اساس زمان باقی‌مانده
-    if (remainingTime.hours >= 5) {
-      return {
-        message:
-          language === "en"
-            ? "Open - Plenty of time!"
-            : language === "ar"
-            ? "مفتوح - الكثير من الوقت!"
-            : "باز است - زمان زیادی باقی است!",
-        color: "default",
-      };
-    } else if (remainingTime.hours >= 1) {
-      return {
-        message:
-          language === "en"
-            ? "Open - Last orders soon!"
-            : language === "ar"
-            ? "مفتوح - الطلبات الأخيرة قريبًا!"
-            : "باز است - سفارش‌های پایانی به زودی!",
-        color: "secondary",
       };
     } else {
       return {
@@ -167,8 +144,8 @@ export default function ClockDrawer() {
           language === "en"
             ? "Open - Closing soon!"
             : language === "ar"
-            ? "مفتوح - إغلاق قريبًا!"
-            : "باز است - به زودی بسته می‌شود!",
+              ? "مفتوح - إغلاق قريبًا!"
+              : "باز است - به زودی بسته می‌شود!",
         color: "destructive",
       };
     }
@@ -184,14 +161,14 @@ export default function ClockDrawer() {
       language === "en"
         ? "Hours Remaining"
         : language === "ar"
-        ? "الساعات المتبقية"
-        : "ساعت باقی‌مانده",
+          ? "الساعات المتبقية"
+          : "ساعت باقی‌مانده",
     openHours:
       language === "en"
         ? "Open Hours"
         : language === "ar"
-        ? "ساعات العمل"
-        : "ساعت‌های کاری",
+          ? "ساعات العمل"
+          : "ساعت‌های کاری",
     address:
       language === "en" ? "Address" : language === "ar" ? "العنوان" : "آدرس",
     phone1:
@@ -217,17 +194,16 @@ export default function ClockDrawer() {
         dir={language === "en" ? "ltr" : "rtl"}
         className="h-auto max-h-[80vh] glass-drawer"
       >
-        <div className="flex-1 space-y-5 overflow-y-auto px-2 pb-16 pt-4">
+        <div className="flex-1 space-y-4 overflow-y-auto px-2 pb-12">
           {/* هدر با نام شعبه */}
-          <div className="flex flex-col items-center mt-2 space-y-2">
+          <div className="flex flex-col items-center space-y-2">
             <h1 className="font-bold text-xl text-center">
-              {language === "ar"
-                ? selectedBranch?.name_ar
-                : language === "fa"
-                ? selectedBranch?.name_fa
-                : selectedBranch?.name_en}
+              {translationsMap.openHours}
             </h1>
-            <Badge variant={statusInfo.color as any} className="text-xs">
+            <Badge
+              variant={statusInfo.color as "default" | "secondary" | "destructive" | "outline"}
+              className="text-xs"
+            >
               {statusInfo.message}
             </Badge>
           </div>
@@ -254,15 +230,15 @@ export default function ClockDrawer() {
                     {formatTime(
                       remainingTime.hours,
                       remainingTime.minutes,
-                      remainingTime.seconds
+                      remainingTime.seconds,
                     )}
                   </div>
                   <p className="text-sm text-gray-300">
                     {language === "en"
                       ? "Until closing at 11:00 PM"
                       : language === "ar"
-                      ? "حتى الإغلاق الساعة 11:00 مساءً"
-                      : "تا ساعت ۲۳:۰۰ (۱۱ شب)"}
+                        ? "حتى الإغلاق الساعة 11:00 مساءً"
+                        : "تا ساعت ۲۳:۰۰ (۱۱ شب)"}
                   </p>
                 </>
               ) : (
@@ -274,8 +250,8 @@ export default function ClockDrawer() {
                     {language === "en"
                       ? "Opens tomorrow at 8:00 AM"
                       : language === "ar"
-                      ? "يفتح غدًا الساعة 8:00 صباحًا"
-                      : "فردا ساعت ۸:۰۰ صبح باز می‌شود"}
+                        ? "يفتح غدًا الساعة 8:00 صباحًا"
+                        : "فردا ساعت ۸:۰۰ صبح باز می‌شود"}
                   </p>
                 </>
               )}
@@ -309,38 +285,44 @@ export default function ClockDrawer() {
               {translationsMap.openHours}
             </h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <div dir={language === 'fa' || 'ar' ? "ltr" : ""} className="bg-white/5 rounded-lg p-3 text-center">
+              <div
+                dir={language === "fa" || "ar" ? "ltr" : ""}
+                className="bg-white/5 rounded-lg p-3 text-center"
+              >
                 <div className="font-semibold">
                   {language === "en"
                     ? "Every Day"
                     : language === "ar"
-                    ? "كل يوم"
-                    : "هر روز"}
+                      ? "كل يوم"
+                      : "هر روز"}
                 </div>
-                <div className="text-gray-300 mt-1" >8:00 AM - 11:00 PM</div>
+                <div className="text-gray-300 mt-1">8:00 AM - 12:00 PM</div>
                 <div className="text-xs text-gray-400 mt-1">
                   {language === "en"
-                    ? "15 hours"
+                    ? "16 hours"
                     : language === "ar"
-                    ? "15 ساعة"
-                    : "۱۵ ساعت"}
+                      ? "16 ساعة"
+                      : "۱۶ ساعت"}
                 </div>
               </div>
-              <div dir={language === 'fa' || 'ar' ? "ltr" : ""} className="bg-white/5 rounded-lg p-3 text-center">
+              <div
+                dir={language === "fa" || "ar" ? "ltr" : ""}
+                className="bg-white/5 rounded-lg p-3 text-center"
+              >
                 <div className="font-semibold">
                   {language === "en"
                     ? "Kitchen closes"
                     : language === "ar"
-                    ? "المطبخ يغلق"
-                    : "آشپزخانه می‌بندد"}
+                      ? "المطبخ يغلق"
+                      : "آشپزخانه می‌بندد"}
                 </div>
-                <div className="text-gray-300 mt-1">10:30 PM</div>
+                <div className="text-gray-300 mt-1">11:30 PM</div>
                 <div className="text-xs text-gray-400 mt-1">
                   {language === "en"
                     ? "Last order time"
                     : language === "ar"
-                    ? "آخر وقت طلب"
-                    : "آخرین زمان سفارش"}
+                      ? "آخر وقت طلب"
+                      : "آخرین زمان سفارش"}
                 </div>
               </div>
             </div>
