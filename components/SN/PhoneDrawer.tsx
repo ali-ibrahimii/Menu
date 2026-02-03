@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Phone, Copy, MessageCircle, Check, X } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -52,9 +48,9 @@ export default function PhoneDrawer() {
         secondaryNumber: "دوم",
         notAvailable: "ندارد",
         close: "بستن",
-      }
+      },
     };
-    
+
     return translations[language]?.[key] || translations.en[key] || key;
   };
 
@@ -92,12 +88,12 @@ export default function PhoneDrawer() {
   };
 
   // کامپوننت کارت تلفن
-  const PhoneCard = ({ 
-    phoneNumber, 
-    label, 
-    isPrimary = false 
-  }: { 
-    phoneNumber: string | undefined | null; 
+  const PhoneCard = ({
+    phoneNumber,
+    label,
+    isPrimary = false,
+  }: {
+    phoneNumber: string | undefined | null;
     label: string;
     isPrimary?: boolean;
   }) => {
@@ -126,8 +122,18 @@ export default function PhoneDrawer() {
             onClick={() => handlePhoneCall(phoneNumber)}
             className="flex-1 text-white/80 py-2 px-2 rounded-sm bg-gray-500/20 text-sm flex items-center justify-center gap-1 transition"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+              />
             </svg>
             <span>{t("call")}</span>
           </button>
@@ -148,7 +154,7 @@ export default function PhoneDrawer() {
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <DrawerTrigger asChild>
         <button className="bg-white/5 rounded-full p-3 border border-white/10">
-          <Phone size={20} className="text-white" />
+          <Phone size={20} className="" />
         </button>
       </DrawerTrigger>
 
@@ -156,8 +162,9 @@ export default function PhoneDrawer() {
         <div className="w-full px-10 pb-10">
           {/* هدر ساده */}
           <div className="flex items-center justify-center mb-4">
-              <p className="text-white font-medium">{t("contactInfo")}</p>
-            
+            <h1 className="font-bold text-xl text-center">
+              {t("contactInfo")}
+            </h1>
           </div>
 
           {/* لیست شماره‌ها */}
@@ -180,15 +187,17 @@ export default function PhoneDrawer() {
                     <Phone size={18} className="text-gray-400" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">{t("secondaryNumber")}</p>
-                    <p className="text-xs text-gray-500 mt-1">{t("notAvailable")}</p>
+                    <p className="text-sm text-gray-400">
+                      {t("secondaryNumber")}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {t("notAvailable")}
+                    </p>
                   </div>
                 </div>
               </div>
             )}
           </div>
-
-          
         </div>
       </DrawerContent>
     </Drawer>

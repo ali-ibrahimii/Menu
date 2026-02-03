@@ -337,7 +337,7 @@ export default function HomeContent() {
 
       {/* Main Content Card */}
       <div className="absolute bottom-0 w-full z-20 glass-card">
-        <div className="glass-check-status absolute left-0 top-20">
+        <div className="bg-white/5 rounded-r-lg p-2 border border-white/10 absolute left-0 top-20">
           <CheckRestaurantStatus />
         </div>
 

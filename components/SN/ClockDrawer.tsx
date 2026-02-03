@@ -142,11 +142,11 @@ export default function ClockDrawer() {
       return {
         message:
           language === "en"
-            ? "Open - Closing soon!"
+            ? "Open"
             : language === "ar"
-              ? "مفتوح - إغلاق قريبًا!"
-              : "باز است - به زودی بسته می‌شود!",
-        color: "destructive",
+              ? "مفتوح!"
+              : "باز است",
+        color: "secondary",
       };
     }
   };

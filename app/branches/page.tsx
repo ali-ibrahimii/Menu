@@ -208,7 +208,7 @@ export default function BranchesPage() {
                   }}
                 >
                   {/* عکس پس‌زمینه */}
-                  <div className="absolute inset-0">
+                  <div className="absolute inset-0 border border-white/10 rounded-3xl overflow-hidden">
                     <Image
                       src={currentImage}
                       alt={`${branch.name_fa} - عکس ${currentIndex + 1}`}
