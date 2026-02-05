@@ -30,8 +30,8 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl">
       <body>
-        <LanguageProvider>
-          <BranchProvider>
+          <LanguageProvider>
+        <BranchProvider>
             <AdminAuthProvider>
               <Toaster position="top-center" />
               {children}

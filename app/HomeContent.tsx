@@ -242,7 +242,7 @@ export default function HomeContent() {
   return (
     <main
       dir={language === "en" ? "ltr" : "rtl"}
-      className="relative w-screen min-h-screen mx-auto overflow-hidden"
+      className="relative min-h-screen overflow-hidden"
     >
       {/* Background Image با یک انیمیشن */}
       <div className="min-h-full w-screen fixed inset-0 -z-10">
