@@ -12,7 +12,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fa" dir="rtl">
-      <body>
+      <body className"h-full w-full">
           <LanguageProvider>
         <BranchProvider>
             <AdminAuthProvider>
