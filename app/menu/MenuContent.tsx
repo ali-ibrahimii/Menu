@@ -18,6 +18,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import Link from "next/link";
 import { useBranch } from "@/contexts/BranchContext";
 import Loader from "@/components/Loader";
+import Image from "next/image";
 
 export default function Home() {
   const id = useId();
@@ -62,7 +63,7 @@ export default function Home() {
       food.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
       food.description_en?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       food.description_ar?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      food.description_fa?.toLowerCase().includes(searchTerm.toLowerCase())
+      food.description_fa?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // گروه‌بندی غذاهای فیلتر شده
@@ -71,7 +72,7 @@ export default function Home() {
   // گرفتن دسته‌بندی‌های فعال (آنهایی که غذا دارند)
   const getActiveCategories = () => {
     const uniqueCategorySlugs = Array.from(
-      new Set(foods.map((food) => food.category?.trim()).filter(Boolean))
+      new Set(foods.map((food) => food.category?.trim()).filter(Boolean)),
     );
 
     return categories
@@ -119,7 +120,7 @@ export default function Home() {
       if (indexB === -1) return -1;
 
       return indexA - indexB;
-    }
+    },
   );
 
   // گرفتن نام دسته‌بندی
@@ -128,8 +129,8 @@ export default function Home() {
       return language === "en"
         ? "Uncategorized"
         : language === "ar"
-        ? "غير مصنف"
-        : "دسته‌بندی نشده";
+          ? "غير مصنف"
+          : "دسته‌بندی نشده";
     }
 
     const category = categories.find((cat) => {
@@ -279,7 +280,7 @@ export default function Home() {
           // غذاهایی که branch_id برابر با شعبه انتخاب شده دارند
           // یا غذاهایی که branch_id ندارند (برای همه شعب)
           foodsQuery = foodsQuery.or(
-            `branch_id.eq.${selectedBranch.id},branch_id.is.null`
+            `branch_id.eq.${selectedBranch.id},branch_id.is.null`,
           );
         } else {
           // اگر شعبه انتخاب نشده، فقط غذاهایی که branch_id ندارند
@@ -351,7 +352,7 @@ export default function Home() {
           const foodCategory = food.category?.trim();
           const selected = selectedCategory?.trim();
           return foodCategory === selected;
-        })
+        }),
       );
     } else {
       setFilteredFoods(foods);
@@ -375,10 +376,18 @@ export default function Home() {
   }
 
   return (
-    <main className="w-full min-h-screen px-6 py-2 pt-5 overflow-y-auto overscroll-none touch-pan-y">
-      <div className="w-full min-h-screen fixed inset-0 -z-10">
-        <div className="absolute top-0 bg-black/10 backdrop-blur-[1px] w-full h-full"></div>
-        <img src="/bg6.jpg" alt="" className="w-full min-h-screen" />
+    <main className="w-full min-h-screen px-6 bg-black py-2 pt-5 overflow-y-auto overscroll-none touch-pan-y">
+      <div className="min-h-[110vh] w-screen fixed inset-0 -z-10"
+      >
+        <div className="absolute top-0 bg-black/10 backdrop-blur-[1px] w-full h-full"
+        />
+        <Image
+          fill
+          priority
+          src="/bg6.jpg"
+          alt=""
+          className="object-cover"
+        />
       </div>
 
       {/* دکمه برگشت به صفحه ورودی و مینو */}
@@ -571,8 +580,8 @@ export default function Home() {
               language === "en"
                 ? selectedBranch.name_en || selectedBranch.name_fa
                 : language === "ar"
-                ? selectedBranch.name_ar || selectedBranch.name_fa
-                : selectedBranch.name_fa
+                  ? selectedBranch.name_ar || selectedBranch.name_fa
+                  : selectedBranch.name_fa
             }`}
         </p>
         © 2025 Watandar Restaurant

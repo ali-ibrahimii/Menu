@@ -5,10 +5,31 @@
 
 /* globals.css یا index.css */
 @font-face {
-  font-family: "Vazirmatn";
-  src: url("../public/fonts/Peristiwa.otf") format("woff2");
+  font-family: "Shekasteh";
+  src: url("../public/fonts/Shekasteh.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --sat: env(safe-area-inset-top);
+  --sar: env(safe-area-inset-right);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+}
+
+/* برای رفع مشکل ارتفاع در آیفون */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* رفع مشکل overscroll در iOS */
+html, body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* html, body, #__next {
@@ -432,7 +453,8 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
+  /* body {
     @apply bg-background text-foreground;
-  }
+    font-family: "Shekasteh", system-ui, -apple-system, sans-serif;
+  } */
 }

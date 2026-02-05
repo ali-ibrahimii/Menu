@@ -242,10 +242,10 @@ export default function HomeContent() {
   return (
     <main
       dir={language === "en" ? "ltr" : "rtl"}
-      className="relative min-h-screen overflow-hidden"
+      className="relative w-screen min-h-screen mx-auto overflow-hidden"
     >
       {/* Background Image با یک انیمیشن */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
+      <div className="min-h-full w-screen fixed inset-0 -z-10">
         {/* تصویر اصلی با انیمیشن */}
         <div
           className={`absolute inset-0 transition-all duration-2000 ease-[cubic-bezier(0.4,0,0.2,1)] ${
@@ -353,7 +353,7 @@ export default function HomeContent() {
               />
             </div>
             <div className="text-center">
-              <h1 className="text-2xl font-bold mb-2">{t("restaurantName")}</h1>
+              <h1 className="text-2xl font-bold font-[Shekasteh] mb-2">{t("restaurantName")}</h1>
               {/* <h1 className="text-lg">
                 {language === "ar"
                   ? selectedBranch.name_ar
