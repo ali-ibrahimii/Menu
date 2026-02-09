@@ -377,17 +377,9 @@ export default function Home() {
 
   return (
     <main className="w-full min-h-screen px-6 bg-black py-2 pt-5 overflow-y-auto overscroll-none touch-pan-y">
-      <div className="min-h-[110vh] w-screen fixed inset-0 -z-10"
-      >
-        <div className="absolute top-0 bg-black/10 backdrop-blur-[1px] w-full h-full"
-        />
-        <Image
-          fill
-          priority
-          src="/bg6.jpg"
-          alt=""
-          className="object-cover"
-        />
+      <div className="min-h-[110vh] w-screen fixed inset-0 -z-10">
+        <div className="absolute top-0 bg-black/10 backdrop-blur-[1px] w-full h-full" />
+        <Image fill priority src="/bg6.jpg" alt="" className="object-cover" />
       </div>
 
       {/* دکمه برگشت به صفحه ورودی و مینو */}
@@ -616,10 +608,16 @@ function FoodCard({
       {/* شروع عکس کارت غذا */}
       <div className="w-4/12 h-full rounded-2xl p-[1.5px] bg-[linear-gradient(130deg,#d62828_0%,transparent_35%),linear-gradient(-45deg,#d62828_0%,transparent_35%)]">
         <div className="w-full h-full rounded-[16px] overflow-hidden">
-          <img
+          <Image
             src={food.image_url}
             alt={getFoodName(food)}
-            className="object-cover w-full h-full"
+            width={120}
+            height={120}
+            className="w-full h-full object-cover"
+            quality={85}
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAADAAQDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+            unoptimized={false}
           />
         </div>
       </div>

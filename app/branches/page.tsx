@@ -163,7 +163,7 @@ export default function BranchesPage() {
       className="relative min-h-screen overflow-hidden "
     >
       <div className="fixed inset-0 -z-10 overflow-hidden w-screen h-screen">
-        <img src="/bg6.jpg" className="h-full w-full" />
+        <Image width={150} height={150} src="/bg6.jpg" className="h-full w-full" alt="background" />
       </div>
       <div className="z-10 px-4 py-6">
         <div className="max-w-6xl mx-auto">
@@ -319,7 +319,7 @@ export default function BranchesPage() {
           </div> */}
         </div>
       </div>
-      <div className="bg-black/50 backdrop-blur-[1px] inset-0 -z-10 absolute top-0 w-full h-full left-0"></div>
+      <div className="bg-black/20 backdrop-blur-[2px] inset-0 -z-10 absolute top-0 w-full h-full left-0"></div>
     </div>
   );
 }
