@@ -160,11 +160,8 @@ export default function BranchesPage() {
   return (
     <div
       dir={language === "en" ? "ltr" : "rtl"}
-      className="relative min-h-screen overflow-hidden "
+      className="relative min-h-screen overflow-hidden bg-linear-to-br from-gray-700 via-gray-800 to-gray-800"
     >
-      <div className="fixed inset-0 -z-10 overflow-hidden w-screen h-screen">
-        <Image width={150} height={150} src="/bg6.jpg" className="h-full w-full" alt="background" />
-      </div>
       <div className="z-10 px-4 py-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-white">

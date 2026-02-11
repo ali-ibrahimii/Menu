@@ -79,7 +79,7 @@ html, body {
 
 .glass-card {
   @apply inline-flex items-center py-10 justify-center rounded-t-[55px] 
-         text-white transition-transform duration-150 ease-in-out overflow-visible;
+          transition-transform duration-150 ease-in-out overflow-visible;
   background: linear-gradient(
     to top,
     rgba(15, 23, 42, 0.9) 0%,
@@ -95,21 +95,147 @@ html, body {
   backdrop-filter: blur(8px) saturate(120%);
 }
 
-.glass-card-menu {
-  @apply inline-flex items-center justify-center rounded-2xl 
-         text-white transition-transform duration-150 ease-in-out overflow-hidden;
+.glass-card-gradient {
+  @apply relative rounded-2xl overflow-hidden 
+         transition-all duration-500 hover:scale-[1.02];
   
-
-  box-shadow: inset 0 1px 3px 1px rgba(255, 255, 255, 0.12),
-    0 0 0 0 rgba(255, 255, 255, 0.12);
-
-  -webkit-backdrop-filter: blur(2px) saturate(120%);
-  backdrop-filter: blur(2px) saturate(120%);
+  /* پس‌زمینه شیشه‌ای */
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px);
+  
+  /* حاشیه گرادیان */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 2rem;
+    padding: 2px;
+    background: linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.4),
+      rgba(255, 255, 255, 0.1),
+      transparent,
+      rgba(0, 0, 0, 0.1)
+    );
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  
+  /* سایه پیچیده */
+  box-shadow: 
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 10px 30px -10px rgba(0, 0, 0, 0.2),
+    0 20px 60px -30px rgba(0, 0, 0, 0.3),
+    0 30px 60px -30px rgba(0, 0, 0, 0.25),
+    
+    /* سایه داخلی برای عمق */
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
 }
+
+
+
+.glass-card-3d {
+  @apply relative rounded-2xl transition-all duration-500 
+         hover:-translate-y-2 hover:shadow-2xl overflow-hidden;
+  
+  /* افکت سه‌بعدی با چند لایه سایه */
+  box-shadow: 
+    /* لایه ۱: سایه نزدیک */
+    0 1px 1px rgba(0, 0, 0, 0.08),
+    
+    /* لایه ۲: عمق متوسط */
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    
+    /* لایه ۳: عمق زیاد */
+    0 1px 4px rgba(0, 0, 0, 0.2),
+    
+    /* لایه ۴: سایه دور */
+    0 3px 15px rgba(0, 0, 0, 0.2),
+    
+    /* هایلایت بالایی برای حس برجستگی */
+    0 -2px 4px rgba(255, 255, 255, 0.01),
+    
+    /* سایه داخلی ملایم */
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  
+  backdrop-filter: blur(10px);
+  /* border: 1=px solid rgba(255, 255, 255, 0.15); */
+  
+  /* افکت درخشان در هاور */
+  &:hover::after {
+    opacity: 1;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.5),
+      transparent
+    );
+    border-radius: 2rem;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+  }
+}
+
+
+
+/* در globals.css */
+.glass-card-elevated {
+  @apply inline-flex items-center justify-center rounded-2xl 
+         transition-all duration-300 ease-out overflow-hidden;
+  
+  /* سایه‌های چندلایه برای عمق */
+  box-shadow: 
+    /* سایه بیرونی ملایم */
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    
+    /* سایه داخلی برای برجسته‌نمایی */
+    inset 0 2px 4px 0 rgba(255, 255, 255, 0.1),
+    
+    /* هایلایت بالایی */
+    0 -2px 10px -2px rgba(255, 255, 255, 0.3),
+    
+    /* سایه زیرین برای حس شناور بودن */
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* افکت شیشه‌ای */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  
+  backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+
 
 .glass-phone-card {
   @apply flex items-center justify-center w-full space-x-2.5 rounded-2xl 
-         text-white transition-transform duration-150 ease-in-out overflow-hidden;
+          transition-transform duration-150 ease-in-out overflow-hidden;
   
 
   box-shadow: inset 0 1px 3px 1px rgba(255, 255, 255, 0.12),
@@ -120,7 +246,7 @@ html, body {
 }
 
 .glass-cart-btn {
-  @apply inline-flex items-center justify-center rounded-md 
+  @apply inline-flex items-center text-foreground border border-black/5 dark:text-gray-200 justify-center rounded-md 
          transition-transform duration-150 ease-in-out overflow-hidden;
   
 
@@ -146,12 +272,12 @@ html, body {
 }
 
 .glass-category {
-  @apply inline-flex items-center text-white justify-center rounded-full 
+  @apply inline-flex items-center text-black dark:text-gray-200 justify-center rounded-full 
           transition-transform duration-150 ease-in-out overflow-hidden;
   
 
-  box-shadow: inset 0 1px 1px 1px rgba(255, 255, 255, 0.12),
-    0 0 0 0 rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 1px 1px rgba(0, 0, 0, 0.12),
+    0 0 0 0 rgba(0, 0, 0, 0.12);
 
   -webkit-backdrop-filter: blur(1px) saturate(120%);
   backdrop-filter: blur(1px) saturate(120%);
@@ -181,7 +307,7 @@ html, body {
 
 .glass-side {
   @apply inline-flex items-center py-10 justify-center border-none 
-         text-white transition-transform duration-150 ease-in-out overflow-visible;
+         transition-transform duration-150 ease-in-out overflow-visible;
   background: linear-gradient(
     to top,
     rgba(15, 23, 42, 0.9) 0%,
@@ -199,7 +325,7 @@ html, body {
 
 .glass-drawer {
   @apply inline-flex items-center justify-center border-none rounded-t-[44px] 
-         text-white/80 transition-transform duration-150 ease-in-out overflow-visible;
+         transition-transform duration-150 ease-in-out overflow-visible;
   background: linear-gradient(
     to top,
     rgba(15, 23, 42, 0.9) 0%,
@@ -215,7 +341,7 @@ html, body {
 
 .glass-rate-card {
   @apply items-center justify-center rounded-2xl 
-         text-white transition-transform duration-150 ease-in-out overflow-hidden;
+         transition-transform duration-150 ease-in-out overflow-hidden;
   background: linear-gradient(
     to top,
     rgba(15, 23, 42, 0.9) 0%,

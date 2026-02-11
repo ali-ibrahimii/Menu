@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useBranch } from "@/contexts/BranchContext";
 import Loader from "@/components/Loader";
 import Image from "next/image";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Home() {
   const id = useId();
@@ -376,12 +377,7 @@ export default function Home() {
   }
 
   return (
-    <main className="w-full min-h-screen px-6 bg-black py-2 pt-5 overflow-y-auto overscroll-none touch-pan-y">
-      <div className="min-h-[110vh] w-screen fixed inset-0 -z-10">
-        <div className="absolute top-0 bg-black/10 backdrop-blur-[1px] w-full h-full" />
-        <Image fill priority src="/bg6.jpg" alt="" className="object-cover" />
-      </div>
-
+    <main className="w-full min-h-screen px-5 dark:bg-[#191919] dark:text-gray-200 py-2 pt-5 overflow-y-auto overscroll-none touch-pan-y">
       {/* دکمه برگشت به صفحه ورودی و مینو */}
       <div
         className={`text-3xl font-bold flex justify-between items-center ${
@@ -389,11 +385,11 @@ export default function Home() {
         }`}
         dir={language === "en" ? "ltr" : "rtl"}
       >
-        <h1 className={`text-3xl font-bold text-gray-200`}>{t("menu")}</h1>
+        <h1 className={`text-3xl font-bold `}>{t("menu")}</h1>
 
         <Link
           href={"/"}
-          className="active:scale-95 glass-category-default text-white p-2"
+          className="active:scale-95 glass-category-default  p-2"
         >
           <ChevronLeft
             size={20}
@@ -410,7 +406,7 @@ export default function Home() {
           <div dir={language === "en" ? "ltr" : "rtl"} className="relative">
             <Input
               id={id}
-              className="peer ps-10 pe-9 py-[20px] text-gray-200 focus:text-gray-200 glass-category-default border-none text-md"
+              className="peer ps-10 pe-9 py-[20px]  dark:text-gray-200 dark:focus:text-gray-200 rounded-full text-md"
               placeholder={t("search")}
               type="search"
               value={searchTerm}
@@ -435,9 +431,10 @@ export default function Home() {
             </button>
           </div>
         </div>
-        <div className="flex text-white">
+        <div className="flex">
           <LanguageSwitcher />
           <CartDrawer />
+          <ThemeToggle />
         </div>
       </div>
 
@@ -505,7 +502,7 @@ export default function Home() {
                   />
                 ))
               ) : (
-                <div className="col-span-full border text-center py-8 text-gray-200">
+                <div className="col-span-full border text-center py-8 ">
                   {t("noFoodInCategory")}
                 </div>
               )}
@@ -519,13 +516,13 @@ export default function Home() {
                 <div key={categorySlug} className="space-y-4">
                   {/* تیتر دسته‌بندی */}
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-gray-200">
+                    <h2 className="text-xl font-bold">
                       {getCategoryName(categorySlug)}
                     </h2>
                   </div>
 
                   {/* خط جداکننده */}
-                  <div className="h-px bg-linear-to-r from-transparent via-gray-300 to-transparent" />
+                  <div className="h-px bg-linear-to-r from-transparent via-black dark:via-gray-200 to-transparent" />
 
                   {/* کارت‌های غذا در این دسته‌بندی */}
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -565,7 +562,7 @@ export default function Home() {
         />
       )}
 
-      <div className="text-center text-gray-300 text-sm py-6 w-full">
+      <div className="text-center dark:text-gray-200 text-sm py-6 w-full">
         <p>
           {selectedBranch &&
             `${
@@ -602,7 +599,7 @@ function FoodCard({
     <div
       dir={`${language === "en" ? "ltr" : "rtl"}`}
       key={food.id}
-      className="relative flex items-center w-full glass-card-menu h-34  rounded-2xl hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer"
+      className="relative flex items-center w-full  glass-card-3d h-34  rounded-2xl hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer"
       onClick={() => handleFoodClick(food)}
     >
       {/* شروع عکس کارت غذا */}
@@ -626,13 +623,13 @@ function FoodCard({
       {/* شروع متن کارت غذا */}
       <div className="flex flex-col mx-3 w-8/12 overflow-hidden py-2">
         <div className="mb-5">
-          <h2 className="text-md font-bold text-gray-200 truncate">
+          <h2 className="text-md font-bold truncate">
             {getFoodName(food)}
           </h2>
 
           {/* مواد تشکیل دهنده */}
           {getIngredients(food) && (
-            <p className="text-gray-200 text-[12px] line-clamp-2 leading-4.5">
+            <p className="text-[12px] line-clamp-2 leading-4.5">
               {getIngredients(food).toString()}
             </p>
           )}

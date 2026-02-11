@@ -5,11 +5,12 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { Toaster } from "@/components/ui/sonner";
 import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 import { BranchProvider } from "@/contexts/BranchContext";
-import { icons } from "lucide-react";
+import { ThemeProvider } from "@/contexts/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "رستوران وطندار | منوی دیجیتال",
-  description: "منوی آنلاین رستوران وطندار مشهد | سفارش غذاهای ایرانی و بین‌المللی",
+  description:
+    "منوی آنلاین رستوران وطندار مشهد | سفارش غذاهای ایرانی و بین‌المللی",
   icons: {
     icon: "/logo1.png",
   },
@@ -29,16 +30,16 @@ export const metadata: Metadata = {
   ],
 
   robots: {
-  index: true, // ⭐ اجازه ایندکس شدن توسط گوگل
-  follow: true, // ⭐ اجازه دنبال کردن لینک‌ها
-  googleBot: {
-    index: true,
-    follow: true,
-    "max-video-preview": -1, // پیش‌نمایش ویدیو نامحدود
-    "max-image-preview": "large", // ⭐ تصویر بزرگ در نتایج جستجو
-    "max-snippet": -1, // نمایش snippet نامحدود
+    index: true, // ⭐ اجازه ایندکس شدن توسط گوگل
+    follow: true, // ⭐ اجازه دنبال کردن لینک‌ها
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1, // پیش‌نمایش ویدیو نامحدود
+      "max-image-preview": "large", // ⭐ تصویر بزرگ در نتایج جستجو
+      "max-snippet": -1, // نمایش snippet نامحدود
+    },
   },
-},
   // ...
 };
 
@@ -59,16 +60,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fa" dir="rtl">
+    <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body>
-        <LanguageProvider>
-          <BranchProvider>
-            <AdminAuthProvider>
-              <Toaster position="top-center" />
-              {children}
-            </AdminAuthProvider>
-          </BranchProvider>
-        </LanguageProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <BranchProvider>
+              <AdminAuthProvider>
+                <Toaster position="top-center" />
+                {children}
+              </AdminAuthProvider>
+            </BranchProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
