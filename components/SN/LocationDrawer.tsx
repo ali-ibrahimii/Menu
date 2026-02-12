@@ -86,7 +86,7 @@ export default function LocationDrawer() {
           {/* دکمه مسیریابی هوشمند */}
           <Button 
             onClick={handleNavigation}
-            className="w-full py-6 bg-gray-600/30 text-base font-medium"
+            className="w-full py-6 dark:bg-white text-base font-medium"
             size="lg"
           >
             {getButtonIcon()}

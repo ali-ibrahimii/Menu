@@ -197,11 +197,11 @@ export default function ClockDrawer() {
         <div className="flex-1 space-y-4 overflow-y-auto px-2 pb-12">
           {/* هدر با نام شعبه */}
           <div className="flex flex-col items-center space-y-2">
-            <h1 className="font-bold text-xl text-center">
+            <h1 className="font-bold text-xl text-center font-[BTitr]">
               {translationsMap.openHours}
             </h1>
             <Badge
-              variant={statusInfo.color as "default" | "secondary" | "destructive" | "outline"}
+              variant={"default"}
               className="text-xs"
             >
               {statusInfo.message}
@@ -209,15 +209,15 @@ export default function ClockDrawer() {
           </div>
 
           {/*  خط جدا کننده  */}
-          <div className="h-px bg-linear-to-r from-transparent via-white to-transparent" />
+          <div className="h-px bg-linear-to-r from-transparent dark:via-white via-black to-transparent" />
 
           {/* ساعت شمار معکوس */}
-          <div className="space-y-4 bg-white/5 rounded-xl p-4 border border-white/10">
+          <div className="space-y-4 dark:bg-white/5 bg-black/10 rounded-xl p-4 border dark:border-white/10 border-black/10">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold text-sm">
                 {translationsMap.hoursRemaining}
               </h3>
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="default" className="text-xs">
                 {translationsMap.today}
               </Badge>
             </div>
@@ -233,20 +233,20 @@ export default function ClockDrawer() {
                       remainingTime.seconds,
                     )}
                   </div>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm text-gray-800 dark:text-gray-300">
                     {language === "en"
-                      ? "Until closing at 11:00 PM"
+                      ? "Until closing at 11:30 PM"
                       : language === "ar"
-                        ? "حتى الإغلاق الساعة 11:00 مساءً"
-                        : "تا ساعت ۲۳:۰۰ (۱۱ شب)"}
+                        ? "حتى الإغلاق الساعة 11:30 مساءً"
+                        : "تا ساعت ۲۳:۳۰ (۱۱:۳۰ شب)"}
                   </p>
                 </>
               ) : (
                 <>
-                  <div className="text-3xl font-bold text-gray-400">
+                  <div className="text-3xl font-bold dark:text-gray-400 text-gray-800">
                     {translationsMap.closed}
                   </div>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm dark:text-gray-300 text-gray-800">
                     {language === "en"
                       ? "Opens tomorrow at 8:00 AM"
                       : language === "ar"
@@ -287,7 +287,7 @@ export default function ClockDrawer() {
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div
                 dir={language === "fa" || "ar" ? "ltr" : ""}
-                className="bg-white/5 rounded-lg p-3 text-center"
+                className="dark:bg-white/5 bg-black/10 rounded-lg p-3 text-center"
               >
                 <div className="font-semibold">
                   {language === "en"
@@ -296,8 +296,8 @@ export default function ClockDrawer() {
                       ? "كل يوم"
                       : "هر روز"}
                 </div>
-                <div className="text-gray-300 mt-1">8:00 AM - 12:00 PM</div>
-                <div className="text-xs text-gray-400 mt-1">
+                <div className="dark:text-gray-300 mt-1">8:00 AM - 12:00 PM</div>
+                <div className="text-xs dark:text-gray-400 mt-1">
                   {language === "en"
                     ? "16 hours"
                     : language === "ar"
@@ -307,7 +307,7 @@ export default function ClockDrawer() {
               </div>
               <div
                 dir={language === "fa" || "ar" ? "ltr" : ""}
-                className="bg-white/5 rounded-lg p-3 text-center"
+                className="dark:bg-white/5 bg-black/10 rounded-lg p-3 text-center"
               >
                 <div className="font-semibold">
                   {language === "en"
@@ -316,8 +316,8 @@ export default function ClockDrawer() {
                       ? "المطبخ يغلق"
                       : "آشپزخانه می‌بندد"}
                 </div>
-                <div className="text-gray-300 mt-1">11:30 PM</div>
-                <div className="text-xs text-gray-400 mt-1">
+                <div className="dark:text-gray-300 mt-1">11:30 PM</div>
+                <div className="text-xs dark:text-gray-400 mt-1">
                   {language === "en"
                     ? "Last order time"
                     : language === "ar"

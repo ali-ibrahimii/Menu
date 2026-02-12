@@ -30,6 +30,7 @@ import ClockDrawer from "@/components/SN/ClockDrawer";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useBranch } from "@/contexts/BranchContext";
 import Loader from "@/components/Loader";
+import ThemeToggle from "@/components/ThemeToggle";
 
 // گالری عکس‌های هر شعبه
 const branchImageGalleries: Record<string, string[]> = {
@@ -242,7 +243,7 @@ export default function HomeContent() {
   return (
     <main
       dir={language === "en" ? "ltr" : "rtl"}
-      className="relative min-h-screen overflow-hidden"
+      className="relative min-h-screen overflow-hidden text-white"
     >
       {/* Background Image با یک انیمیشن */}
       <div className="min-h-full w-screen fixed inset-0 -z-10">
@@ -266,16 +267,16 @@ export default function HomeContent() {
       </div>
 
       {/* Header Section */}
-      <div className="relative z-10 text-white pt-8 px-4">
+      <div className="relative z-10 dark:text-white pt-8 px-4">
         <div className="flex justify-between px-2 items-center mb-4">
           <Drawer direction={language === "en" ? "left" : "right"}>
             <DrawerTrigger>
-              <Button className="p-2 glass-cart-btn text-gray-300">
+              <Button className="p-2 bg-white/5 rounded-md text-white backdrop-blur-[2px] border border-white/10">
                 <Menu />
               </Button>
             </DrawerTrigger>
             <DrawerContent
-              className={`glass-side ${
+              className={`side-drawer ${
                 language === "en" ? "rounded-r-[55px]" : "rounded-l-[55px]"
               }`}
             >
@@ -287,7 +288,7 @@ export default function HomeContent() {
                       alt="Watandar logo"
                       width={120}
                       height={30}
-                      className="object-cover"
+                      className="object-cover dark:opacity-80"
                     />
                   </div>
                 </DrawerTitle>
@@ -309,14 +310,17 @@ export default function HomeContent() {
                   </div>
                 </div>
 
-                <div className="mt-4 space-y-2">
+                <div className="space-y-2">
                   <Link
                     href={"/branches"}
-                    className="block font-medium p-2 bg-gray-600/20 rounded-md text-center text-white/80"
+                    className="block font-medium p-2.5 px-8 bg-black rounded-full text-center text-white"
                     onClick={() => clearSelectedBranch()}
                   >
-                    انتخاب / تغییر شعبه
+                    {t("change")} / {t("selectBranch")}
                   </Link>
+                  <div>
+                    <ThemeToggle />
+                  </div>
                 </div>
               </div>
               <DrawerFooter>
@@ -353,7 +357,7 @@ export default function HomeContent() {
               />
             </div>
             <div className="text-center">
-              <h1 className="text-2xl font-bold font-[Shekasteh] mb-2">{t("restaurantName")}</h1>
+              <h1 className={`${language === "en" ? "font-[Balbek]" : "font-[BTitr]"} text-2xl`}>{t("restaurantName")}</h1>
               {/* <h1 className="text-lg">
                 {language === "ar"
                   ? selectedBranch.name_ar

@@ -64,6 +64,7 @@ export const translations = {
 
     // app/branches
     selectBranch: "انتخاب شعبه",
+    change: "تغییر",
     acitve: "فعال",
     notAcitve: "بسته",
     selectBranchReq: "لطفاً شعبه مورد نظر خود را انتخاب کنید",
@@ -128,6 +129,7 @@ export const translations = {
 
     // app/branches
     selectBranch: "اختيار الفرع",
+    change: "يتغير",
     acitve: "نشيط",
     notAcitve: "غير نشط",
     selectBranchReq: "يرجى اختيار الفرع الذي ترغب به.",
@@ -192,6 +194,7 @@ export const translations = {
 
     // app/branches
     selectBranch: "Branch selection",
+    change: "Change",
     acitve: "Active",
     notAcitve: "Not active",
     selectBranchReq: "Please select your desired branch.",

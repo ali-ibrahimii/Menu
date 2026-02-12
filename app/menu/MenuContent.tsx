@@ -385,11 +385,11 @@ export default function Home() {
         }`}
         dir={language === "en" ? "ltr" : "rtl"}
       >
-        <h1 className={`text-3xl font-bold `}>{t("menu")}</h1>
+        <h1 className={`${language === "en" ? "font-[Balbek]" : "font-[BTitr]" }`}>{t("menu")}</h1>
 
         <Link
           href={"/"}
-          className="active:scale-95 glass-category-default  p-2"
+          className="active:scale-95 category-card-default dark:text-white  p-2"
         >
           <ChevronLeft
             size={20}
@@ -434,7 +434,6 @@ export default function Home() {
         <div className="flex">
           <LanguageSwitcher />
           <CartDrawer />
-          <ThemeToggle />
         </div>
       </div>
 
@@ -450,9 +449,9 @@ export default function Home() {
               onClick={() => setSelectedCategory(null)}
               className={`${
                 selectedCategory === null
-                  ? "glass-category"
-                  : "glass-category-default"
-              } glass-category text-[13px] min-w-max`}
+                  ? "category-card"
+                  : "category-card-default"
+              } category-card text-[13px] min-w-max`}
             >
               {t("allFoods")}
             </Button>
@@ -467,16 +466,16 @@ export default function Home() {
                     onClick={() => setSelectedCategory(cleanSlug)}
                     className={`${
                       selectedCategory === cleanSlug
-                        ? "glass-category"
-                        : "glass-category-default"
-                    } glass-category text-[13px] min-w-max`}
+                        ? "category-card"
+                        : "category-card-default"
+                    } category-card text-[13px] min-w-max`}
                   >
                     {getCategoryButtonName(category)}
                   </Button>
                 );
               })
             ) : (
-              <p className="glass-category px-3">{t("noFoodInCategory")}</p>
+              <p className="category-card-default px-3">{t("noFoodInCategory")}</p>
             )}
           </div>
           <ScrollBar orientation="horizontal" className="hidden" />
@@ -541,7 +540,7 @@ export default function Home() {
                 </div>
               ))
             ) : (
-              <div className="text-center py-8 text-gray-300">
+              <div className="flex items-center justify-center min-h-[70vh] border text-center py-8 dark:text-gray-300 w-full">
                 {t("noFoods")}
               </div>
             )}

@@ -103,16 +103,16 @@ export default function PhoneDrawer() {
     const isCopied = copiedPhone === cleanedNumber;
 
     return (
-      <div className="bg-white/5 rounded-lg p-3 mb-2 border border-white/10">
+      <div className="dark:bg-white/5 bg-black/10 rounded-lg p-3 mb-2 border border-white/10">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <Phone size={16} className="text-gray-300" />
-            <span className="text-sm text-gray-300">{label}</span>
+            <Phone size={16} className="" />
+            <span className="text-sm">{label}</span>
           </div>
         </div>
 
         <div className="mb-3">
-          <div className="text-lg font-bold text-white tracking-wider">
+          <div className="text-lg font-bold tracking-wider">
             {formatPhoneNumber(phoneNumber)}
           </div>
         </div>
@@ -120,7 +120,7 @@ export default function PhoneDrawer() {
         <div className="flex gap-2">
           <button
             onClick={() => handlePhoneCall(phoneNumber)}
-            className="flex-1 text-white/80 py-2 px-2 rounded-sm bg-gray-500/20 text-sm flex items-center justify-center gap-1 transition"
+            className="flex-1 py-2 px-2 rounded-sm dark:bg-gray-500/20 bg-black/15 text-sm flex items-center justify-center gap-1 transition"
           >
             <svg
               className="w-4 h-4"
@@ -140,7 +140,7 @@ export default function PhoneDrawer() {
 
           <button
             onClick={() => handleSendMessage(phoneNumber)}
-            className="flex-1 bg-gray-500/20 rounded-sm text-white/80 py-2 px-2 text-sm flex items-center justify-center gap-1 transition"
+            className="flex-1 dark:bg-gray-500/20 bg-black/15 rounded-sm py-2 px-2 text-sm flex items-center justify-center gap-1 transition"
           >
             <MessageCircle size={16} />
             <span>{t("sendMessage")}</span>
@@ -158,11 +158,11 @@ export default function PhoneDrawer() {
         </button>
       </DrawerTrigger>
 
-      <DrawerContent className="border glass-drawer max-h-[80vh]">
+      <DrawerContent className="dark:text-white border glass-drawer max-h-[80vh]">
         <div className="w-full px-10 pb-10">
           {/* هدر ساده */}
           <div className="flex items-center justify-center mb-4">
-            <h1 className="font-bold text-xl text-center">
+            <h1 className="text-xl text-center font-[BTitr]">
               {t("contactInfo")}
             </h1>
           </div>
@@ -181,16 +181,16 @@ export default function PhoneDrawer() {
             />
 
             {!selectedBranch?.phone_2 && (
-              <div className="bg-white/5 rounded-lg p-3 border border-white/10 text-center">
+              <div className="bg-white/15 rounded-lg p-3 border border-white/10 text-center">
                 <div className="flex flex-col items-center gap-2">
                   <div className="p-2 rounded-full bg-gray-500/20">
-                    <Phone size={18} className="text-gray-400" />
+                    <Phone size={18} className="dark:text-gray-400" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm dark:text-gray-400">
                       {t("secondaryNumber")}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs dark:text-gray-500 mt-1">
                       {t("notAvailable")}
                     </p>
                   </div>

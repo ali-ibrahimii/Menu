@@ -160,15 +160,15 @@ export default function BranchesPage() {
   return (
     <div
       dir={language === "en" ? "ltr" : "rtl"}
-      className="relative min-h-screen overflow-hidden bg-linear-to-br from-gray-700 via-gray-800 to-gray-800"
+      className="relative min-h-screen overflow-hidden bg-accent dark:bg-[#191919]"
     >
       <div className="z-10 px-4 py-6">
         <div className="max-w-6xl mx-auto">
-          <div className="text-white">
+          <div className="">
             <LanguageSwitcher />
           </div>
           {/* هدر */}
-          <div className="text-center mb-8 text-white/80">
+          <div className="text-center mb-8 ">
             <div className="inline-flex items-center justify-center">
               <div className="relative w-30 h-30">
                 <Image
