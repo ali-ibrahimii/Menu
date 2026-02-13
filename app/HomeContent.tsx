@@ -406,7 +406,7 @@ export default function HomeContent() {
             href={`/menu?branch=${selectedBranch.slug}`}
             className="w-full flex justify-center bg-white/4 glass-button"
           >
-            <button className={`${language === "en" ? "font-[Balbek]" : "font-[BTitr]" } py-2 w-full `}>
+            <button className={`${language === "en" ? "" : "" } py-2 w-full `}>
               {t("viewMenu")}
             </button>
           </Link>

@@ -620,12 +620,10 @@ function FoodCard({
     <div
       dir={`${language === "en" ? "ltr" : "rtl"}`}
       key={food.id}
-      className="relative flex items-center w-full h-34 dark:bg-white/5 border backdrop-blur-[1px] rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer"
+      className="relative flex items-center w-full h-34 dark:bg-white/5 border backdrop-blur-[2px] rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer"
       onClick={() => handleFoodClick(food)}
     >
-      <div className="absolute inset-0 top-0 -z-[1px] h-full w-full overflow-hidden">
-          <LightRays />
-        </div>
+      
       {/* شروع عکس کارت غذا */}
       <div className="w-4/12 h-full z-10 rounded-2xl p-[1.5px] bg-[linear-gradient(130deg,#d62828_0%,transparent_35%),linear-gradient(-45deg,#d62828_0%,transparent_35%)]">
         <div className="w-full h-full rounded-[16px] overflow-hidden">
@@ -647,7 +645,7 @@ function FoodCard({
       {/* شروع متن کارت غذا */}
       <div className="flex flex-col mx-3 w-8/12 overflow-hidden py-2">
         <div className="mb-5">
-          <h2 className="text-md font-bold truncate font-[BTitr]">{getFoodName(food)}</h2>
+          <h2 className="text-md font-bold truncate">{getFoodName(food)}</h2>
 
           {/* مواد تشکیل دهنده */}
           {getIngredients(food) && (
