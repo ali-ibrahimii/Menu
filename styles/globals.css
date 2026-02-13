@@ -289,13 +289,12 @@ html, body {
 }
 
 .category-card {
-  @apply inline-flex items-center text-white dark:text-gray-200 justify-center rounded-full 
+  @apply inline-flex items-center bg-black dark:text-white justify-center rounded-full 
           transition-transform duration-150 ease-in-out overflow-hidden;
-  background: black;
 }
 
 .category-card-default {
-  @apply inline-flex items-center dark:text-white text-black justify-center rounded-full 
+  @apply inline-flex items-center dark:text-white dark:bg-accent text-black justify-center rounded-full 
          transition-transform duration-150 ease-in-out overflow-hidden border border-gray-700/60;
   border-width: 1px;
   background:transparent ;

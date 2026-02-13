@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Star, Send } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/lib/supabaseClient";
+import Loader from "./Loader";
 
 interface RatingSystemProps {
   foodId: string;
@@ -189,7 +190,7 @@ export default function RatingSystem({
         {!showReviewForm && (
           <Button
             onClick={() => setShowReviewForm(true)}
-            className="w-full bg-white/5 rounded-md p-3 border border-white/10"
+            className="w-full rounded-md p-3 border border-white/10"
           >
             {t("addReview")}
           </Button>
@@ -198,11 +199,11 @@ export default function RatingSystem({
 
       {/* فرم ثبت نظر */}
       {showReviewForm && (
-        <div className="text-gray-200 bg-white/5 rounded-xl border border-white/10 p-6 space-y-4">
+        <div className=" rounded-xl border p-6 space-y-4">
           <h3 className="text-lg font-semibold">{t("addReview")}</h3>
 
           <div className="space-y-2">
-            <Label className="text-white">{t("yourRating")}</Label>
+            <Label className="">{t("yourRating")}</Label>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -215,8 +216,8 @@ export default function RatingSystem({
                     size={24}
                     className={`${
                       star <= rating
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
+                        ? "fill-yellow-600 text-yellow-700"
+                        : ""
                     } hover:text-yellow-400 transition-colors`}
                   />
                 </button>
@@ -225,7 +226,7 @@ export default function RatingSystem({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-white" htmlFor="customerName ">{t("yourName")}</Label>
+            <Label className="" htmlFor="customerName ">{t("yourName")}</Label>
             <Input
               id="customerName"
               value={customerName}
@@ -237,12 +238,12 @@ export default function RatingSystem({
                   ? "أدخل اسمك"
                   : "Enter your name"
               }
-              className="bg-white/5 rounded-sm p-3 border border-white/10"
+              className="bg-black/5 dark:bg-white/5 rounded-sm p-3 border dark:border-white/5 border-black/10"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-white" htmlFor="comment">{t("yourComment")}</Label>
+            <Label className="dark:text-white" htmlFor="comment">{t("yourComment")}</Label>
             <Textarea
               id="comment"
               value={comment}
@@ -255,7 +256,7 @@ export default function RatingSystem({
                   : "Write your comment..."
               }
               rows={4}
-              className="bg-white/5 rounded-md p-3 border border-white/10"
+              className="dark:bg-white/5 bg-black/5 rounded-md p-3 border dark:border-white/10 border-black/10"
             />
           </div>
 
@@ -263,13 +264,13 @@ export default function RatingSystem({
             <Button
               onClick={submitReview}
               disabled={submitting}
-              className="flex-1 bg-white/5 rounded-md p-3 border border-white/10"
+              className="flex-1 dark:bg-white/5 rounded-md p-3 border"
             >
               <Send size={16} className="" />
               {submitting ? t("submitting") : t("submit")}
             </Button>
             <Button
-            className="bg-white/5 rounded-md p-3 border border-white/10"
+            className="dark:bg-white/5 rounded-md p-3 border dark:border-white/10"
               
               onClick={() => setShowReviewForm(false)}
               disabled={submitting}
@@ -286,8 +287,7 @@ export default function RatingSystem({
 
         {loadingReviews ? (
           <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">{t("loadingReviews")}</p>
+            <Loader />
           </div>
         ) : reviews.length === 0 ? (
           <div className="text-center py-8 text-gray-500">{t("noReviews")}</div>

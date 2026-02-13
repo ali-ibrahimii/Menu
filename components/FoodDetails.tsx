@@ -30,6 +30,7 @@ import RatingSystem, { RatingStats } from "@/components/RatingSystem";
 import { translations } from "@/translations/translation";
 import { toast } from "sonner";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import Image from "next/image";
 
 interface FoodDetailsProps {
   food: Food;
@@ -109,7 +110,7 @@ export default function FoodDetails({
       <DrawerContent className="h-[90vh] glass-drawer">
         <div
           dir={language === "en" ? "ltr" : "rtl"}
-          className="flex-1 overflow-y-auto text-white"
+          className="flex-1 overflow-y-auto dark:text-white"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden">
             {/* بخش تصاویر */}
@@ -141,7 +142,9 @@ export default function FoodDetails({
                                   : "border-white/30 hover:border-white/50 hover:scale-105"
                               }`}
                             >
-                              <img
+                              <Image
+                                width={120}
+                                height={120}
                                 src={image}
                                 alt={`${getFoodName(food)} ${index + 1}`}
                                 className="w-full h-full object-cover"
@@ -190,7 +193,7 @@ export default function FoodDetails({
                       </div>
                     )}
                   </div>
-                  <div className="flex justify-between items-center text-white/80">
+                  <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-bold">
                       {getFoodName(food)}
                     </h1>
@@ -199,13 +202,13 @@ export default function FoodDetails({
                     >
                       <Badge
                         variant={
-                          food.is_available ? "secondary" : "destructive"
+                          food.is_available ? "default" : "destructive"
                         }
                         className=""
                       >
                         {food.is_available ? t("available") : t("notAvailable")}
                       </Badge>
-                      <div className="text-sm font-bold text-yellow-300">
+                      <div className="text-sm font-bold dark:text-yellow-300">
                         {food.price.toLocaleString()} {t("price")}
                       </div>
                     </div>
@@ -247,7 +250,7 @@ export default function FoodDetails({
               </div>
 
               {/* توضیحات */}
-              <div className="prose max-w-none text-white/80">
+              <div className="prose max-w-none">
                 <h1 className="font-bold text-md">
                   {language === "fa"
                     ? "توضیحات:"
@@ -287,10 +290,10 @@ export default function FoodDetails({
               </div>
 
               {/* مشخصات فنی */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-white/80">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
                 {food.cooking_time && (
-                  <div className="flex justify-center items-center p-2 space-x-3 bg-white/5 rounded-md border border-white/10">
+                  <div className="flex justify-center items-center p-2 space-x-3 bg-black/5 border-black/15 dark:bg-white/5 rounded-md border dark:border-white/10">
                     <div className="">
                       <Clock className="" size={18} />
                     </div>
@@ -304,7 +307,7 @@ export default function FoodDetails({
                 )}
 
                 {food.serves && (
-                  <div className="flex justify-center items-center p-2 space-x-3 bg-white/5 rounded-md border border-white/10">
+                  <div className="flex justify-center items-center p-2 space-x-3 bg-black/5 border-black/15 dark:bg-white/5 rounded-md border dark:border-white/10">
                     <div className="">
                       <Users className="" size={18} />
                     </div>
@@ -318,7 +321,7 @@ export default function FoodDetails({
                 )}
               </div>
 
-              <div className="text-white/80">
+              <div className="">
                 <h1 className="font-bold text-md my-1">
                   {language === "fa"
                     ? "مواد تشکیل‌دهنده:"
@@ -327,14 +330,14 @@ export default function FoodDetails({
                       : "Ingredients:"}
                 </h1>
                 {getIngredients(food) && (
-                  <p className="text-gray-200 text-[13px] leading-tight">
+                  <p className=" text-[13px] leading-tight">
                     {getIngredients(food).toString()}
                   </p>
                 )}
               </div>
 
               {/* سیستم امتیازدهی */}
-              <div className="mb-6 text-white/80">
+              <div className="mb-6">
                 <RatingSystem
                   foodId={food.id}
                   onRatingStatsChange={handleRatingStatsChange}

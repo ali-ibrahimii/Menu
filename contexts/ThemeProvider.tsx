@@ -8,7 +8,7 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return (
     <NextThemesProvider
       attribute="class"           // استفاده از کلاس CSS برای تغییر حالت
-      defaultTheme="light"       // حالت پیش‌فرض: روشن
+      defaultTheme="system"       // حالت پیش‌فرض: روشن
       enableSystem={true}        // تشخیص خودکار حالت سیستم
       disableTransitionOnChange={false} // انیمیشن نرم برای تغییر
       {...props}

@@ -20,6 +20,10 @@ import { useBranch } from "@/contexts/BranchContext";
 import Loader from "@/components/Loader";
 import Image from "next/image";
 import ThemeToggle from "@/components/ThemeToggle";
+import { LightRays } from "@/components/ui/light-rays";
+import { DotPattern } from "@/components/ui/dot-pattern";
+import { cn } from "@/lib/utils"
+
 
 export default function Home() {
   const id = useId();
@@ -377,7 +381,20 @@ export default function Home() {
   }
 
   return (
-    <main className="w-full min-h-screen px-5 dark:bg-[#191919] dark:text-gray-200 py-2 pt-5 overflow-y-auto overscroll-none touch-pan-y">
+    <main className="relative w-full min-h-screen px-5 dark:bg-[#191919] dark:text-gray-200 py-2 pt-5 overflow-y-auto touch-pan-y">
+      <div className="fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 flex h-[500px] w-full flex-col items-center justify-center overflow-hidden">
+        <DotPattern
+          glow={true}
+          className={cn(
+            "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
+          )}
+        />
+      </div>
+
+      <div className="z-[44px] h-full w-full overflow-hidden">
+        <LightRays />
+      </div>
+
       {/* دکمه برگشت به صفحه ورودی و مینو */}
       <div
         className={`text-3xl font-bold flex justify-between items-center ${
@@ -385,7 +402,11 @@ export default function Home() {
         }`}
         dir={language === "en" ? "ltr" : "rtl"}
       >
-        <h1 className={`${language === "en" ? "font-[Balbek]" : "font-[BTitr]" }`}>{t("menu")}</h1>
+        <h1
+          className={`${language === "en" ? "font-[Balbek]" : "font-[BTitr]"}`}
+        >
+          {t("menu")}
+        </h1>
 
         <Link
           href={"/"}
@@ -434,6 +455,7 @@ export default function Home() {
         <div className="flex">
           <LanguageSwitcher />
           <CartDrawer />
+          <ThemeToggle />
         </div>
       </div>
 
@@ -449,9 +471,9 @@ export default function Home() {
               onClick={() => setSelectedCategory(null)}
               className={`${
                 selectedCategory === null
-                  ? "category-card"
-                  : "category-card-default"
-              } category-card text-[13px] min-w-max`}
+                  ? "dark:bg-white rounded-full dark:text-black"
+                  : "bg-transparent border dark:text-white dark:border-white border-black rounded-full text-black"
+              } text-[13px] min-w-max`}
             >
               {t("allFoods")}
             </Button>
@@ -466,16 +488,18 @@ export default function Home() {
                     onClick={() => setSelectedCategory(cleanSlug)}
                     className={`${
                       selectedCategory === cleanSlug
-                        ? "category-card"
-                        : "category-card-default"
-                    } category-card text-[13px] min-w-max`}
+                        ? "border  dark:border-white rounded-full dark:bg-white"
+                        : "bg-transparent border text-black border-black dark:border-white dark:text-white rounded-full"
+                    }  text-[13px] min-w-max`}
                   >
                     {getCategoryButtonName(category)}
                   </Button>
                 );
               })
             ) : (
-              <p className="category-card-default px-3">{t("noFoodInCategory")}</p>
+              <p className="category-card-default px-3">
+                {t("noFoodInCategory")}
+              </p>
             )}
           </div>
           <ScrollBar orientation="horizontal" className="hidden" />
@@ -540,7 +564,7 @@ export default function Home() {
                 </div>
               ))
             ) : (
-              <div className="flex items-center justify-center min-h-[70vh] border text-center py-8 dark:text-gray-300 w-full">
+              <div className="flex items-center justify-center min-h-[70vh] text-center py-8 dark:text-gray-300 w-full">
                 {t("noFoods")}
               </div>
             )}
@@ -598,11 +622,14 @@ function FoodCard({
     <div
       dir={`${language === "en" ? "ltr" : "rtl"}`}
       key={food.id}
-      className="relative flex items-center w-full  glass-card-3d h-34  rounded-2xl hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer"
+      className="relative flex items-center w-full h-34 dark:bg-white/5 border backdrop-blur-[1px] rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer"
       onClick={() => handleFoodClick(food)}
     >
+      <div className="absolute inset-0 top-0 -z-[1px] h-full w-full overflow-hidden">
+          <LightRays />
+        </div>
       {/* شروع عکس کارت غذا */}
-      <div className="w-4/12 h-full rounded-2xl p-[1.5px] bg-[linear-gradient(130deg,#d62828_0%,transparent_35%),linear-gradient(-45deg,#d62828_0%,transparent_35%)]">
+      <div className="w-4/12 h-full z-10 rounded-2xl p-[1.5px] bg-[linear-gradient(130deg,#d62828_0%,transparent_35%),linear-gradient(-45deg,#d62828_0%,transparent_35%)]">
         <div className="w-full h-full rounded-[16px] overflow-hidden">
           <Image
             src={food.image_url}
@@ -622,9 +649,7 @@ function FoodCard({
       {/* شروع متن کارت غذا */}
       <div className="flex flex-col mx-3 w-8/12 overflow-hidden py-2">
         <div className="mb-5">
-          <h2 className="text-md font-bold truncate">
-            {getFoodName(food)}
-          </h2>
+          <h2 className="text-md font-bold truncate font-[BTitr]">{getFoodName(food)}</h2>
 
           {/* مواد تشکیل دهنده */}
           {getIngredients(food) && (
