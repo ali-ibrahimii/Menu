@@ -19,7 +19,6 @@ import Link from "next/link";
 import { useBranch } from "@/contexts/BranchContext";
 import Loader from "@/components/Loader";
 import Image from "next/image";
-import ThemeToggle from "@/components/ThemeToggle";
 import { LightRays } from "@/components/ui/light-rays";
 import { DotPattern } from "@/components/ui/dot-pattern";
 import { cn } from "@/lib/utils"
@@ -455,7 +454,6 @@ export default function Home() {
         <div className="flex">
           <LanguageSwitcher />
           <CartDrawer />
-          <ThemeToggle />
         </div>
       </div>
 
