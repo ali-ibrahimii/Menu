@@ -1,6 +1,15 @@
 "use client";
 
-import { useId, useState, useEffect, useMemo, useCallback, memo, useDeferredValue, useRef } from "react";
+import {
+  useId,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  memo,
+  useDeferredValue,
+  useRef,
+} from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Food, Category } from "@/types";
 import { translations } from "@/translations/translation";
@@ -21,11 +30,12 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft, SearchIcon, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddToCartButton from "@/components/AddToCartButton";
+import { useRouter } from "next/navigation";
 
 // ==================== تابع debounce اختصاصی ====================
 function useDebounce<T extends (...args: any[]) => any>(
   callback: T,
-  delay: number
+  delay: number,
 ): (...args: Parameters<T>) => void {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -38,7 +48,7 @@ function useDebounce<T extends (...args: any[]) => any>(
         callback(...args);
       }, delay);
     },
-    [callback, delay]
+    [callback, delay],
   );
 }
 
@@ -64,12 +74,12 @@ const FoodCard = memo(function FoodCard({
   return (
     <div
       dir={language === "en" ? "ltr" : "rtl"}
-      className="relative flex items-center w-full h-34 dark:bg-white/5 border backdrop-blur-[2px] rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer will-change-transform"
+      className="relative flex items-center w-full h-34 glass-card-3d border backdrop-blur-[2px] rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer will-change-transform"
       onClick={() => handleFoodClick(food)}
       style={{ transform: "translateZ(0)" }}
     >
       <div className="w-4/12 h-full z-10 rounded-2xl p-[1.5px] bg-[linear-gradient(130deg,#d62828_0%,transparent_35%),linear-gradient(-45deg,#d62828_0%,transparent_35%)]">
-        <div className="w-full h-full rounded-[16px] overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
+        <div className="w-full h-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
           {isImageLoading && !imageError && (
             <div className="absolute inset-0 animate-pulse bg-gray-200 dark:bg-gray-700" />
           )}
@@ -149,41 +159,69 @@ export default function Home() {
   const [searchInput, setSearchInput] = useState("");
   const searchTerm = useDeferredValue(searchInput); // استفاده از useDeferredValue به جای debounce
   const [isDataFetched, setIsDataFetched] = useState(false);
+  const router = useRouter();
 
   // ========== توابع ترجمه ==========
-  const t = useCallback((key: string) => {
-    const langTranslations = translations[language] as Record<string, string>;
-    return langTranslations[key] || key;
-  }, [language]);
+  const t = useCallback(
+    (key: string) => {
+      const langTranslations = translations[language] as Record<string, string>;
+      return langTranslations[key] || key;
+    },
+    [language],
+  );
 
-  const getFoodName = useCallback((food: Food) => {
-    switch (language) {
-      case "fa": return food.name_fa;
-      case "ar": return food.name_ar;
-      case "en": return food.name_en;
-      default: return food.name_fa;
-    }
-  }, [language]);
+  const getFoodName = useCallback(
+    (food: Food) => {
+      switch (language) {
+        case "fa":
+          return food.name_fa;
+        case "ar":
+          return food.name_ar;
+        case "en":
+          return food.name_en;
+        default:
+          return food.name_fa;
+      }
+    },
+    [language],
+  );
 
-  const getIngredients = useCallback((food: Food) => {
-    let ingredients;
-    switch (language) {
-      case "fa": ingredients = food.ingredients_fa; break;
-      case "ar": ingredients = food.ingredients_ar; break;
-      case "en": ingredients = food.ingredients_en; break;
-      default: ingredients = food.ingredients_fa;
-    }
-    return ingredients?.toString() || "";
-  }, [language]);
+  const getIngredients = useCallback(
+    (food: Food) => {
+      let ingredients;
+      switch (language) {
+        case "fa":
+          ingredients = food.ingredients_fa;
+          break;
+        case "ar":
+          ingredients = food.ingredients_ar;
+          break;
+        case "en":
+          ingredients = food.ingredients_en;
+          break;
+        default:
+          ingredients = food.ingredients_fa;
+      }
+      return ingredients?.toString() || "";
+    },
+    [language],
+  );
 
-  const getFoodDescription = useCallback((food: Food) => {
-    switch (language) {
-      case "fa": return food.description_fa;
-      case "ar": return food.description_ar;
-      case "en": return food.description_en;
-      default: return food.description_fa;
-    }
-  }, [language]);
+  const getFoodDescription = useCallback(
+    (food: Food) => {
+      switch (language) {
+        case "fa":
+          return food.description_fa;
+        case "ar":
+          return food.description_ar;
+        case "en":
+          return food.description_en;
+        default:
+          return food.description_fa;
+      }
+    },
+    [language],
+  );
 
   // ========== هندلرها ==========
   const handleFoodClick = useCallback((food: Food) => {
@@ -218,16 +256,20 @@ export default function Home() {
 
         if (selectedBranch?.id) {
           foodsQuery = foodsQuery.or(
-            `branch_id.eq.${selectedBranch.id},branch_id.is.null`
+            `branch_id.eq.${selectedBranch.id},branch_id.is.null`,
           );
         } else {
           foodsQuery = foodsQuery.is("branch_id", null);
         }
 
-        const [{ data: foodsData }, { data: categoriesData }] = await Promise.all([
-          foodsQuery,
-          supabase.from("categories").select("*").order("order_number", { ascending: true, nullsFirst: false })
-        ]);
+        const [{ data: foodsData }, { data: categoriesData }] =
+          await Promise.all([
+            foodsQuery,
+            supabase
+              .from("categories")
+              .select("*")
+              .order("order_number", { ascending: true, nullsFirst: false }),
+          ]);
 
         if (isMounted) {
           const cleanedFoods = (foodsData || []).map((food) => ({
@@ -253,7 +295,9 @@ export default function Home() {
     };
 
     fetchData();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [selectedBranch, isDataFetched]);
 
   // ========== فیلترها ==========
@@ -268,14 +312,14 @@ export default function Home() {
         food.name_en.toLowerCase().includes(searchLower) ||
         food.description_en?.toLowerCase().includes(searchLower) ||
         food.description_ar?.toLowerCase().includes(searchLower) ||
-        food.description_fa?.toLowerCase().includes(searchLower)
+        food.description_fa?.toLowerCase().includes(searchLower),
     );
   }, [foods, searchTerm]);
 
   const displayedFoods = useMemo(() => {
     if (!selectedCategory) return filteredFoodsBySearch;
     return filteredFoodsBySearch.filter(
-      (food) => food.category?.trim() === selectedCategory?.trim()
+      (food) => food.category?.trim() === selectedCategory?.trim(),
     );
   }, [filteredFoodsBySearch, selectedCategory]);
 
@@ -291,7 +335,7 @@ export default function Home() {
 
   const activeCategories = useMemo(() => {
     const uniqueCategorySlugs = new Set(
-      foods.map((food) => food.category?.trim()).filter(Boolean)
+      foods.map((food) => food.category?.trim()).filter(Boolean),
     );
     return categories
       .filter((category) => uniqueCategorySlugs.has(category.slug?.trim()))
@@ -300,16 +344,22 @@ export default function Home() {
 
   const sortedCategories = useMemo(() => {
     const categoryOrder = [
-      "afghan-foods", "iranian-foods", "breakfast", "drinks",
-      "hot-drinks", "cold-drinks", "coffee-based-drinks", "dessert",
+      "afghan-foods",
+      "iranian-foods",
+      "breakfast",
+      "drinks",
+      "hot-drinks",
+      "cold-drinks",
+      "coffee-based-drinks",
+      "dessert",
     ];
 
     return Object.entries(groupedFoods).sort(([slugA], [slugB]) => {
       const indexA = categoryOrder.indexOf(slugA);
       const indexB = categoryOrder.indexOf(slugB);
       if (indexA === -1 && indexB === -1) {
-        const catA = categories.find(c => c.slug?.trim() === slugA);
-        const catB = categories.find(c => c.slug?.trim() === slugB);
+        const catA = categories.find((c) => c.slug?.trim() === slugA);
+        const catB = categories.find((c) => c.slug?.trim() === slugB);
         return (catA?.order_number ?? 999) - (catB?.order_number ?? 999);
       }
       if (indexA === -1) return 1;
@@ -321,7 +371,10 @@ export default function Home() {
   // ========== رندر ==========
   if (loading) {
     return (
-      <div dir={language === "en" ? "ltr" : "rtl"} className="relative min-h-screen flex items-center justify-center">
+      <div
+        dir={language === "en" ? "ltr" : "rtl"}
+        className="relative min-h-screen flex items-center justify-center"
+      >
         <div className="flex items-center justify-center flex-col">
           <Loader />
           <p className="mt-2">{t("loading")}</p>
@@ -333,35 +386,48 @@ export default function Home() {
   return (
     <main className="relative w-full min-h-screen px-5 dark:bg-[#191919] dark:text-gray-200 py-2 pt-5 overflow-y-auto touch-pan-y">
       {/* الگوهای تزئینی */}
-      <div className="fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 flex h-[500px] w-full flex-col items-center justify-center overflow-hidden pointer-events-none">
-        <DotPattern glow={true} className={cn("[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]")} />
-      </div>
-      <div className="z-[44px] h-full w-full overflow-hidden pointer-events-none">
-        <LightRays />
-      </div>
 
       {/* هدر */}
-      <div className={`text-3xl font-bold flex justify-between items-center ${language === "en" ? "mb-1" : "mb-2"} relative z-10`} dir={language === "en" ? "ltr" : "rtl"}>
-        <h1 className={`${language === "en" ? "font-[Balbek]" : "font-[BTitr]"}`}>{t("menu")}</h1>
-        <Link href={"/"} className="active:scale-95 category-card-default dark:text-white p-2">
-          <ChevronLeft size={20} className={`${language === "en" ? "rotate-180" : ""}`} />
-        </Link>
+      <div
+        className={`text-3xl font-bold flex justify-between items-center ${language === "en" ? "mb-1" : "mb-2"} relative z-10`}
+        dir={language === "en" ? "ltr" : "rtl"}
+      >
+        <h1
+          className={`${language === "en" ? "font-[Balbek]" : "font-[BTitr]"}`}
+        >
+          {t("menu")}
+        </h1>
+        <Button
+          onClick={() => router.push("/")}
+          className="active:scale-95 category-card-default dark:text-white p-2"
+        >
+          <ChevronLeft
+            size={20}
+            className={`${language === "en" ? "rotate-180" : ""}`}
+          />
+        </Button>
       </div>
 
       {/* جستجو */}
-      <div dir={language === "en" ? "ltr" : "rtl"} className="flex items-center justify-center w-full space-x-1 relative z-10">
+      <div
+        dir={language === "en" ? "ltr" : "rtl"}
+        className="flex items-center justify-center w-full space-x-1 relative z-10"
+      >
         <div className="*:not-first:mt-2 w-full">
           <div dir={language === "en" ? "ltr" : "rtl"} className="relative">
             <Input
               id={id}
-              className="peer ps-10 pe-9 py-[20px] dark:text-gray-200 dark:focus:text-gray-200 rounded-full text-md"
+              className="peer ps-10 pe-9 py-5 dark:text-gray-200 dark:focus:text-gray-200 rounded-full text-md"
               placeholder={t("search")}
               type="search"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
             />
             <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-4 pt-1 text-gray-400">
-              <SearchIcon size={16} className={`${language === "en" ? "" : "rotate-90"}`} />
+              <SearchIcon
+                size={16}
+                className={`${language === "en" ? "" : "rotate-90"}`}
+              />
             </div>
           </div>
         </div>
@@ -372,15 +438,19 @@ export default function Home() {
       </div>
 
       {/* دسته‌بندی‌ها */}
-      <div className="mt-3 relative z-10">
-        <ScrollArea dir={language === "en" ? "ltr" : "rtl"} className="rounded-md flex whitespace-nowrap">
+      <div className="mt-3 relative z-50">
+        <ScrollArea
+          dir={language === "en" ? "ltr" : "rtl"}
+          className="rounded-md flex whitespace-nowrap"
+        >
           <div className="flex space-x-2 pb-2">
             <Button
               onClick={() => handleCategoryClick(null)}
-              className={`${selectedCategory === null
+              className={`${
+                selectedCategory === null
                   ? "dark:bg-white rounded-full dark:text-black"
                   : "bg-transparent border dark:text-white dark:border-white border-black rounded-full text-black"
-                } text-[13px] min-w-max transition-colors duration-150`}
+              } text-[13px] min-w-max transition-colors duration-150`}
             >
               {t("allFoods")}
             </Button>
@@ -388,17 +458,23 @@ export default function Home() {
             {activeCategories.map((category) => (
               <Button
                 key={category.id}
-                onClick={() => handleCategoryClick(category.slug?.trim() || null)}
-                className={`${selectedCategory === category.slug?.trim()
+                onClick={() =>
+                  handleCategoryClick(category.slug?.trim() || null)
+                }
+                className={`${
+                  selectedCategory === category.slug?.trim()
                     ? "dark:bg-white rounded-full dark:text-black border dark:border-white"
                     : "bg-transparent border dark:text-white dark:border-white border-black rounded-full text-black"
-                  } text-[13px] min-w-max transition-colors duration-150`}
+                } text-[13px] min-w-max transition-colors duration-150`}
               >
-                {language === "en" 
-                  ? (category.slug?.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") || category.name)
+                {language === "en"
+                  ? category.slug
+                      ?.split("-")
+                      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                      .join(" ") || category.name
                   : language === "ar"
-                    ? (category.name_ar || category.name)
-                    : (category.name || category.slug)}
+                    ? category.name_ar || category.name
+                    : category.name || category.slug}
               </Button>
             ))}
           </div>
@@ -423,7 +499,9 @@ export default function Home() {
                 />
               ))
             ) : (
-              <div className="col-span-full border text-center py-8 rounded-lg">{t("noFoodInCategory")}</div>
+              <div className="col-span-full border text-center py-8 rounded-lg">
+                {t("noFoodInCategory")}
+              </div>
             )}
           </div>
         ) : (
@@ -471,8 +549,16 @@ export default function Home() {
 
       {/* فوتر */}
       <div className="text-center dark:text-gray-200 text-sm py-6 w-full relative z-10">
-        <p>{selectedBranch?.name_en || selectedBranch?.name_fa || ""}</p>
-        © 2025 Watandar Restaurant
+        <p>{selectedBranch?.name_en || selectedBranch?.name_fa || ""}</p>© 2025
+        Watandar Restaurant
+      </div>
+      <div className="fixed inset-0 -z-10 top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 flex h-[500px] w-full flex-col items-center justify-center overflow-hidden pointer-events-none">
+        <DotPattern
+          glow={true}
+          className={cn(
+            "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
+          )}
+        />
       </div>
     </main>
   );

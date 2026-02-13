@@ -12,7 +12,15 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { Building2, Clock, Menu, X, Phone, Store, Instagram } from "lucide-react";
+import {
+  Building2,
+  Clock,
+  Menu,
+  X,
+  Phone,
+  Store,
+  Instagram,
+} from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
@@ -31,6 +39,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useBranch } from "@/contexts/BranchContext";
 import Loader from "@/components/Loader";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useTransition } from "react";
 
 // گالری عکس‌های هر شعبه
 const branchImageGalleries: Record<string, string[]> = {
@@ -64,6 +73,7 @@ export default function HomeContent() {
   const { language } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filteredFoods, setFilteredFoods] = useState<Food[]>([]);
+  const [isPending, startTransition] = useTransition();
 
   // State برای مدیریت پس‌زمینه‌های متغیر
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
@@ -214,7 +224,7 @@ export default function HomeContent() {
   useEffect(() => {
     if (selectedCategory) {
       setFilteredFoods(
-        foods.filter((food) => food.category === selectedCategory)
+        foods.filter((food) => food.category === selectedCategory),
       );
     } else {
       setFilteredFoods(foods);
@@ -239,6 +249,13 @@ export default function HomeContent() {
   if (!selectedBranch || bgImages.length === 0) {
     return null;
   }
+
+  const handleNavigate = () => {
+    startTransition(() => {
+      router.push(`/menu?branch=${selectedBranch.slug}`);
+    });
+  };
+
 
   return (
     <main
@@ -304,8 +321,8 @@ export default function HomeContent() {
                       {language === "en"
                         ? selectedBranch.name_en || selectedBranch.name_fa
                         : language === "ar"
-                        ? selectedBranch.name_ar || selectedBranch.name_fa
-                        : selectedBranch.name_fa}
+                          ? selectedBranch.name_ar || selectedBranch.name_fa
+                          : selectedBranch.name_fa}
                     </span>
                   </div>
                 </div>
@@ -357,7 +374,11 @@ export default function HomeContent() {
               />
             </div>
             <div className="text-center">
-              <h1 className={`${language === "en" ? "font-[Balbek]" : "font-[BTitr]"} text-2xl`}>{t("restaurantName")}</h1>
+              <h1
+                className={`${language === "en" ? "font-[Balbek]" : "font-[BTitr]"} text-2xl`}
+              >
+                {t("restaurantName")}
+              </h1>
               {/* <h1 className="text-lg">
                 {language === "ar"
                   ? selectedBranch.name_ar
@@ -372,22 +393,22 @@ export default function HomeContent() {
           {/* <div className="flex items-center gap-4"> */}
           <div className="flex items-center gap-3 z-50 inset-0">
             <>
-            <Link href="/branches">
-            <button className="bg-white/5 rounded-full p-3 border border-white/10">
-              <Building2 size={20} />
-            </button>
-            </Link>
+              <div>
+                <Button onClick={() => {router.push('/branches')}} className="bg-white/5 rounded-full p-3 border border-white/10">
+                  <Building2 size={20} />
+                </Button>
+              </div>
             </>
             <>
-            <Link href="https://www.instagram.com/vatandar_restaurant?igsh=N3R3a3VlOXUwYXF6ZQ==" target="_blank" rel="noopener noreferrer" >
-              <button
-                className="bg-white/5 rounded-full p-3 border border-white/10"
-                
-                >
-                <Instagram size={20} />
-              </button>
+              <Link
+                href="https://www.instagram.com/vatandar_restaurant?igsh=N3R3a3VlOXUwYXF6ZQ=="
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <button className="bg-white/5 rounded-full p-3 border border-white/10">
+                  <Instagram size={20} />
+                </button>
               </Link>
-                
             </>
             <>
               <ClockDrawer />
@@ -402,14 +423,12 @@ export default function HomeContent() {
           {/* </div> */}
 
           {/* دکمه اصلی مشاهده منو */}
-          <Link
-            href={`/menu?branch=${selectedBranch.slug}`}
-            className="w-full flex justify-center bg-white/4 glass-button"
+          <Button
+            onClick={handleNavigate}
+            className="py-2 w-full"
           >
-            <button className={`${language === "en" ? "" : "" } py-2 w-full `}>
-              {t("viewMenu")}
-            </button>
-          </Link>
+            {t("viewMenu")}
+          </Button>
         </div>
       </div>
     </main>

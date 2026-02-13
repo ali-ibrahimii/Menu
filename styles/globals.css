@@ -157,7 +157,7 @@ html, body {
 
 
 .glass-card-3d {
-  @apply relative rounded-2xl transition-all duration-500 
+  @apply relative rounded-2xl transition-all duration-50 
          hover:-translate-y-2 hover:shadow-2xl overflow-hidden;
   
   /* افکت سه‌بعدی با چند لایه سایه */
@@ -169,16 +169,16 @@ html, body {
     0 1px 2px rgba(0, 0, 0, 0.12),
     
     /* لایه ۳: عمق زیاد */
-    0 1px 4px rgba(0, 0, 0, 0.2),
+    0 4px 5px rgba(0, 0, 0, 0.2),
     
     /* لایه ۴: سایه دور */
-    0 3px 15px rgba(0, 0, 0, 0.2),
+    0 3px 2px rgba(0, 0, 0, 0.2),
     
     /* هایلایت بالایی برای حس برجستگی */
-    0 -2px 4px rgba(255, 255, 255, 0.01),
+    0 -2px 44px rgba(255, 255, 255, 0.01),
     
     /* سایه داخلی ملایم */
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    inset 0 0px 0 rgba(255, 255, 255, 0.4);
   
   background: linear-gradient(
     145deg,
@@ -188,30 +188,6 @@ html, body {
   );
   
   backdrop-filter: blur(10px);
-  /* border: 1=px solid rgba(255, 255, 255, 0.15); */
-  
-  /* افکت درخشان در هاور */
-  &:hover::after {
-    opacity: 1;
-  }
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 0px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.5),
-      transparent
-    );
-    border-radius: 2rem;
-    opacity: 0.5;
-    transition: opacity 0.3s ease;
-  }
 }
 
 
