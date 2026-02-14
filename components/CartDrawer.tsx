@@ -181,16 +181,16 @@ export default function CartDrawer() {
         dir={language === "en" ? "ltr" : "rtl"}
       >
         <DrawerHeader>
-          <DrawerTitle className="flex items-center justify-center text-gray-200">
+          <DrawerTitle className="flex items-center justify-center">
             {t("shoppingCart")}
           </DrawerTitle>
-          <DrawerDescription className="text-gray-400">{t("cartDescription")}</DrawerDescription>
+          <DrawerDescription className="">{t("cartDescription")}</DrawerDescription>
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-3 w-full py-4 space-y-4">
           {/* آیتم‌های سبد خرید */}
           {items.length === 0 ? (
-            <div className="text-center text-gray-200 py-10">
+            <div className="text-center  py-10">
               <NotebookText size={48} className="mx-auto mb-4 opacity-60" />
               <p>{t("emptyCart")}</p>
             </div>
@@ -200,7 +200,7 @@ export default function CartDrawer() {
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="glass-card-menu w-full p-3 gap-2"
+                    className="relative flex items-center w-full p-2 gap-2 glass-cart bg-accent dark:bg-[#191919] border rounded-2xl overflow-hidden cursor-pointer"
                   >
                     <img
                       src={item.image_url}
@@ -256,12 +256,12 @@ export default function CartDrawer() {
               </div>
 
               {/*  خط جدا کننده  */}
-              <div className="h-px bg-linear-to-r from-transparent via-white to-transparent" />
+              <div className="h-px bg-linear-to-r from-transparent dark:via-white via-black to-transparent" />
 
               {/* جمع کل   */}
               <div className="pt-2 px-6">
                 <div className="flex justify-between items-center">
-                  <span className="font-medium text-gray-300">{t("total")}:</span>
+                  <span className="font-medium">{t("total")}:</span>
                   <span className="text-sm font-bold text-green-600">
                     {getTotalPrice().toLocaleString()} {t("price")}
                   </span>

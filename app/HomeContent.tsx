@@ -256,7 +256,6 @@ export default function HomeContent() {
     });
   };
 
-
   return (
     <main
       dir={language === "en" ? "ltr" : "rtl"}
@@ -357,7 +356,7 @@ export default function HomeContent() {
       </div>
 
       {/* Main Content Card */}
-      <div className="absolute bottom-0 w-full z-20 glass-card">
+      <div className="absolute bottom-0 w-full z-30 glass-card">
         <div className="bg-white/5 rounded-r-lg p-2 border border-white/10 absolute left-0 top-20">
           <CheckRestaurantStatus />
         </div>
@@ -379,24 +378,21 @@ export default function HomeContent() {
               >
                 {t("restaurantName")}
               </h1>
-              {/* <h1 className="text-lg">
-                {language === "ar"
-                  ? selectedBranch.name_ar
-                  : language === "en"
-                  ? selectedBranch.name_en
-                  : selectedBranch.name_fa}
-              </h1> */}
             </div>
           </div>
 
-          {/* Social Icons */}
-          {/* <div className="flex items-center gap-4"> */}
+          {/* دکمه های منو اصلی */}
           <div className="flex items-center gap-3 z-50 inset-0">
             <>
               <div>
-                <Button onClick={() => {router.push('/branches')}} className="bg-white/5 rounded-full p-3 border border-white/10">
+                <button
+                  onClick={() => {
+                    router.push("/branches");
+                  }}
+                  className="bg-white/5 rounded-full p-3 border border-white/10"
+                >
                   <Building2 size={20} />
-                </Button>
+                </button>
               </div>
             </>
             <>
@@ -422,13 +418,15 @@ export default function HomeContent() {
           </div>
           {/* </div> */}
 
-          {/* دکمه اصلی مشاهده منو */}
-          <Button
+          {/* دکمه مشاهده منو */}
+          <button
             onClick={handleNavigate}
-            className="py-2 w-full"
+            className="w-full flex justify-center bg-white/4 glass-button"
           >
-            {t("viewMenu")}
-          </Button>
+            <div className={`${language === "en" ? "" : ""} py-2 w-full `}>
+              {t("viewMenu")}
+            </div>
+          </button>
         </div>
       </div>
     </main>

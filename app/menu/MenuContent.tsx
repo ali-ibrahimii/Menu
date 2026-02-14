@@ -74,7 +74,7 @@ const FoodCard = memo(function FoodCard({
   return (
     <div
       dir={language === "en" ? "ltr" : "rtl"}
-      className="relative flex items-center w-full h-34 glass-card-3d border backdrop-blur-[2px] rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer will-change-transform"
+      className="relative flex items-center w-full h-34 glass-card-3d bg-accent dark:bg-[#191919] border dark: backdrop-blur-[2px] rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 active:scale-95 cursor-pointer will-change-transform"
       onClick={() => handleFoodClick(food)}
       style={{ transform: "translateZ(0)" }}
     >
@@ -384,8 +384,16 @@ export default function Home() {
   }
 
   return (
-    <main className="relative w-full min-h-screen px-5 dark:bg-[#191919] dark:text-gray-200 py-2 pt-5 overflow-y-auto touch-pan-y">
+    <main className="relative w-full min-h-screen px-5 dark:text-gray-200 py-2 pt-5 overflow-y-auto touch-pan-y">
       {/* الگوهای تزئینی */}
+      <div className="fixed inset-0 -z-[1px] top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 flex h-[500px] w-full flex-col items-center justify-center overflow-hidden pointer-events-none">
+        <DotPattern
+          glow={true}
+          className={cn(
+            "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
+          )}
+        />
+      </div>
 
       {/* هدر */}
       <div
@@ -397,15 +405,15 @@ export default function Home() {
         >
           {t("menu")}
         </h1>
-        <Button
+        <button
           onClick={() => router.push("/")}
-          className="active:scale-95 category-card-default dark:text-white p-2"
+          className="active:scale-95 border rounded-full bg-accent dark:bg-[#191919] dark:text-white p-2"
         >
           <ChevronLeft
             size={20}
             className={`${language === "en" ? "rotate-180" : ""}`}
           />
-        </Button>
+        </button>
       </div>
 
       {/* جستجو */}
@@ -438,7 +446,7 @@ export default function Home() {
       </div>
 
       {/* دسته‌بندی‌ها */}
-      <div className="mt-3 relative z-50">
+      <div className="mt-3 sticky top-0 z-50">
         <ScrollArea
           dir={language === "en" ? "ltr" : "rtl"}
           className="rounded-md flex whitespace-nowrap"
@@ -449,7 +457,7 @@ export default function Home() {
               className={`${
                 selectedCategory === null
                   ? "dark:bg-white rounded-full dark:text-black"
-                  : "bg-transparent border dark:text-white dark:border-white border-black rounded-full text-black"
+                  : "bg-transparent border dark:text-white rounded-full text-black"
               } text-[13px] min-w-max transition-colors duration-150`}
             >
               {t("allFoods")}
@@ -463,8 +471,8 @@ export default function Home() {
                 }
                 className={`${
                   selectedCategory === category.slug?.trim()
-                    ? "dark:bg-white rounded-full dark:text-black border dark:border-white"
-                    : "bg-transparent border dark:text-white dark:border-white border-black rounded-full text-black"
+                    ? "dark:bg-white rounded-full dark:text-black border"
+                    : "bg-transparent border dark:text-white rounded-full text-black"
                 } text-[13px] min-w-max transition-colors duration-150`}
               >
                 {language === "en"
@@ -551,14 +559,6 @@ export default function Home() {
       <div className="text-center dark:text-gray-200 text-sm py-6 w-full relative z-10">
         <p>{selectedBranch?.name_en || selectedBranch?.name_fa || ""}</p>© 2025
         Watandar Restaurant
-      </div>
-      <div className="fixed inset-0 -z-10 top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 flex h-[500px] w-full flex-col items-center justify-center overflow-hidden pointer-events-none">
-        <DotPattern
-          glow={true}
-          className={cn(
-            "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
-          )}
-        />
       </div>
     </main>
   );
