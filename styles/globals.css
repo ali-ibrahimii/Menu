@@ -196,20 +196,6 @@ html, body {
   background:transparent ;
 }
 
-.category-card {
-  @apply inline-flex items-center bg-black dark:text-white justify-center rounded-full 
-          transition-transform duration-150 ease-in-out overflow-hidden;
-}
-
-.category-card-default {
-  @apply inline-flex items-center dark:text-white dark:bg-accent text-black justify-center rounded-full 
-         transition-transform duration-150 ease-in-out overflow-hidden border;
-  border-width: 1px;
-  background:transparent ;
-}
-
-
-
 .side-drawer {
   @apply inline-flex items-center py-10 justify-center border-r border-gray-500
          transition-transform duration-150 ease-in-out overflow-visible;
