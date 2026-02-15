@@ -103,7 +103,7 @@ export default function PhoneDrawer() {
     const isCopied = copiedPhone === cleanedNumber;
 
     return (
-      <div className="dark:bg-white/5 bg-black/10 rounded-lg p-3 mb-2 border border-white/10">
+      <div className="dark:bg-card bg-sidebar rounded-lg p-3 mb-2 border glass-card-3d">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Phone size={16} className="" />
@@ -159,7 +159,7 @@ export default function PhoneDrawer() {
       </DrawerTrigger>
 
       <DrawerContent className="dark:text-white border glass-drawer max-h-[80vh]">
-        <div className="w-full px-10 pb-10">
+        <div className="w-full px-8 pb-6">
           {/* هدر ساده */}
           <div className="flex items-center justify-center mb-4">
             <h1 className="text-xl text-center font-[BTitr]">

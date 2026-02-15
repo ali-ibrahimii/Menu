@@ -1,23 +1,21 @@
 "use client";
 
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { MapPin, Navigation } from "lucide-react";
+import { Loader2, MapPin, Navigation } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState, useEffect } from "react";
 import { useBranch } from "@/contexts/BranchContext";
-
+import Loader from "../Loader";
 
 export default function LocationDrawer() {
   const [open, setOpen] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
-    const { selectedBranch } = useBranch();
+  const { selectedBranch } = useBranch();
+  const [mapLoading, setMapLoading] = useState(true);
 
-  
   // const coords = { lat: 36.299265340575474, lng: 59.640879444238244 };
 
-  
-  
   useEffect(() => {
     // تشخیص دستگاه بعد از رندر اولیه
     const userAgent = navigator.userAgent || navigator.vendor;
@@ -38,6 +36,12 @@ export default function LocationDrawer() {
     }
   };
 
+  useEffect(() => {
+    if (!open) {
+      setMapLoading(true);
+    }
+  }, [open]);
+
   // متن دکمه بر اساس دستگاه
   const getButtonText = () => {
     if (isIOS) return "Apple Maps";
@@ -56,7 +60,7 @@ export default function LocationDrawer() {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <button 
+        <button
           className="bg-white/5 rounded-full p-3 border border-white/10"
           aria-label="نمایش موقعیت و مسیریابی"
         >
@@ -67,6 +71,13 @@ export default function LocationDrawer() {
       <DrawerContent className="h-[50vh] glass-drawer">
         {/* نقشه */}
         <div className="flex-1 relative w-full p-2">
+          {mapLoading && (
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+
+              <Loader />
+            </div>
+          )}
+
           <iframe
             src={mapUrl}
             width="100%"
@@ -77,14 +88,14 @@ export default function LocationDrawer() {
             referrerPolicy="no-referrer-when-downgrade"
             className="rounded-4xl"
             title="موقعیت رستوران وطندار"
+            onLoad={() => setMapLoading(false)}
           />
         </div>
 
         {/* اطلاعات موقعیت */}
         <div className="my-6">
-          
           {/* دکمه مسیریابی هوشمند */}
-          <Button 
+          <Button
             onClick={handleNavigation}
             className="w-full py-6 dark:bg-white text-base font-medium"
             size="lg"

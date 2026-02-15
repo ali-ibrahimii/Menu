@@ -21,7 +21,7 @@ export default function LanguageSwitcher() {
           <Globe className="opacity-60" size={18} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="glass-lang-btn text-gray-300 border-none">
+      <DropdownMenuContent className="">
         <DropdownMenuRadioGroup
           value={language}
           onValueChange={(value) => setLanguage(value as "fa" | "ar" | "en")}

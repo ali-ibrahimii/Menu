@@ -141,11 +141,7 @@ export default function ClockDrawer() {
     } else {
       return {
         message:
-          language === "en"
-            ? "Open"
-            : language === "ar"
-              ? "مفتوح!"
-              : "باز است",
+          language === "en" ? "Open" : language === "ar" ? "مفتوح!" : "باز است",
         color: "secondary",
       };
     }
@@ -194,16 +190,13 @@ export default function ClockDrawer() {
         dir={language === "en" ? "ltr" : "rtl"}
         className="h-auto max-h-[80vh] glass-drawer"
       >
-        <div className="flex-1 w-full px-8 space-y-4 overflow-y-auto pb-12">
+        <div className="flex-1 w-full px-8 space-y-4 overflow-y-auto pb-6">
           {/* هدر با نام شعبه */}
           <div className="flex flex-col items-center space-y-2">
             <h1 className="font-bold text-xl text-center font-[BTitr]">
               {translationsMap.openHours}
             </h1>
-            <Badge
-              variant={"default"}
-              className="text-xs"
-            >
+            <Badge variant={"default"} className="text-xs">
               {statusInfo.message}
             </Badge>
           </div>
@@ -212,7 +205,7 @@ export default function ClockDrawer() {
           <div className="h-px bg-linear-to-r from-transparent dark:via-white via-black to-transparent" />
 
           {/* ساعت شمار معکوس */}
-          <div className="space-y-4 dark:bg-white/5 bg-sidebar rounded-xl p-4 border dark:border-white/10 border-black/10">
+          <div className="space-y-4 dark:bg-card bg-sidebar rounded-xl p-4 border dark:border-white/10 border-black/10">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold text-sm">
                 {translationsMap.hoursRemaining}:
@@ -226,7 +219,9 @@ export default function ClockDrawer() {
             <div className="text-center space-y-2">
               {remainingTime.isOpen ? (
                 <>
-                  <div className={`text-4xl font-bold tracking-wider ${language === "en" ? "font-[Balbek]" : "font-[BTitr]"}`}>
+                  <div
+                    className={`text-4xl font-bold tracking-wider py-1 ${language === "en" ? "font-[Balbek]" : "font-[BTitr]"}`}
+                  >
                     {formatTime(
                       remainingTime.hours,
                       remainingTime.minutes,
@@ -260,21 +255,12 @@ export default function ClockDrawer() {
             {/* نوار پیشرفت */}
             {remainingTime.isOpen && (
               <div className="space-y-2">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between items-center text-xs">
                   <span>8:00 AM</span>
                   {/*  خط جدا کننده  */}
-                  <div className="h-px bg-linear-to-r from-transparent via-white to-transparent" />
-                  <span className="">
-                    {remainingTime.percentage}%{" "}
-                    {language === "en"
-                      ? "passed"
-                      : language === "ar"
-                      ? "انقضت"
-                      : "گذشته"}
-                  </span>
                   <span>11:00 PM</span>
                 </div>
-                {/* <Progress value={remainingTime.percentage} className="h-2 bg-amber-500" /> */}
+                <div className="h-px bg-linear-to-r from-transparent dark:via-white via-black to-transparent" />
               </div>
             )}
           </div>
@@ -296,7 +282,9 @@ export default function ClockDrawer() {
                       ? "كل يوم"
                       : "هر روز"}
                 </div>
-                <div className="dark:text-gray-300 mt-1">8:00 AM - 12:00 PM</div>
+                <div className="dark:text-gray-300 mt-1">
+                  8:00 AM - 12:00 PM
+                </div>
                 <div className="text-xs dark:text-gray-400 mt-1">
                   {language === "en"
                     ? "16 hours"
