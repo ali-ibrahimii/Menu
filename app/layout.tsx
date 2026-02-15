@@ -7,6 +7,7 @@ import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 import { BranchProvider } from "@/contexts/BranchContext";
 import { ThemeProvider } from "@/contexts/ThemeProvider";
 import { Analytics } from "@vercel/analytics/react";
+import AOSProvider from "@/contexts/AOSProvider";
 
 export const metadata: Metadata = {
   // متادیتای اصلی
@@ -251,6 +252,8 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <AOSProvider>
+
         <ThemeProvider>
           <LanguageProvider>
             <BranchProvider>
@@ -262,6 +265,7 @@ export default function RootLayout({
             </BranchProvider>
           </LanguageProvider>
         </ThemeProvider>
+        </AOSProvider>
       </body>
     </html>
   );
