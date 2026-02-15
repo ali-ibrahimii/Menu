@@ -126,7 +126,7 @@ export const metadata: Metadata = {
   },
   
   // آرشیو
-  archive: "none",
+  archives: "none",
   
   // لنگر (anchor)
   assets: ["https://vatandar-menu.vercel.app/assets"],
