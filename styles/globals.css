@@ -212,14 +212,14 @@ html, body {
 
 .side-drawer {
   @apply inline-flex items-center py-10 justify-center border-r border-gray-500
-         transition-transform duration-150 ease-in-out bg-accent overflow-visible dark:bg-[#191919] bg-accent;
+         transition-transform duration-150 ease-in-out overflow-visible;
 
   
 }
 
 .glass-drawer {
-  @apply inline-flex items-center justify-center border-t border-white/50 rounded-t-[44px] text-black
-         transition-transform duration-150 ease-in-out overflow-visible bg-accent dark:text-white dark:bg-[#191919];
+  @apply inline-flex items-center justify-center border-t border-white/50 dark:text-white rounded-t-[44px] text-black
+         transition-transform duration-150 ease-in-out overflow-visible;
 }
 
 .glass-rate-card {

@@ -24,11 +24,6 @@ export const metadata: Metadata = {
     "سفارش غذا",
   ],
 
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fef3c7" }, // رنگ روشن
-    { media: "(prefers-color-scheme: dark)", color: "#1f2937" }, // رنگ تیره
-  ],
-
   robots: {
     index: true, // ⭐ اجازه ایندکس شدن توسط گوگل
     follow: true, // ⭐ اجازه دنبال کردن لینک‌ها

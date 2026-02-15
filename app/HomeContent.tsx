@@ -329,7 +329,7 @@ export default function HomeContent() {
                 <div className="space-y-2">
                   <Link
                     href={"/branches"}
-                    className="block font-medium p-2.5 px-8 bg-black rounded-full text-center text-white"
+                    className="block font-medium p-2.5 px-8 dark:bg-white bg-black rounded-full text-center text-white dark:text-black"
                     onClick={() => clearSelectedBranch()}
                   >
                     {t("change")} / {t("selectBranch")}

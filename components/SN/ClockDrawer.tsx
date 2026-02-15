@@ -194,7 +194,7 @@ export default function ClockDrawer() {
         dir={language === "en" ? "ltr" : "rtl"}
         className="h-auto max-h-[80vh] glass-drawer"
       >
-        <div className="flex-1 space-y-4 overflow-y-auto px-2 pb-12">
+        <div className="flex-1 w-full px-8 space-y-4 overflow-y-auto pb-12">
           {/* هدر با نام شعبه */}
           <div className="flex flex-col items-center space-y-2">
             <h1 className="font-bold text-xl text-center font-[BTitr]">
@@ -212,10 +212,10 @@ export default function ClockDrawer() {
           <div className="h-px bg-linear-to-r from-transparent dark:via-white via-black to-transparent" />
 
           {/* ساعت شمار معکوس */}
-          <div className="space-y-4 dark:bg-white/5 bg-black/10 rounded-xl p-4 border dark:border-white/10 border-black/10">
+          <div className="space-y-4 dark:bg-white/5 bg-sidebar rounded-xl p-4 border dark:border-white/10 border-black/10">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold text-sm">
-                {translationsMap.hoursRemaining}
+                {translationsMap.hoursRemaining}:
               </h3>
               <Badge variant="default" className="text-xs">
                 {translationsMap.today}
@@ -226,7 +226,7 @@ export default function ClockDrawer() {
             <div className="text-center space-y-2">
               {remainingTime.isOpen ? (
                 <>
-                  <div className="text-4xl font-bold tracking-wider font-mono">
+                  <div className={`text-4xl font-bold tracking-wider ${language === "en" ? "font-[Balbek]" : "font-[BTitr]"}`}>
                     {formatTime(
                       remainingTime.hours,
                       remainingTime.minutes,
@@ -264,14 +264,14 @@ export default function ClockDrawer() {
                   <span>8:00 AM</span>
                   {/*  خط جدا کننده  */}
                   <div className="h-px bg-linear-to-r from-transparent via-white to-transparent" />
-                  {/* <span className="text-gray-300">
+                  <span className="">
                     {remainingTime.percentage}%{" "}
                     {language === "en"
                       ? "passed"
                       : language === "ar"
                       ? "انقضت"
                       : "گذشته"}
-                  </span> */}
+                  </span>
                   <span>11:00 PM</span>
                 </div>
                 {/* <Progress value={remainingTime.percentage} className="h-2 bg-amber-500" /> */}
@@ -284,10 +284,10 @@ export default function ClockDrawer() {
             <h3 className="font-semibold text-sm">
               {translationsMap.openHours}
             </h3>
-            <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="grid grid-cols- gap-2 text-sm">
               <div
                 dir={language === "fa" || "ar" ? "ltr" : ""}
-                className="dark:bg-white/5 bg-black/10 rounded-lg p-3 text-center"
+                className="dark:bg-white/5 bg-sidebar border rounded-lg p-3 text-center"
               >
                 <div className="font-semibold">
                   {language === "en"
@@ -303,26 +303,6 @@ export default function ClockDrawer() {
                     : language === "ar"
                       ? "16 ساعة"
                       : "۱۶ ساعت"}
-                </div>
-              </div>
-              <div
-                dir={language === "fa" || "ar" ? "ltr" : ""}
-                className="dark:bg-white/5 bg-black/10 rounded-lg p-3 text-center"
-              >
-                <div className="font-semibold">
-                  {language === "en"
-                    ? "Kitchen closes"
-                    : language === "ar"
-                      ? "المطبخ يغلق"
-                      : "آشپزخانه می‌بندد"}
-                </div>
-                <div className="dark:text-gray-300 mt-1">11:30 PM</div>
-                <div className="text-xs dark:text-gray-400 mt-1">
-                  {language === "en"
-                    ? "Last order time"
-                    : language === "ar"
-                      ? "آخر وقت طلب"
-                      : "آخرین زمان سفارش"}
                 </div>
               </div>
             </div>

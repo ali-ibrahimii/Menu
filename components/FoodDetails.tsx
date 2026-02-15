@@ -110,14 +110,18 @@ export default function FoodDetails({
       <DrawerContent className="h-[90vh] glass-drawer">
         <div
           dir={language === "en" ? "ltr" : "rtl"}
-          className="flex-1 overflow-y-auto dark:text-white"
+          className="flex-1 overflow-y-auto"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden">
             {/* بخش تصاویر */}
             <div className="relative mb-2 p-2 rounded-3xl overflow-hidden">
               {/* تصویر اصلی */}
               <div className="w-full h-90 rounded-3xl overflow-hidden">
-                <img
+                <Image
+                  width={120}
+                  height={120}
+                  quality={70}
+                  loading="lazy"
                   src={images[selectedImageIndex]}
                   alt={getFoodName(food)}
                   className="w-full h-full object-cover"
@@ -145,6 +149,8 @@ export default function FoodDetails({
                               <Image
                                 width={120}
                                 height={120}
+                                quality={40}
+                                loading="lazy"
                                 src={image}
                                 alt={`${getFoodName(food)} ${index + 1}`}
                                 className="w-full h-full object-cover"
@@ -172,7 +178,7 @@ export default function FoodDetails({
               <div>
                 <div className="mb-3">
                   <div className="flex justify-between items-center">
-                    <Badge variant="secondary" className="text-[11px]">
+                    <Badge variant="default" className="text-[11px]">
                       {food.category}
                     </Badge>
 
@@ -181,7 +187,7 @@ export default function FoodDetails({
                         <div className="flex items-center gap-1">
                           <Star
                             size={14}
-                            className="fill-yellow-400 text-yellow-400"
+                            className="fill-yellow-500 text-yellow-400"
                           />
                           <span className="text-[11px] font-semibold">
                             {ratingStats.averageRating.toFixed(1)}
@@ -194,16 +200,12 @@ export default function FoodDetails({
                     )}
                   </div>
                   <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">
-                      {getFoodName(food)}
-                    </h1>
+                    <h1 className="text-2xl font-bold">{getFoodName(food)}</h1>
                     <div
                       className={`${language === "en" ? "text-right" : "text-left"}`}
                     >
                       <Badge
-                        variant={
-                          food.is_available ? "default" : "destructive"
-                        }
+                        variant={food.is_available ? "default" : "destructive"}
                         className=""
                       >
                         {food.is_available ? t("available") : t("notAvailable")}
@@ -240,7 +242,7 @@ export default function FoodDetails({
                   {food.tags && (
                     <Badge
                       // variant="secondary"
-                      className="flex items-center rounded-full border border-white/10 bg-amber-300/15 gap-1 text-[12px]"
+                      className="flex items-center rounded-full border border-white/10 dark:white text-foreground bg-purple-500/70 gap-1 text-[12px]"
                     >
                       <Tag size={14} />
                       {food.tags.join(", ")}
@@ -271,17 +273,17 @@ export default function FoodDetails({
                   {getFoodDescription(food).length > 200 && (
                     <button
                       onClick={toggleDescription}
-                      className="flex items-center gap-1.5 mt-2 text-green-300 hover:text-green-200 font-medium transition-colors"
+                      className="flex items-center gap-1.5 mt-2 text-sm text-green-700 hover:text-green-500 transition-colors"
                     >
                       {isExpanded ? (
                         <>
                           <ChevronUp size={16} />
-                          {t("showLess")}
+                          {getDescriptionButtonText()}
                         </>
                       ) : (
                         <>
                           <ChevronDown size={16} />
-                          {t("showMore")}
+                          {getDescriptionButtonText()}
                         </>
                       )}
                     </button>
@@ -291,7 +293,6 @@ export default function FoodDetails({
 
               {/* مشخصات فنی */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-
                 {food.cooking_time && (
                   <div className="flex justify-center items-center p-2 space-x-3 bg-black/5 border-black/15 dark:bg-white/5 rounded-md border dark:border-white/10">
                     <div className="">

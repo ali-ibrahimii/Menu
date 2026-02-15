@@ -96,13 +96,11 @@ export default function RatingSystem({
     return translations[language][key as keyof typeof translations.fa] || key;
   };
 
-  // محاسبه میانگین امتیاز
   const averageRating =
     reviews.length > 0
       ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
       : 0;
 
-  // ✅ تابع برای ارسال آمار به parent component
   const updateRatingStats = () => {
     if (onRatingStatsChange) {
       onRatingStatsChange({
@@ -112,7 +110,6 @@ export default function RatingSystem({
     }
   };
 
-  // ✅ بارگذاری نظرات
   const loadReviews = async () => {
     try {
       setLoadingReviews(true);
@@ -137,7 +134,6 @@ export default function RatingSystem({
     }
   }, [foodId]);
 
-  // ✅ ارسال آمار هنگام تغییر reviews
   useEffect(() => {
     updateRatingStats();
   }, [reviews]);
@@ -199,7 +195,7 @@ export default function RatingSystem({
 
       {/* فرم ثبت نظر */}
       {showReviewForm && (
-        <div className=" rounded-xl border p-6 space-y-4">
+        <div className=" rounded-xl border bg-accent dark:bg-card p-6 space-y-4">
           <h3 className="text-lg font-semibold">{t("addReview")}</h3>
 
           <div className="space-y-2">
@@ -217,7 +213,7 @@ export default function RatingSystem({
                     className={`${
                       star <= rating
                         ? "fill-yellow-600 text-yellow-700"
-                        : ""
+                        : "text-gray-400"
                     } hover:text-yellow-400 transition-colors`}
                   />
                 </button>
@@ -264,13 +260,14 @@ export default function RatingSystem({
             <Button
               onClick={submitReview}
               disabled={submitting}
-              className="flex-1 dark:bg-white/5 rounded-md p-3 border"
+              className="flex-1 dark:bg-white rounded-md p-3 border"
             >
               <Send size={16} className="" />
               {submitting ? t("submitting") : t("submit")}
             </Button>
             <Button
-            className="dark:bg-white/5 rounded-md p-3 border dark:border-white/10"
+            variant={'outline'}
+            className=""
               
               onClick={() => setShowReviewForm(false)}
               disabled={submitting}
@@ -286,7 +283,7 @@ export default function RatingSystem({
         <h3 className="text-xl font-bold">{t("reviews")}</h3>
 
         {loadingReviews ? (
-          <div className="text-center py-8">
+          <div className="flex justify-center items-center text-center py-8">
             <Loader />
           </div>
         ) : reviews.length === 0 ? (

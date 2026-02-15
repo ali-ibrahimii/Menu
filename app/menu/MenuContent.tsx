@@ -1,5 +1,16 @@
 "use client";
 
+// app/menu/page.tsx
+import type { Metadata } from 'next'
+
+// متادیتای معمولی (عنوان، توضیحات و ...)
+export const metadata: Metadata = {
+  title: 'منو رستوران',
+  description: 'منوی کامل رستوران',
+}
+
+
+
 import {
   useId,
   useState,
@@ -32,25 +43,6 @@ import { Button } from "@/components/ui/button";
 import AddToCartButton from "@/components/AddToCartButton";
 import { useRouter } from "next/navigation";
 
-// ==================== تابع debounce اختصاصی ====================
-function useDebounce<T extends (...args: any[]) => any>(
-  callback: T,
-  delay: number,
-): (...args: Parameters<T>) => void {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  return useCallback(
-    (...args: Parameters<T>) => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      timeoutRef.current = setTimeout(() => {
-        callback(...args);
-      }, delay);
-    },
-    [callback, delay],
-  );
-}
 
 // ==================== کامپوننت کارت غذا ====================
 const FoodCard = memo(function FoodCard({
@@ -85,7 +77,7 @@ const FoodCard = memo(function FoodCard({
           )}
           {imageError ? (
             <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
-              <span className="text-xs text-gray-500">خطا</span>
+              <span className="text-xs text-gray-500"></span>
             </div>
           ) : (
             <Image
@@ -117,7 +109,7 @@ const FoodCard = memo(function FoodCard({
               {getIngredients(food).toString()}
             </p>
           )}
-          <span className="text-[13px] font-bold text-yellow-500 mt-1 inline-block">
+          <span className="text-[13px] font-bold text-green-600 mt-1 inline-block">
             {food.price.toLocaleString()} {t("price")}
           </span>
         </div>
@@ -368,6 +360,33 @@ export default function Home() {
     });
   }, [groupedFoods, categories]);
 
+const getCategoryName = useCallback((slug: string) => {
+  if (!slug || slug === "uncategorized") {
+    return language === "en" ? "Uncategorized" : language === "ar" ? "غير مصنف" : "دسته‌بندی نشده";
+  }
+
+  const category = categories.find(cat => cat.slug?.trim().toLowerCase() === slug?.trim().toLowerCase());
+  
+  if (!category) {
+    return slug
+      .split("-")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
+
+  // برگردوندن اسم بر اساس زبان
+  switch (language) {
+    case "en":
+      return category.name || slug;
+    case "ar":
+      return category.name_ar || category.name || slug;
+    case "fa":
+      return category.name || category.name || slug;
+    default:
+      return category.name || slug;
+  }
+}, [categories, language]);
+
   // ========== رندر ==========
   if (loading) {
     return (
@@ -446,18 +465,18 @@ export default function Home() {
       </div>
 
       {/* دسته‌بندی‌ها */}
-      <div className="mt-3 sticky top-0 z-50">
+      <div className="mt-3 z-50">
         <ScrollArea
           dir={language === "en" ? "ltr" : "rtl"}
-          className="rounded-md flex whitespace-nowrap"
+          className="flex whitespace-nowrap"
         >
           <div className="flex space-x-2 pb-2">
             <Button
               onClick={() => handleCategoryClick(null)}
               className={`${
                 selectedCategory === null
-                  ? "dark:bg-white rounded-full dark:text-black"
-                  : "bg-transparent border dark:text-white rounded-full text-black"
+                  ? "dark:bg-white rounded-full dark:text-black transition-transform duration-100 ease-in-out overflow-hidden"
+                  : "bg-transparent border dark:text-white rounded-full text-black transition-transform duration-150 ease-in-out overflow-hidden"
               } text-[13px] min-w-max transition-colors duration-150`}
             >
               {t("allFoods")}
@@ -471,8 +490,8 @@ export default function Home() {
                 }
                 className={`${
                   selectedCategory === category.slug?.trim()
-                    ? "dark:bg-white rounded-full dark:text-black border"
-                    : "bg-transparent border dark:text-white rounded-full text-black"
+                    ? "dark:bg-white rounded-full dark:text-black border transition-transform duration-150 ease-in-out overflow-hidden"
+                    : "bg-transparent border dark:text-white rounded-full text-black transition-transform duration-150 ease-in-out overflow-hidden"
                 } text-[13px] min-w-max transition-colors duration-150`}
               >
                 {language === "en"
@@ -517,7 +536,7 @@ export default function Home() {
             {sortedCategories.length > 0 ? (
               sortedCategories.map(([categorySlug, categoryFoods]) => (
                 <div key={categorySlug} className="space-y-4">
-                  <h2 className="text-xl font-bold">{categorySlug}</h2>
+                  <h2 className="font-bold font-[BTitr]">{getCategoryName(categorySlug)}</h2>
                   <div className="h-px bg-linear-to-r from-transparent via-black dark:via-gray-200 to-transparent" />
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                     {categoryFoods.map((food) => (

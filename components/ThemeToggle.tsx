@@ -20,13 +20,13 @@ export default function ThemeToggle() {
   }
 
   return (
-    <div className="flex items-center justify-evenly bg-black backdrop-blur-sm rounded-full p-1">
+    <div className="flex items-center justify-evenly bg-black dark:bg-card-foreground backdrop-blur-sm rounded-full p-1">
       <button
         onClick={() => setTheme("light")}
         className={`p-2 rounded-full transition-all ${
           theme === "light"
             ? "bg-white text-gray-900"
-            : "text-gray-300 hover:bg-white/10"
+            : "text-background hover:bg-white/10"
         }`}
         aria-label="حالت روز"
       >
@@ -50,7 +50,7 @@ export default function ThemeToggle() {
         className={`p-2 rounded-full transition-all ${
           theme === "system"
             ? "bg-blue-500 text-white"
-            : "text-gray-300 hover:bg-white/10"
+            : "dark:text-black text-accent hover:bg-gray-800"
         }`}
         aria-label="حالت سیستم"
       >
