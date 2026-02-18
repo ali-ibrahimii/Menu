@@ -24,16 +24,20 @@ import Link from "next/link";
 import { useBranch } from "@/contexts/BranchContext";
 import Loader from "@/components/Loader";
 import Image from "next/image";
-import { LightRays } from "@/components/ui/light-rays";
 import { DotPattern } from "@/components/ui/dot-pattern";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, SearchIcon, ChevronLeft } from "lucide-react";
+import { SearchIcon, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddToCartButton from "@/components/AddToCartButton";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  AnimatePresence,
+} from "framer-motion";
 
-// ==================== کامپوننت کارت غذا با انیمیشن ====================
+// ==================== کامپوننت کارت غذا ====================
 const FoodCard = memo(function FoodCard({
   food,
   language,
@@ -53,56 +57,30 @@ const FoodCard = memo(function FoodCard({
 }) {
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
-  const [direction, setDirection] = useState<'up' | 'down'>('down');
-  const prevScrollY = useRef(0);
 
-  // تشخیص جهت اسکرول
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > prevScrollY.current) {
-        setDirection('down');
-      } else if (currentScrollY < prevScrollY.current) {
-        setDirection('up');
-      }
-      prevScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // انیمیشن بر اساس جهت اسکرول
-  const getInitialPosition = () => {
-    if (direction === 'down') {
-      return { opacity: 0, y: 50 }; // از پایین میاد
-    } else {
-      return { opacity: 0, y: -50 }; // از بالا میاد
-    }
-  };
-  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{
-        once: false,
+      viewport={{ 
+        once: false, // مهم: اجازه اجرای مجدد انیمیشن
         margin: "-30px",
-        amount: 0.2,
+        amount: 0.1
       }}
-      transition={{
-        duration: 0.4,
+      transition={{ 
+        duration: 0.3, 
         delay: Math.min(index * 0.02, 0.2),
-        ease: "easeOut" // cubic-bezier برای انیمیشن نرم‌تر
+        ease: "easeOut"
       }}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       dir={language === "en" ? "ltr" : "rtl"}
       className="relative flex items-center w-full h-34 glass-card-3d bg-accent dark:bg-[#191919] border dark: backdrop-blur-[2px] rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer will-change-transform"
       onClick={() => handleFoodClick(food)}
-      style={{ transform: "translateZ(0)" }}
+      style={{ transform: "translateZ(0)"}}
       layout
     >
+      {/* بقیه کدهای FoodCard بدون تغییر */}
       <div className="w-4/12 h-full z-10 rounded-2xl p-[1.5px] bg-[linear-gradient(130deg,#d62828_0%,transparent_35%),linear-gradient(-45deg,#d62828_0%,transparent_35%)]">
         <div className="w-full h-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
           {isImageLoading && !imageError && (
@@ -171,18 +149,14 @@ const FoodCard = memo(function FoodCard({
 
 FoodCard.displayName = "FoodCard";
 
-// ==================== کامپوننت دسته‌بندی با انیمیشن ====================
+// ==================== کامپوننت دکمه دسته‌بندی ====================
 const CategoryButton = memo(function CategoryButton({
-  category,
   isSelected,
   onClick,
-  language,
   children,
 }: {
-  category: Category | null;
   isSelected: boolean;
   onClick: () => void;
-  language: string;
   children: React.ReactNode;
 }) {
   return (
@@ -216,15 +190,14 @@ export default function Home() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const searchTerm = useDeferredValue(searchInput);
-  const [isDataFetched, setIsDataFetched] = useState(false);
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
 
   // ========== توابع ترجمه ==========
   const t = useCallback(
     (key: string) => {
-      const langTranslations = translations[language] as Record<string, string>;
-      return langTranslations[key] || key;
+      const langTranslations = translations[language as keyof typeof translations];
+      return langTranslations[key as keyof typeof langTranslations] || key;
     },
     [language],
   );
@@ -298,38 +271,25 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  // ========== گرفتن اطلاعات از دیتابیس با کش ==========
+  // ========== گرفتن اطلاعات از دیتابیس بر اساس شعبه ==========
   useEffect(() => {
     let isMounted = true;
 
     const fetchData = async () => {
-      if (isDataFetched) return;
-
       try {
         setLoading(true);
 
-        // بررسی کش محلی
-        const cachedFoods = sessionStorage.getItem("cached_foods");
-        const cachedCategories = sessionStorage.getItem("cached_categories");
-        const cacheTimestamp = sessionStorage.getItem("cache_timestamp");
-        const cacheAge = cacheTimestamp
-          ? Date.now() - parseInt(cacheTimestamp)
-          : Infinity;
-
-        if (cachedFoods && cachedCategories && cacheAge < 5 * 60 * 1000) {
-          // 5 دقیقه
-          setFoods(JSON.parse(cachedFoods));
-          setCategories(JSON.parse(cachedCategories));
-          setIsDataFetched(true);
-          setLoading(false);
-          return;
-        }
+        // پاک کردن کش قبلی
+        sessionStorage.removeItem("cached_foods");
+        sessionStorage.removeItem("cached_categories");
+        sessionStorage.removeItem("cache_timestamp");
 
         let foodsQuery = supabase
           .from("foods")
           .select("*")
           .eq("is_available", true);
 
+        // فیلتر بر اساس شعبه انتخاب شده
         if (selectedBranch?.id) {
           foodsQuery = foodsQuery.or(
             `branch_id.eq.${selectedBranch.id},branch_id.is.null`,
@@ -361,15 +321,22 @@ export default function Home() {
             name_ar: cat.name_ar || "",
           }));
           setCategories(cleanedCategories);
-          setIsDataFetched(true);
 
-          // ذخیره در کش
-          sessionStorage.setItem("cached_foods", JSON.stringify(cleanedFoods));
-          sessionStorage.setItem(
-            "cached_categories",
-            JSON.stringify(cleanedCategories),
-          );
-          sessionStorage.setItem("cache_timestamp", Date.now().toString());
+          // ذخیره در کش با کلید مخصوص هر شعبه
+          if (selectedBranch?.id) {
+            sessionStorage.setItem(
+              `cached_foods_${selectedBranch.id}`,
+              JSON.stringify(cleanedFoods),
+            );
+            sessionStorage.setItem(
+              `cached_categories_${selectedBranch.id}`,
+              JSON.stringify(cleanedCategories),
+            );
+            sessionStorage.setItem(
+              `cache_timestamp_${selectedBranch.id}`,
+              Date.now().toString(),
+            );
+          }
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -378,11 +345,40 @@ export default function Home() {
       }
     };
 
-    fetchData();
+    // بررسی کش مخصوص هر شعبه
+    const checkCache = () => {
+      if (!selectedBranch?.id) return false;
+
+      const cachedFoods = sessionStorage.getItem(
+        `cached_foods_${selectedBranch.id}`,
+      );
+      const cachedCategories = sessionStorage.getItem(
+        `cached_categories_${selectedBranch.id}`,
+      );
+      const cacheTimestamp = sessionStorage.getItem(
+        `cache_timestamp_${selectedBranch.id}`,
+      );
+      const cacheAge = cacheTimestamp
+        ? Date.now() - parseInt(cacheTimestamp)
+        : Infinity;
+
+      if (cachedFoods && cachedCategories && cacheAge < 5 * 60 * 1000) {
+        setFoods(JSON.parse(cachedFoods));
+        setCategories(JSON.parse(cachedCategories));
+        setLoading(false);
+        return true;
+      }
+      return false;
+    };
+
+    if (!checkCache()) {
+      fetchData();
+    }
+
     return () => {
       isMounted = false;
     };
-  }, [selectedBranch]);
+  }, [selectedBranch?.id]); // وابستگی به selectedBranch
 
   // ========== فیلترها ==========
   const filteredFoodsBySearch = useMemo(() => {
@@ -517,7 +513,7 @@ export default function Home() {
       ref={containerRef}
       className="relative w-full min-h-screen px-5 dark:text-gray-200 py-2 pt-5 overflow-y-auto touch-pan-y"
     >
-      {/* الگوهای تزئینی */}
+      {/* بقیه کدهای JSX بدون تغییر */}
       <div className="fixed inset-0 -z-[1px] top-1/2 -left-1/2 -translate-y-1/2 -translate-x-1/2 flex h-[500px] w-full">
         <DotPattern
           glow={true}
@@ -527,7 +523,7 @@ export default function Home() {
         />
       </div>
 
-      {/* هدر با انیمیشن */}
+      {/* هدر */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -538,7 +534,9 @@ export default function Home() {
         <h1
           className={`${language === "en" ? "font-[Balbek]" : "font-[BTitr]"}`}
         >
-          {t("menu")}
+          {t("menu")}{" "}
+          {selectedBranch &&
+            `- ${selectedBranch.name_fa || selectedBranch.name_en}`}
         </h1>
         <Link href="/" prefetch={true}>
           <motion.button
@@ -554,7 +552,7 @@ export default function Home() {
         </Link>
       </motion.div>
 
-      {/* جستجو با انیمیشن */}
+      {/* جستجو */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -586,7 +584,7 @@ export default function Home() {
         </div>
       </motion.div>
 
-      {/* دسته‌بندی‌ها با انیمیشن */}
+      {/* دسته‌بندی‌ها */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -599,10 +597,8 @@ export default function Home() {
         >
           <div className="flex space-x-2 pb-2">
             <CategoryButton
-              category={null}
               isSelected={selectedCategory === null}
               onClick={() => handleCategoryClick(null)}
-              language={language}
             >
               {t("allFoods")}
             </CategoryButton>
@@ -617,12 +613,10 @@ export default function Home() {
                   transition={{ delay: index * 0.03 }}
                 >
                   <CategoryButton
-                    category={category}
                     isSelected={selectedCategory === category.slug?.trim()}
                     onClick={() =>
                       handleCategoryClick(category.slug?.trim() || null)
                     }
-                    language={language}
                   >
                     {language === "en"
                       ? category.slug
@@ -641,7 +635,7 @@ export default function Home() {
         </ScrollArea>
       </motion.div>
 
-      {/* کارت‌های غذا با انیمیشن */}
+      {/* کارت‌های غذا */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
