@@ -104,8 +104,7 @@ html, body {
 
 
 .glass-card-3d {
-  @apply relative rounded-2xl transition-all duration-50 
-         hover:-translate-y-2 hover:shadow-2xl overflow-hidden;
+  @apply relative rounded-2xl transition-all duration-50 overflow-hidden;
   
   /* افکت سه‌بعدی با چند لایه سایه */
   box-shadow: 
@@ -131,8 +130,7 @@ html, body {
 }
 
 .glass-cart {
-  @apply relative transition-all duration-50 
-         hover:-translate-y-2 hover:shadow-2xl overflow-hidden;
+  @apply relative transition-all duration-50 overflow-hidden;
   
   /* افکت سه‌بعدی با چند لایه سایه */
   box-shadow: 

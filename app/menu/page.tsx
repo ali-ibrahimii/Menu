@@ -494,16 +494,19 @@ export default function Home() {
         >
           {t("menu")}
         </h1>
-        <Link href="/" prefetch={true}>
           <button
-            className="border rounded-full bg-accent dark:bg-[#191919] dark:text-white p-2"
-          >
+            className="border rounded-full bg-accent dark:bg-[#191919] dark:text-white p-2 active:scale-95 transition-transform duration-75"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              router.push("/");
+            }
+          }>
             <ChevronLeft
               size={20}
               className={`${language === "en" ? "rotate-180" : ""}`}
             />
           </button>
-        </Link>
       </div>
 
       {/* جستجو */}

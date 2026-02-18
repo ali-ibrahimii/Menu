@@ -31,6 +31,7 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
+import Image from "next/image";
 
 // تابع ایجاد شناسه دستگاه (همان تابع قبلی)
 const getDeviceId = () => {
@@ -181,10 +182,12 @@ export default function CartDrawer() {
         dir={language === "en" ? "ltr" : "rtl"}
       >
         <DrawerHeader>
-          <DrawerTitle className="flex items-center justify-center">
+          <DrawerTitle className="flex items-center justify-center font-[BTitr] text-lg gap-2">
             {t("shoppingCart")}
           </DrawerTitle>
-          <DrawerDescription className="">{t("cartDescription")}</DrawerDescription>
+          <DrawerDescription className="">
+            {t("cartDescription")}
+          </DrawerDescription>
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-3 w-full py-4 space-y-4">
@@ -202,10 +205,14 @@ export default function CartDrawer() {
                     key={item.id}
                     className="relative flex items-center w-full p-2 gap-2 glass-cart bg-accent dark:bg-[#191919] border rounded-2xl overflow-hidden cursor-pointer"
                   >
-                    <img
+                    <Image
+                      width={120}
+                      height={120}
                       src={item.image_url}
                       alt={getFoodName(item)}
                       className="w-12 h-12 rounded-md object-cover"
+                      loading="lazy"
+                      quality={70}
                     />
 
                     <div className="flex-1">

@@ -291,7 +291,7 @@ export default function RatingSystem({
         ) : (
           <div className="space-y-4">
             {reviews.map((review) => (
-              <div key={review.id} className="bg-white/5 rounded-lg border border-white/10 p-4">
+              <div key={review.id} className="bg-sidebar rounded-lg border glass-card-3d p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h4 className="font-semibold">{review.customer_name}</h4>
