@@ -419,14 +419,16 @@ export default function HomeContent() {
           {/* </div> */}
 
           {/* دکمه مشاهده منو */}
+          <Link href={`/menu?branch=${selectedBranch.slug}`} prefetch={true}>
           <button
-            onClick={handleNavigate}
+            // onClick={handleNavigate}
             className="w-full flex justify-center bg-white/4 glass-button"
-          >
+            >
             <div className={`${language === "en" ? "" : ""} py-2 w-full `}>
               {t("viewMenu")}
             </div>
           </button>
+            </Link>
         </div>
       </div>
     </main>

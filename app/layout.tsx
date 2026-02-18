@@ -8,33 +8,33 @@ import { BranchProvider } from "@/contexts/BranchContext";
 import { ThemeProvider } from "@/contexts/ThemeProvider";
 import { Analytics } from "@vercel/analytics/react";
 import AOSProvider from "@/contexts/AOSProvider";
+import Providers from "@/contexts/providers";
 
 export const metadata: Metadata = {
   // متادیتای اصلی
   metadataBase: new URL("https://vatandar-menu.vercel.app"),
-  
+
   title: {
     default: "رستوران وطندار | منوی دیجیتال",
     template: "%s | رستوران وطندار مشهد",
   },
-  
-  description: "منوی آنلاین رستوران وطندار مشهد | سفارش غذاهای ایرانی، افغانی، صبحانه، نوشیدنی‌های گرم و سرد با بهترین کیفیت و قیمت مناسب",
-  
+
+  description:
+    "منوی آنلاین رستوران وطندار مشهد | سفارش غذاهای ایرانی، افغانی، صبحانه، نوشیدنی‌های گرم و سرد با بهترین کیفیت و قیمت مناسب",
+
   // آیکون‌ها
   icons: {
     icon: [
       { url: "/logo1.png", sizes: "32x32", type: "image/png" },
       { url: "/logo1.png", sizes: "16x16", type: "image/png" },
     ],
-    apple: [
-      { url: "/logo1.png", sizes: "180x180", type: "image/png" },
-    ],
+    apple: [{ url: "/logo1.png", sizes: "180x180", type: "image/png" }],
     shortcut: "/logo1.png",
   },
-  
+
   // منیفست برای PWA
   manifest: "/manifest.json",
-  
+
   // کلیدواژه‌های جامع
   keywords: [
     "رستوران مشهد",
@@ -60,23 +60,24 @@ export const metadata: Metadata = {
     "تولد در رستوران مشهد",
     "رزرو میز رستوران مشهد",
   ],
-  
+
   // نویسنده و تولیدکننده
   authors: [{ name: "Ali Ibrahimi", url: "https://github.com/ali-ibrahimii" }],
   creator: "Ali Ibrahimi",
   publisher: "Vatandar Restaurant",
-  
+
   // قالب
   formatDetection: {
     email: false,
     address: true,
     telephone: true,
   },
-  
+
   // متادیتای شبکه‌های اجتماعی
   openGraph: {
     title: "رستوران وطندار | منوی دیجیتال ",
-    description: "سفارش آنلاین انواع غذاهای ایرانی، افغانی، صبحانه و نوشیدنی در رستوران وطندار مشهد",
+    description:
+      "سفارش آنلاین انواع غذاهای ایرانی، افغانی، صبحانه و نوشیدنی در رستوران وطندار مشهد",
     url: "https://vatandar-menu.vercel.app",
     siteName: "رستوران وطندار",
     images: [
@@ -90,7 +91,7 @@ export const metadata: Metadata = {
     locale: "fa_IR",
     type: "website",
   },
-  
+
   // توییتر کارت
   twitter: {
     card: "summary_large_image",
@@ -99,7 +100,7 @@ export const metadata: Metadata = {
     images: ["/twitter-image.jpg"], // تصویر مخصوص توییتر
     creator: "@watandar", // اگر توییتر داری
   },
-  
+
   // ربات‌ها و ایندکس کردن
   robots: {
     index: true,
@@ -114,7 +115,7 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  
+
   // تأییدیه‌ها
   verification: {
     google: "googleec72074d61f7d798", // کد تأیید گوگل سرچ کنسول
@@ -122,19 +123,19 @@ export const metadata: Metadata = {
     yahoo: "yahoo-verification-code", // برای یاهو (اختیاری)
     other: {
       "google-site-verification": "googleec72074d61f7d798",
-      "me": ["ali-ibrahimii@example.com"],
+      me: ["ali-ibrahimii@example.com"],
     },
   },
-  
+
   // آرشیو
   archives: "none",
-  
+
   // لنگر (anchor)
   assets: ["https://vatandar-menu.vercel.app/assets"],
-  
+
   // کتابخانه
   bookmarks: "https://vatandar-menu.vercel.app",
-  
+
   // کاننیکال
   alternates: {
     canonical: "https://vatandar-menu.vercel.app",
@@ -144,24 +145,24 @@ export const metadata: Metadata = {
       "ar-SA": "https://vatandar-menu.vercel.app/ar",
     },
   },
-  
+
   // اعتبارسنجی
   category: "restaurant",
-  
+
   // طبقه‌بندی
   classification: "Restaurant, Food Delivery, Online Menu",
-  
+
   // سایر متا تگ‌های مفید
   other: {
     "geo.region": "IR-09", // استان خراسان رضوی
     "geo.placename": "Mashhad",
     "geo.position": "36.299265;59.640879", // مختصات رستوران
-    "ICBM": "36.299265, 59.640879",
-    "language": "fa",
-    "rating": "4.5",
-    "target": "all",
-    "audience": "all",
-    "distribution": "global",
+    ICBM: "36.299265, 59.640879",
+    language: "fa",
+    rating: "4.5",
+    target: "all",
+    audience: "all",
+    distribution: "global",
     "revisit-after": "1 days",
   },
 };
@@ -189,34 +190,42 @@ export default function RootLayout({
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Restaurant",
-    "name": "رستوران وطندار",
-    "image": "https://vatandar-menu.vercel.app/logo1.png",
-    "url": "https://vatandar-menu.vercel.app",
-    "telephone": "+98-513-xxx-xxxx", // شماره تلفن واقعی
-    "address": {
+    name: "رستوران وطندار",
+    image: "https://vatandar-menu.vercel.app/logo1.png",
+    url: "https://vatandar-menu.vercel.app",
+    telephone: "+98-513-xxx-xxxx", // شماره تلفن واقعی
+    address: {
       "@type": "PostalAddress",
-      "streetAddress": "آدرس دقیق رستوران",
-      "addressLocality": "مشهد",
-      "addressRegion": "خراسان رضوی",
-      "addressCountry": "IR"
+      streetAddress: "آدرس دقیق رستوران",
+      addressLocality: "مشهد",
+      addressRegion: "خراسان رضوی",
+      addressCountry: "IR",
     },
-    "geo": {
+    geo: {
       "@type": "GeoCoordinates",
-      "latitude": 36.299265,
-      "longitude": 59.640879
+      latitude: 36.299265,
+      longitude: 59.640879,
     },
-    "openingHoursSpecification": [
+    openingHoursSpecification: [
       {
         "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-        "opens": "08:00",
-        "closes": "23:00"
-      }
+        dayOfWeek: [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ],
+        opens: "08:00",
+        closes: "23:00",
+      },
     ],
-    "menu": "https://vatandar-menu.vercel.app/menu",
-    "acceptsReservations": "True",
-    "priceRange": "$$",
-    "servesCuisine": ["Iranian", "Afghan", "International"]
+    menu: "https://vatandar-menu.vercel.app/menu",
+    acceptsReservations: "True",
+    priceRange: "$$",
+    servesCuisine: ["Iranian", "Afghan", "International"],
   };
 
   return (
@@ -227,7 +236,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        
+
         {/* Font Preload */}
         <link
           rel="preload"
@@ -236,36 +245,51 @@ export default function RootLayout({
           type="font/ttf"
           crossOrigin="anonymous"
         />
-        
+
         {/* Favicon for all platforms */}
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#d62828" />
         <meta name="msapplication-TileColor" content="#d62828" />
         <meta name="theme-color" content="#d62828" />
-        
+
         {/* Additional SEO */}
-        <meta 
-          name="google-site-verification" 
-          content="googleec72074d61f7d798" 
+        <meta
+          name="google-site-verification"
+          content="googleec72074d61f7d798"
         />
       </head>
       <body>
-        <AOSProvider>
-
-        <ThemeProvider>
-          <LanguageProvider>
-            <BranchProvider>
-              <AdminAuthProvider>
-                <Toaster position="top-center" />
-                {children}
-                <Analytics /> {/* برای آنالیز بازدیدها (اختیاری) */}
-              </AdminAuthProvider>
-            </BranchProvider>
-          </LanguageProvider>
-        </ThemeProvider>
-        </AOSProvider>
+        <Providers>
+          <AOSProvider>
+            <ThemeProvider>
+              <LanguageProvider>
+                <BranchProvider>
+                  <AdminAuthProvider>
+                    <Toaster position="top-center" />
+                    {children}
+                    <Analytics /> {/* برای آنالیز بازدیدها (اختیاری) */}
+                  </AdminAuthProvider>
+                </BranchProvider>
+              </LanguageProvider>
+            </ThemeProvider>
+          </AOSProvider>
+        </Providers>
       </body>
     </html>
   );
