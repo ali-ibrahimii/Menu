@@ -62,22 +62,22 @@ const FoodCard = memo(function FoodCard({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ 
+      viewport={{
         once: false, // مهم: اجازه اجرای مجدد انیمیشن
         margin: "-30px",
-        amount: 0.1
+        amount: 0.1,
       }}
-      transition={{ 
-        duration: 0.3, 
+      transition={{
+        duration: 0.3,
         delay: Math.min(index * 0.02, 0.2),
-        ease: "easeOut"
+        ease: "easeOut",
       }}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       dir={language === "en" ? "ltr" : "rtl"}
       className="relative flex items-center w-full h-34 glass-card-3d bg-accent dark:bg-[#191919] border dark: backdrop-blur-[2px] rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer will-change-transform"
       onClick={() => handleFoodClick(food)}
-      style={{ transform: "translateZ(0)"}}
+      style={{ transform: "translateZ(0)" }}
       layout
     >
       {/* بقیه کدهای FoodCard بدون تغییر */}
@@ -196,7 +196,8 @@ export default function Home() {
   // ========== توابع ترجمه ==========
   const t = useCallback(
     (key: string) => {
-      const langTranslations = translations[language as keyof typeof translations];
+      const langTranslations =
+        translations[language as keyof typeof translations];
       return langTranslations[key as keyof typeof langTranslations] || key;
     },
     [language],
@@ -534,9 +535,7 @@ export default function Home() {
         <h1
           className={`${language === "en" ? "font-[Balbek]" : "font-[BTitr]"}`}
         >
-          {t("menu")}{" "}
-          {selectedBranch &&
-            `- ${selectedBranch.name_fa || selectedBranch.name_en}`}
+          {t("menu")}
         </h1>
         <Link href="/" prefetch={true}>
           <motion.button
