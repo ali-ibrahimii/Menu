@@ -82,7 +82,7 @@ export const metadata: Metadata = {
     siteName: "رستوران وطندار",
     images: [
       {
-        url: "/branch2/6.jpg", // یک تصویر مناسب برای شبکه‌های اجتماعی بساز
+        url: "/bg.jpg", // یک تصویر مناسب برای شبکه‌های اجتماعی بساز
         width: 1200,
         height: 630,
         alt: "رستوران وطندار مشهد",
@@ -242,7 +242,7 @@ export default function RootLayout({
           rel="preload"
           href="/fonts/Titr-Bold.ttf"
           as="font"
-          type="font/ttf"
+          type="true"
           crossOrigin="anonymous"
         />
 

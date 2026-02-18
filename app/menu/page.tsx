@@ -99,10 +99,10 @@ const FoodCard = memo(function FoodCard({
               className={`w-full h-full object-cover transition-opacity duration-300 ${
                 isImageLoading ? "opacity-0" : "opacity-100"
               }`}
-              quality={80}
+              quality={70}
               loading={index < 6 ? "eager" : "lazy"}
               priority={index < 6}
-              onLoadingComplete={() => setIsImageLoading(false)}
+              onLoad={() => setIsImageLoading(false)}
               onError={() => {
                 setImageError(true);
                 setIsImageLoading(false);
