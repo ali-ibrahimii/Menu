@@ -230,15 +230,6 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
 
-        {/* Font Preload */}
-        <link
-          rel="preload"
-          href="/fonts/Titr-Bold.ttf"
-          as="font"
-          type="true"
-          crossOrigin="anonymous"
-        />
-
         {/* Favicon for all platforms */}
         <link
           rel="apple-touch-icon"
