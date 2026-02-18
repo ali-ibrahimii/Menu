@@ -80,14 +80,7 @@ export const metadata: Metadata = {
       "سفارش آنلاین انواع غذاهای ایرانی، افغانی، صبحانه و نوشیدنی در رستوران وطندار مشهد",
     url: "https://vatandar-menu.vercel.app",
     siteName: "رستوران وطندار",
-    images: [
-      {
-        url: "/bg.jpg", // یک تصویر مناسب برای شبکه‌های اجتماعی بساز
-        width: 1200,
-        height: 630,
-        alt: "رستوران وطندار مشهد",
-      },
-    ],
+    images: ["/card-image.jpg"],
     locale: "fa_IR",
     type: "website",
   },
@@ -97,7 +90,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "رستوران وطندار | منوی دیجیتال",
     description: "سفارش آنلاین غذا از رستوران وطندار مشهد",
-    images: ["/bg.jpg"], // تصویر مخصوص توییتر
+    images: ["/card-image.jpg"], // تصویر مخصوص توییتر
     creator: "@vatandar", // اگر توییتر داری
   },
 
