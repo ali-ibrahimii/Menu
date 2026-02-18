@@ -30,14 +30,8 @@ import { SearchIcon, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddToCartButton from "@/components/AddToCartButton";
 import { useRouter } from "next/navigation";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  AnimatePresence,
-} from "framer-motion";
 
-// ==================== کامپوننت کارت غذا ====================
+// ==================== کامپوننت کارت غذا (بدون انیمیشن) ====================
 const FoodCard = memo(function FoodCard({
   food,
   language,
@@ -59,28 +53,12 @@ const FoodCard = memo(function FoodCard({
   const [imageError, setImageError] = useState(false);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{
-        once: false, // مهم: اجازه اجرای مجدد انیمیشن
-        margin: "-30px",
-        amount: 0.1,
-      }}
-      transition={{
-        duration: 0.3,
-        delay: Math.min(index * 0.02, 0.2),
-        ease: "easeOut",
-      }}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+    <div
       dir={language === "en" ? "ltr" : "rtl"}
-      className="relative flex items-center w-full h-34 glass-card-3d bg-accent dark:bg-[#191919] border dark: backdrop-blur-[2px] rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer will-change-transform"
+      className="relative flex items-center w-full h-34 glass-card-3d bg-accent dark:bg-[#191919] border rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer will-change-transform"
       onClick={() => handleFoodClick(food)}
       style={{ transform: "translateZ(0)" }}
-      layout
     >
-      {/* بقیه کدهای FoodCard بدون تغییر */}
       <div className="w-4/12 h-full z-10 rounded-2xl p-[1.5px] bg-[linear-gradient(130deg,#d62828_0%,transparent_35%),linear-gradient(-45deg,#d62828_0%,transparent_35%)]">
         <div className="w-full h-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
           {isImageLoading && !imageError && (
@@ -99,7 +77,6 @@ const FoodCard = memo(function FoodCard({
               className={`w-full h-full object-cover transition-opacity duration-300 ${
                 isImageLoading ? "opacity-0" : "opacity-100"
               }`}
-              quality={70}
               loading={index < 6 ? "eager" : "lazy"}
               priority={index < 6}
               onLoad={() => setIsImageLoading(false)}
@@ -143,13 +120,13 @@ const FoodCard = memo(function FoodCard({
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 });
 
 FoodCard.displayName = "FoodCard";
 
-// ==================== کامپوننت دکمه دسته‌بندی ====================
+// ==================== کامپوننت دکمه دسته‌بندی (بدون انیمیشن) ====================
 const CategoryButton = memo(function CategoryButton({
   isSelected,
   onClick,
@@ -160,18 +137,16 @@ const CategoryButton = memo(function CategoryButton({
   children: React.ReactNode;
 }) {
   return (
-    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} layout>
-      <Button
-        onClick={onClick}
-        className={`${
-          isSelected
-            ? "dark:bg-white rounded-full dark:text-black border transition-all duration-200 overflow-hidden"
-            : "bg-transparent border dark:text-white rounded-full text-black transition-all duration-200 overflow-hidden"
-        } text-[13px] min-w-max`}
-      >
-        {children}
-      </Button>
-    </motion.div>
+    <Button
+      onClick={onClick}
+      className={`${
+        isSelected
+          ? "dark:bg-white rounded-full dark:text-black border transition-all duration-200"
+          : "bg-transparent border dark:text-white rounded-full text-black transition-all duration-200"
+      } text-[13px] min-w-max`}
+    >
+      {children}
+    </Button>
   );
 });
 
@@ -469,13 +444,11 @@ export default function Home() {
 
       switch (language) {
         case "en":
-          return category.name || slug;
+          return slug;
         case "ar":
-          return category.name_ar || category.name || slug;
-        case "fa":
-          return category.name || category.name || slug;
+          return category.name_ar;
         default:
-          return category.name || slug;
+          return category.name;
       }
     },
     [categories, language],
@@ -484,38 +457,25 @@ export default function Home() {
   // ========== رندر ==========
   if (loading) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+      <div
         dir={language === "en" ? "ltr" : "rtl"}
         className="relative min-h-screen flex items-center justify-center"
       >
         <div className="flex items-center justify-center flex-col">
           <Loader />
-          <motion.p
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="mt-2"
-          >
-            {t("loading")}
-          </motion.p>
+          <p className="mt-2">{t("loading")}</p>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.main
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+    <main
       ref={containerRef}
       className="relative w-full min-h-screen px-5 dark:text-gray-200 py-2 pt-5 overflow-y-auto touch-pan-y"
     >
-      {/* بقیه کدهای JSX بدون تغییر */}
-      <div className="fixed inset-0 -z-[1px] top-1/2 -left-1/2 -translate-y-1/2 -translate-x-1/2 flex h-[500px] w-full">
+      {/* پس‌زمینه */}
+      <div className="fixed inset-0 -z-1 pointer-events-none">
         <DotPattern
           glow={true}
           className={cn(
@@ -525,10 +485,7 @@ export default function Home() {
       </div>
 
       {/* هدر */}
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.3 }}
+      <div
         className={`text-3xl font-bold flex justify-between items-center ${language === "en" ? "mb-1" : "mb-2"} relative z-10`}
         dir={language === "en" ? "ltr" : "rtl"}
       >
@@ -538,24 +495,19 @@ export default function Home() {
           {t("menu")}
         </h1>
         <Link href="/" prefetch={true}>
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className="active:scale-95 border rounded-full bg-accent dark:bg-[#191919] dark:text-white p-2"
+          <button
+            className="border rounded-full bg-accent dark:bg-[#191919] dark:text-white p-2"
           >
             <ChevronLeft
               size={20}
               className={`${language === "en" ? "rotate-180" : ""}`}
             />
-          </motion.button>
+          </button>
         </Link>
-      </motion.div>
+      </div>
 
       {/* جستجو */}
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.1 }}
+      <div
         dir={language === "en" ? "ltr" : "rtl"}
         className="flex items-center justify-center w-full space-x-1 relative z-10"
       >
@@ -581,15 +533,10 @@ export default function Home() {
           <LanguageSwitcher />
           <CartDrawer />
         </div>
-      </motion.div>
+      </div>
 
       {/* دسته‌بندی‌ها */}
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.15 }}
-        className="mt-3 z-50"
-      >
+      <div className="mt-3 z-50">
         <ScrollArea
           dir={language === "en" ? "ltr" : "rtl"}
           className="flex whitespace-nowrap"
@@ -602,130 +549,87 @@ export default function Home() {
               {t("allFoods")}
             </CategoryButton>
 
-            <AnimatePresence>
-              {activeCategories.map((category, index) => (
-                <motion.div
-                  key={category.id}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ delay: index * 0.03 }}
-                >
-                  <CategoryButton
-                    isSelected={selectedCategory === category.slug?.trim()}
-                    onClick={() =>
-                      handleCategoryClick(category.slug?.trim() || null)
-                    }
-                  >
-                    {language === "en"
-                      ? category.slug
-                          ?.split("-")
-                          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                          .join(" ") || category.name
-                      : language === "ar"
-                        ? category.name_ar || category.name
-                        : category.name || category.slug}
-                  </CategoryButton>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            {activeCategories.map((category, index) => (
+              <CategoryButton
+                key={category.id}
+                isSelected={selectedCategory === category.slug?.trim()}
+                onClick={() =>
+                  handleCategoryClick(category.slug?.trim() || null)
+                }
+              >
+                {language === "en"
+                  ? category.slug
+                      ?.split("-")
+                      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                      .join(" ") || category.name
+                  : language === "ar"
+                    ? category.name_ar || category.name
+                    : category.name || category.slug}
+              </CategoryButton>
+            ))}
           </div>
           <ScrollBar orientation="horizontal" className="hidden" />
         </ScrollArea>
-      </motion.div>
+      </div>
 
       {/* کارت‌های غذا */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-        className="mt-3 relative z-10"
-      >
-        <AnimatePresence mode="wait">
-          {selectedCategory ? (
-            <motion.div
-              key={selectedCategory}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3"
-            >
-              {displayedFoods.length > 0 ? (
-                displayedFoods.map((food, index) => (
-                  <FoodCard
-                    key={food.id}
-                    food={food}
-                    language={language}
-                    getFoodName={getFoodName}
-                    getIngredients={getIngredients}
-                    t={t}
-                    handleFoodClick={handleFoodClick}
-                    index={index}
-                  />
-                ))
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="col-span-full border text-center py-8 rounded-lg"
-                >
-                  {t("noFoodInCategory")}
-                </motion.div>
-              )}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="all-categories"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="space-y-8"
-            >
-              {sortedCategories.length > 0 ? (
-                sortedCategories.map(
-                  ([categorySlug, categoryFoods], categoryIndex) => (
-                    <motion.div
-                      key={categorySlug}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: categoryIndex * 0.1 }}
-                      className="space-y-4"
-                    >
-                      <h2 className="font-bold font-[BTitr]">
-                        {getCategoryName(categorySlug)}
-                      </h2>
-                      <div className="h-px bg-linear-to-r from-transparent via-black dark:via-gray-200 to-transparent" />
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-                        {categoryFoods.map((food, index) => (
-                          <FoodCard
-                            key={food.id}
-                            food={food}
-                            language={language}
-                            getFoodName={getFoodName}
-                            getIngredients={getIngredients}
-                            t={t}
-                            handleFoodClick={handleFoodClick}
-                            index={index}
-                          />
-                        ))}
-                      </div>
-                    </motion.div>
-                  ),
-                )
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex items-center justify-center min-h-[70vh] text-center py-8 dark:text-gray-300 w-full"
-                >
-                  {t("noFoods")}
-                </motion.div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+      <div className="mt-3 relative z-10">
+        {selectedCategory ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {displayedFoods.length > 0 ? (
+              displayedFoods.map((food, index) => (
+                <FoodCard
+                  key={food.id}
+                  food={food}
+                  language={language}
+                  getFoodName={getFoodName}
+                  getIngredients={getIngredients}
+                  t={t}
+                  handleFoodClick={handleFoodClick}
+                  index={index}
+                />
+              ))
+            ) : (
+              <div className="col-span-full border text-center py-8 rounded-lg">
+                {t("noFoodInCategory")}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {sortedCategories.length > 0 ? (
+              sortedCategories.map(
+                ([categorySlug, categoryFoods], categoryIndex) => (
+                  <div key={categorySlug} className="space-y-4">
+                    <h2 className="font-bold font-[BTitr]">
+                      {getCategoryName(categorySlug)}
+                    </h2>
+                    <div className="h-px bg-linear-to-r from-transparent via-black dark:via-gray-200 to-transparent" />
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                      {categoryFoods.map((food, index) => (
+                        <FoodCard
+                          key={food.id}
+                          food={food}
+                          language={language}
+                          getFoodName={getFoodName}
+                          getIngredients={getIngredients}
+                          t={t}
+                          handleFoodClick={handleFoodClick}
+                          index={index}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ),
+              )
+            ) : (
+              <div className="flex items-center justify-center min-h-[70vh] text-center py-8 dark:text-gray-300 w-full">
+                {t("noFoods")}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* جزئیات غذا */}
       {selectedFood && (
@@ -740,15 +644,10 @@ export default function Home() {
       )}
 
       {/* فوتر */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="text-center dark:text-gray-200 text-sm py-6 w-full relative z-10"
-      >
+      <div className="text-center dark:text-gray-200 text-sm py-6 w-full relative z-10">
         <p>{selectedBranch?.name_en || selectedBranch?.name_fa || ""}</p>© 2025
         Watandar Restaurant
-      </motion.div>
-    </motion.main>
+      </div>
+    </main>
   );
 }

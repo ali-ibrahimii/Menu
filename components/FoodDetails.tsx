@@ -107,6 +107,8 @@ export default function FoodDetails({
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
+      <DrawerTitle></DrawerTitle>
+      <DrawerDescription></DrawerDescription>
       <DrawerContent className="h-[90vh] glass-drawer">
         <div
           dir={language === "en" ? "ltr" : "rtl"}
@@ -120,7 +122,7 @@ export default function FoodDetails({
                 <Image
                   width={120}
                   height={120}
-                  quality={70}
+                  // quality={70}
                   loading="lazy"
                   src={images[selectedImageIndex]}
                   alt={getFoodName(food)}

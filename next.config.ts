@@ -1,6 +1,7 @@
 // next.config.js
 const nextConfig = {
   images: {
+    // qualities: [80, 90],
     remotePatterns: [
       {
         protocol: 'https',
