@@ -97,8 +97,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "رستوران وطندار | منوی دیجیتال",
     description: "سفارش آنلاین غذا از رستوران وطندار مشهد",
-    images: ["/twitter-image.jpg"], // تصویر مخصوص توییتر
-    creator: "@watandar", // اگر توییتر داری
+    images: ["/bg.jpg"], // تصویر مخصوص توییتر
+    creator: "@vatandar", // اگر توییتر داری
   },
 
   // ربات‌ها و ایندکس کردن
