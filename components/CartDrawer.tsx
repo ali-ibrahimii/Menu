@@ -178,17 +178,16 @@ export default function CartDrawer() {
       </DrawerTrigger>
 
       <DrawerContent
-        className="h-[95vh] glass-drawer"
+        className="min-h-[70vh] glass-drawer"
         dir={language === "en" ? "ltr" : "rtl"}
       >
-        <DrawerHeader>
-          <DrawerTitle className="flex items-center justify-center font-[BTitr] text-lg gap-2">
+        {/* هدر با نام شعبه */}
+        <div className="flex flex-col items-center space-y-2">
+          <h1 className="font-bold text-xl text-center font-[BTitr]">
             {t("shoppingCart")}
-          </DrawerTitle>
-          <DrawerDescription className="">
-            {t("cartDescription")}
-          </DrawerDescription>
-        </DrawerHeader>
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400">{t("cartDescription")}</p>
+        </div>
 
         <div className="flex-1 overflow-y-auto px-3 w-full py-4 space-y-4">
           {/* آیتم‌های سبد خرید */}
@@ -212,7 +211,7 @@ export default function CartDrawer() {
                       alt={getFoodName(item)}
                       className="w-12 h-12 rounded-md object-cover"
                       loading="lazy"
-                      quality={70}
+                      quality={50}
                     />
 
                     <div className="flex-1">

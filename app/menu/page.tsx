@@ -30,134 +30,22 @@ import { SearchIcon, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddToCartButton from "@/components/AddToCartButton";
 import { useRouter } from "next/navigation";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  AnimatePresence,
+} from "framer-motion";
+import FoodCard from "@/components/FoodCard";
+import CategoryButton from "@/components/CategoryButton";
+import { useMenuData } from "@/hooks/useMenuData";
 
-// ==================== کامپوننت کارت غذا (بدون انیمیشن) ====================
-const FoodCard = memo(function FoodCard({
-  food,
-  language,
-  getFoodName,
-  getIngredients,
-  t,
-  handleFoodClick,
-  index,
-}: {
-  food: Food;
-  language: string;
-  getFoodName: (food: Food) => string;
-  getIngredients: (food: Food) => string;
-  t: (key: string) => string;
-  handleFoodClick: (food: Food) => void;
-  index: number;
-}) {
-  const [isImageLoading, setIsImageLoading] = useState(true);
-  const [imageError, setImageError] = useState(false);
 
-  return (
-    <div
-      dir={language === "en" ? "ltr" : "rtl"}
-      className="relative flex items-center w-full h-34 glass-card-3d bg-accent dark:bg-[#191919] border rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer will-change-transform"
-      onClick={() => handleFoodClick(food)}
-      style={{ transform: "translateZ(0)" }}
-    >
-      <div className="w-4/12 h-full z-10 rounded-2xl p-[1.5px] bg-[linear-gradient(130deg,#d62828_0%,transparent_35%),linear-gradient(-45deg,#d62828_0%,transparent_35%)]">
-        <div className="w-full h-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
-          {isImageLoading && !imageError && (
-            <div className="absolute inset-0 animate-pulse bg-gray-200 dark:bg-gray-700" />
-          )}
-          {imageError ? (
-            <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
-              <span className="text-xs text-gray-500"></span>
-            </div>
-          ) : (
-            <Image
-              src={food.image_url || "/placeholder-food.jpg"}
-              alt={getFoodName(food)}
-              width={120}
-              height={120}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
-                isImageLoading ? "opacity-0" : "opacity-100"
-              }`}
-              loading={index < 6 ? "eager" : "lazy"}
-              priority={index < 6}
-              onLoad={() => setIsImageLoading(false)}
-              onError={() => {
-                setImageError(true);
-                setIsImageLoading(false);
-              }}
-              sizes="120px"
-            />
-          )}
-        </div>
-      </div>
 
-      <div className="flex flex-col mx-3 w-8/12 overflow-hidden py-2">
-        <div className="mb-5">
-          <h2 className="text-md font-bold truncate">{getFoodName(food)}</h2>
-          {getIngredients(food) && (
-            <p className="text-[12px] line-clamp-2 leading-4.5">
-              {getIngredients(food).toString()}
-            </p>
-          )}
-          <span className="text-[13px] font-bold text-green-600 mt-1 inline-block">
-            {food.price.toLocaleString()} {t("price")}
-          </span>
-        </div>
-
-        <div>
-          {!food.is_available ? (
-            <Badge variant="destructive" className="opacity-80">
-              {t("notAvailable")}
-            </Badge>
-          ) : (
-            <div
-              className={`absolute bottom-2 ${
-                language === "en" ? "right-2" : "left-2"
-              }`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <AddToCartButton food={food} getFoodName={getFoodName} />
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-});
-
-FoodCard.displayName = "FoodCard";
-
-// ==================== کامپوننت دکمه دسته‌بندی (بدون انیمیشن) ====================
-const CategoryButton = memo(function CategoryButton({
-  isSelected,
-  onClick,
-  children,
-}: {
-  isSelected: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <Button
-      onClick={onClick}
-      className={`${
-        isSelected
-          ? "dark:bg-white rounded-full dark:text-black border transition-all duration-200"
-          : "bg-transparent border dark:text-white rounded-full text-black transition-all duration-200"
-      } text-[13px] min-w-max`}
-    >
-      {children}
-    </Button>
-  );
-});
-
-CategoryButton.displayName = "CategoryButton";
 
 // ==================== کامپوننت اصلی ====================
 export default function Home() {
   const id = useId();
-  const [foods, setFoods] = useState<Food[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
   const { language } = useLanguage();
   const { selectedBranch } = useBranch();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -167,6 +55,7 @@ export default function Home() {
   const searchTerm = useDeferredValue(searchInput);
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
+  const {foods, categories, loading, error, refetch} = useMenuData({ selectedBranchId: selectedBranch?.id });
 
   // ========== توابع ترجمه ==========
   const t = useCallback(
@@ -246,115 +135,6 @@ export default function Home() {
     setSelectedCategory(categorySlug);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
-
-  // ========== گرفتن اطلاعات از دیتابیس بر اساس شعبه ==========
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-
-        // پاک کردن کش قبلی
-        sessionStorage.removeItem("cached_foods");
-        sessionStorage.removeItem("cached_categories");
-        sessionStorage.removeItem("cache_timestamp");
-
-        let foodsQuery = supabase
-          .from("foods")
-          .select("*")
-          .eq("is_available", true);
-
-        // فیلتر بر اساس شعبه انتخاب شده
-        if (selectedBranch?.id) {
-          foodsQuery = foodsQuery.or(
-            `branch_id.eq.${selectedBranch.id},branch_id.is.null`,
-          );
-        } else {
-          foodsQuery = foodsQuery.is("branch_id", null);
-        }
-
-        const [{ data: foodsData }, { data: categoriesData }] =
-          await Promise.all([
-            foodsQuery,
-            supabase
-              .from("categories")
-              .select("*")
-              .order("order_number", { ascending: true, nullsFirst: false }),
-          ]);
-
-        if (isMounted) {
-          const cleanedFoods = (foodsData || []).map((food) => ({
-            ...food,
-            category: food.category?.trim(),
-          }));
-          setFoods(cleanedFoods);
-
-          const cleanedCategories = (categoriesData || []).map((cat) => ({
-            ...cat,
-            slug: cat.slug?.trim(),
-            name: cat.name || "",
-            name_ar: cat.name_ar || "",
-          }));
-          setCategories(cleanedCategories);
-
-          // ذخیره در کش با کلید مخصوص هر شعبه
-          if (selectedBranch?.id) {
-            sessionStorage.setItem(
-              `cached_foods_${selectedBranch.id}`,
-              JSON.stringify(cleanedFoods),
-            );
-            sessionStorage.setItem(
-              `cached_categories_${selectedBranch.id}`,
-              JSON.stringify(cleanedCategories),
-            );
-            sessionStorage.setItem(
-              `cache_timestamp_${selectedBranch.id}`,
-              Date.now().toString(),
-            );
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    // بررسی کش مخصوص هر شعبه
-    const checkCache = () => {
-      if (!selectedBranch?.id) return false;
-
-      const cachedFoods = sessionStorage.getItem(
-        `cached_foods_${selectedBranch.id}`,
-      );
-      const cachedCategories = sessionStorage.getItem(
-        `cached_categories_${selectedBranch.id}`,
-      );
-      const cacheTimestamp = sessionStorage.getItem(
-        `cache_timestamp_${selectedBranch.id}`,
-      );
-      const cacheAge = cacheTimestamp
-        ? Date.now() - parseInt(cacheTimestamp)
-        : Infinity;
-
-      if (cachedFoods && cachedCategories && cacheAge < 5 * 60 * 1000) {
-        setFoods(JSON.parse(cachedFoods));
-        setCategories(JSON.parse(cachedCategories));
-        setLoading(false);
-        return true;
-      }
-      return false;
-    };
-
-    if (!checkCache()) {
-      fetchData();
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedBranch?.id]); // وابستگی به selectedBranch
 
   // ========== فیلترها ==========
   const filteredFoodsBySearch = useMemo(() => {
@@ -457,25 +237,37 @@ export default function Home() {
   // ========== رندر ==========
   if (loading) {
     return (
-      <div
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         dir={language === "en" ? "ltr" : "rtl"}
         className="relative min-h-screen flex items-center justify-center"
       >
         <div className="flex items-center justify-center flex-col">
           <Loader />
-          <p className="mt-2">{t("loading")}</p>
+          <motion.p
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mt-2"
+          >
+            {t("loading")}
+          </motion.p>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <main
+    <motion.main
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       ref={containerRef}
       className="relative w-full min-h-screen px-5 dark:text-gray-200 py-2 pt-5 overflow-y-auto touch-pan-y"
     >
-      {/* پس‌زمینه */}
-      <div className="fixed inset-0 -z-1 pointer-events-none">
+      <div className="fixed inset-0 -z-[1]  pointer-events-none">
         <DotPattern
           glow={true}
           className={cn(
@@ -485,7 +277,10 @@ export default function Home() {
       </div>
 
       {/* هدر */}
-      <div
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.3 }}
         className={`text-3xl font-bold flex justify-between items-center ${language === "en" ? "mb-1" : "mb-2"} relative z-10`}
         dir={language === "en" ? "ltr" : "rtl"}
       >
@@ -494,23 +289,25 @@ export default function Home() {
         >
           {t("menu")}
         </h1>
-          <button
-            className="border rounded-full bg-accent dark:bg-[#191919] dark:text-white p-2 active:scale-95 transition-transform duration-75"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              router.push("/");
-            }
-          }>
+        <Link href="/" prefetch={true}>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className="active:scale-95 border rounded-full bg-accent dark:bg-[#191919] dark:text-white p-2"
+          >
             <ChevronLeft
               size={20}
               className={`${language === "en" ? "rotate-180" : ""}`}
             />
-          </button>
-      </div>
+          </motion.button>
+        </Link>
+      </motion.div>
 
       {/* جستجو */}
-      <div
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
         dir={language === "en" ? "ltr" : "rtl"}
         className="flex items-center justify-center w-full space-x-1 relative z-10"
       >
@@ -536,10 +333,15 @@ export default function Home() {
           <LanguageSwitcher />
           <CartDrawer />
         </div>
-      </div>
+      </motion.div>
 
       {/* دسته‌بندی‌ها */}
-      <div className="mt-3 z-50">
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.15 }}
+        className="mt-3 z-50"
+      >
         <ScrollArea
           dir={language === "en" ? "ltr" : "rtl"}
           className="flex whitespace-nowrap"
@@ -552,87 +354,130 @@ export default function Home() {
               {t("allFoods")}
             </CategoryButton>
 
-            {activeCategories.map((category, index) => (
-              <CategoryButton
-                key={category.id}
-                isSelected={selectedCategory === category.slug?.trim()}
-                onClick={() =>
-                  handleCategoryClick(category.slug?.trim() || null)
-                }
-              >
-                {language === "en"
-                  ? category.slug
-                      ?.split("-")
-                      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                      .join(" ") || category.name
-                  : language === "ar"
-                    ? category.name_ar || category.name
-                    : category.name || category.slug}
-              </CategoryButton>
-            ))}
+            <AnimatePresence>
+              {activeCategories.map((category, index) => (
+                <motion.div
+                  key={category.id}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ delay: index * 0.03 }}
+                >
+                  <CategoryButton
+                    isSelected={selectedCategory === category.slug?.trim()}
+                    onClick={() =>
+                      handleCategoryClick(category.slug?.trim() || null)
+                    }
+                  >
+                    {language === "en"
+                      ? category.slug
+                          ?.split("-")
+                          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                          .join(" ") || category.name
+                      : language === "ar"
+                        ? category.name_ar || category.name
+                        : category.name || category.slug}
+                  </CategoryButton>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
           <ScrollBar orientation="horizontal" className="hidden" />
         </ScrollArea>
-      </div>
+      </motion.div>
 
       {/* کارت‌های غذا */}
-      <div className="mt-3 relative z-10">
-        {selectedCategory ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {displayedFoods.length > 0 ? (
-              displayedFoods.map((food, index) => (
-                <FoodCard
-                  key={food.id}
-                  food={food}
-                  language={language}
-                  getFoodName={getFoodName}
-                  getIngredients={getIngredients}
-                  t={t}
-                  handleFoodClick={handleFoodClick}
-                  index={index}
-                />
-              ))
-            ) : (
-              <div className="col-span-full border text-center py-8 rounded-lg">
-                {t("noFoodInCategory")}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-8">
-            {sortedCategories.length > 0 ? (
-              sortedCategories.map(
-                ([categorySlug, categoryFoods], categoryIndex) => (
-                  <div key={categorySlug} className="space-y-4">
-                    <h2 className="font-bold font-[BTitr]">
-                      {getCategoryName(categorySlug)}
-                    </h2>
-                    <div className="h-px bg-linear-to-r from-transparent via-black dark:via-gray-200 to-transparent" />
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-                      {categoryFoods.map((food, index) => (
-                        <FoodCard
-                          key={food.id}
-                          food={food}
-                          language={language}
-                          getFoodName={getFoodName}
-                          getIngredients={getIngredients}
-                          t={t}
-                          handleFoodClick={handleFoodClick}
-                          index={index}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ),
-              )
-            ) : (
-              <div className="flex items-center justify-center min-h-[70vh] text-center py-8 dark:text-gray-300 w-full">
-                {t("noFoods")}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+        className="mt-3 relative z-10"
+      >
+        <AnimatePresence mode="wait">
+          {selectedCategory ? (
+            <motion.div
+              key={selectedCategory}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3"
+            >
+              {displayedFoods.length > 0 ? (
+                displayedFoods.map((food, index) => (
+                  <FoodCard
+                    key={food.id}
+                    food={food}
+                    language={language}
+                    getFoodName={getFoodName}
+                    getIngredients={getIngredients}
+                    t={t}
+                    handleFoodClick={handleFoodClick}
+                    index={index}
+                  />
+                ))
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="col-span-full border text-center py-8 rounded-lg"
+                >
+                  {t("noFoodInCategory")}
+                </motion.div>
+              )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="all-categories"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-8"
+            >
+              {sortedCategories.length > 0 ? (
+                sortedCategories.map(
+                  ([categorySlug, categoryFoods], categoryIndex) => (
+                    <motion.div
+                      key={categorySlug}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: categoryIndex * 0.1 }}
+                      className="space-y-4"
+                    >
+                      <h2 className="font-bold font-[BTitr]">
+                        {getCategoryName(categorySlug)}
+                      </h2>
+                      <div className="h-px bg-linear-to-r from-transparent via-black dark:via-gray-200 to-transparent" />
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                        {categoryFoods.map((food, index) => (
+                          <FoodCard
+                            key={food.id}
+                            food={food}
+                            language={language}
+                            getFoodName={getFoodName}
+                            getIngredients={getIngredients}
+                            t={t}
+                            handleFoodClick={handleFoodClick}
+                            index={index}
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  ),
+                )
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex items-center justify-center min-h-[70vh] text-center py-8 dark:text-gray-300 w-full"
+                >
+                  {t("noFoods")}
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       {/* جزئیات غذا */}
       {selectedFood && (
@@ -647,10 +492,15 @@ export default function Home() {
       )}
 
       {/* فوتر */}
-      <div className="text-center dark:text-gray-200 text-sm py-6 w-full relative z-10">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="text-center dark:text-gray-200 text-sm py-6 w-full relative z-10"
+      >
         <p>{selectedBranch?.name_en || selectedBranch?.name_fa || ""}</p>© 2025
         Watandar Restaurant
-      </div>
-    </main>
+      </motion.div>
+    </motion.main>
   );
 }

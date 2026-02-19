@@ -19,8 +19,10 @@ import { useBranch } from "@/contexts/BranchContext";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { Branch } from "@/types/index";
-import { Badge } from "../ui/badge";
-// import type { BadgeVariant } from "../ui/badge";
+import { Badge, badgeVariants } from "../ui/badge";
+import type { VariantProps } from "class-variance-authority";
+
+type BadgeVariant = VariantProps<typeof badgeVariants>["variant"];
 
 export default function ClockDrawer() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -33,7 +35,7 @@ export default function ClockDrawer() {
 
   // ساعت‌های کاری رستوران
   const OPEN_HOUR = 8; // 8 AM
-  const CLOSE_HOUR = 23; // 4 AM (در سیستم 24 ساعته)
+  const CLOSE_HOUR = 23.5; // 4 AM (در سیستم 24 ساعته)
   const TOTAL_HOURS = CLOSE_HOUR - OPEN_HOUR; // 15 ساعت
 
   // وضعیت و زمان باقی‌مانده
@@ -127,7 +129,7 @@ export default function ClockDrawer() {
   };
 
   // گرفتن پیام وضعیت بر اساس زبان
-  const getStatusMessage = () => {
+  const getStatusMessage = (): { message: string; color: BadgeVariant } => {
     if (!remainingTime.isOpen) {
       return {
         message:
@@ -141,8 +143,8 @@ export default function ClockDrawer() {
     } else {
       return {
         message:
-          language === "en" ? "Open" : language === "ar" ? "مفتوح!" : "باز است",
-        color: "secondary",
+          language === "en" ? "Open" : language === "ar" ? "مفتوح" : "باز است",
+        color: "default",
       };
     }
   };
@@ -196,7 +198,7 @@ export default function ClockDrawer() {
             <h1 className="font-bold text-xl text-center font-[BTitr]">
               {translationsMap.openHours}
             </h1>
-            <Badge variant={"default"} className="text-xs">
+            <Badge variant={statusInfo.color} className="text-xs">
               {statusInfo.message}
             </Badge>
           </div>
@@ -238,7 +240,7 @@ export default function ClockDrawer() {
                 </>
               ) : (
                 <>
-                  <div className="text-3xl font-bold dark:text-gray-400 text-gray-800">
+                  <div className={`text-3xl font-bold dark:text-gray-600 text-gray-800  ${language === "en" ? "font-[Balbek]" : "font-[BTitr]"}`}>
                     {translationsMap.closed}
                   </div>
                   <p className="text-sm dark:text-gray-300 text-gray-800">
