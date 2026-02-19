@@ -195,7 +195,7 @@ export default function ClockDrawer() {
         <div className="flex-1 w-full px-8 space-y-4 overflow-y-auto pb-6">
           {/* هدر با نام شعبه */}
           <div className="flex flex-col items-center space-y-2">
-            <h1 className="font-bold text-xl text-center font-[BTitr]">
+            <h1 className={`font-bold text-xl text-center ${language === "en" ? "" : "font-[BTitr]"} `}>
               {translationsMap.openHours}
             </h1>
             <Badge variant={statusInfo.color} className="text-xs">

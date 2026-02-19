@@ -79,6 +79,13 @@ export default function BranchDrawer({ branch, onClearBranch, t }: BranchDrawerP
             <div>
               <ThemeToggle />
             </div>
+            <Link
+              href="/branches"
+              className="block font-medium p-2.5 px-8 dark:bg-white bg-black rounded-full text-center text-white dark:text-black"
+              onClick={onClearBranch}
+            >
+              {t("change")} / {t("selectBranch")}
+            </Link>
           </div>
         </div>
         

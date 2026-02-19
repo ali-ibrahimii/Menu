@@ -21,7 +21,7 @@ export default function MainContent({ branch, t }: MainContentProps) {
         <CheckRestaurantStatus />
       </div>
 
-      <div className="flex flex-col items-center space-y-5 w-full px-8 pb-8">
+      <div className="flex flex-col items-center space-y-6 w-full px-8 pb-8">
         <div className="flex-col flex items-center">
           <Image
             src="/logo1.png"

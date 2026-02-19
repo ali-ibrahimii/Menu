@@ -33,7 +33,7 @@ import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
 import Image from "next/image";
 
-// تابع ایجاد شناسه دستگاه (همان تابع قبلی)
+
 const getDeviceId = () => {
   if (typeof window === "undefined") return "unknown";
 
@@ -92,10 +92,10 @@ export default function CartDrawer() {
     setIsSubmitting(true);
 
     try {
-      // گرفتن device_id
+      
       const deviceId = getDeviceId();
 
-      // آماده کردن داده‌های سفارش با device_id
+     
       const orderData = {
         customer_name: customerName.trim(),
         table_number: tableNumber.trim() || null,
@@ -103,27 +103,26 @@ export default function CartDrawer() {
         total_price: getTotalPrice(),
         items: items,
         status: "pending",
-        device_id: deviceId, // ✅ اضافه کردن device_id
+        device_id: deviceId,
         created_at: new Date().toISOString(),
       };
 
       console.log("📦 ثبت سفارش با device_id:", deviceId);
       console.log("📊 داده‌های سفارش:", orderData);
 
-      // ثبت سفارش در دیتابیس Supabase
+   
       const { data, error } = await supabase
         .from("orders")
         .insert([orderData])
         .select();
 
       if (error) {
-        console.error("❌ خطا در ثبت سفارش:", error);
+        console.error("خطا در ثبت سفارش:", error);
         throw error;
       }
 
-      console.log("✅ سفارش با موفقیت ثبت شد:", data);
+      console.log("سفارش با موفقیت ثبت شد:", data);
 
-      // ذخیره اطلاعات مشتری برای استفاده بعدی
       localStorage.setItem("customerName", customerName.trim());
       if (tableNumber.trim()) {
         localStorage.setItem("tableNumber", tableNumber.trim());

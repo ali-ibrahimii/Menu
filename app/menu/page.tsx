@@ -387,13 +387,9 @@ export default function Home() {
       </motion.div>
 
       {/* کارت‌های غذا */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
+      <div
         className="mt-3 relative z-10"
       >
-        <AnimatePresence mode="wait">
           {selectedCategory ? (
             <motion.div
               key={selectedCategory}
@@ -476,8 +472,7 @@ export default function Home() {
               )}
             </motion.div>
           )}
-        </AnimatePresence>
-      </motion.div>
+      </div>
 
       {/* جزئیات غذا */}
       {selectedFood && (
