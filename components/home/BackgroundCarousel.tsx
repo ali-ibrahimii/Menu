@@ -26,6 +26,7 @@ export default function BackgroundCarousel({ images, branchName, isActive }: Bac
           src={images[currentIndex]}
           alt={branchName}
           fill
+          loading="eager"
           className="object-cover"
           priority
           sizes="100vw"

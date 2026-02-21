@@ -494,7 +494,7 @@ export default function Home() {
         className="text-center dark:text-gray-200 text-sm py-6 w-full relative z-10"
       >
         <p>{selectedBranch?.name_en || selectedBranch?.name_fa || ""}</p>© 2025
-        Watandar Restaurant
+        Vatandar Restaurant
       </motion.div>
     </motion.main>
   );

@@ -12,12 +12,19 @@ import { translations } from "@/translations/translation";
 import Image from "next/image";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CheckRestaurantStatus from "@/components/CheckRestaurantStatus";
-import {Branch} from '@/types/index'
+import { Branch } from "@/types/index";
 import Loader from "@/components/Loader";
+import { DotPattern } from "@/components/ui/dot-pattern";
+import { cn } from "@/lib/utils";
 
 // لیست عکس‌های هر شعبه
 const branchImageGalleries: Record<string, string[]> = {
-  main: ["/branch1/1.jpg", "/branch1/2.jpg", "/branch1/3.jpg", "/branch1/4.jpg"],
+  main: [
+    "/branch1/1.jpg",
+    "/branch1/2.jpg",
+    "/branch1/3.jpg",
+    "/branch1/4.jpg",
+  ],
   branch2: [
     "/branch2/1.jpg",
     "/branch2/2.jpg",
@@ -160,8 +167,16 @@ export default function BranchesPage() {
   return (
     <div
       dir={language === "en" ? "ltr" : "rtl"}
-      className="relative min-h-screen overflow-hidden bg-accent dark:bg-[#191919]"
+      className="relative min-h-screen overflow-hidden bg-background"
     >
+      <div className="fixed inset-0 -z-[1]  pointer-events-none">
+        <DotPattern
+          glow={true}
+          className={cn(
+            "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
+          )}
+        />
+      </div>
       <div className="z-10 px-4 py-6">
         <div className="max-w-6xl mx-auto">
           <div className="">
@@ -170,22 +185,21 @@ export default function BranchesPage() {
           {/* هدر */}
           <div className="text-center mb-8 ">
             <div className="inline-flex items-center justify-center">
-              <div className="relative w-30 h-30">
+              <div className="relative w-30 h-30 border rounded-2xl p-3 bg-card-foreground">
                 <Image
                   src="/logo1.png"
                   alt="رستوران وطندار"
-                  fill
+                  width={120}
+                  height={30}
                   className="object-contain"
                   priority
                 />
               </div>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-3">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3 font-[BTitr]">
               {t("restaurantName")}
             </h1>
-            <p className="text-lg max-w-2xl mx-auto">
-              {t("selectBranchReq")}
-            </p>
+            <p className="text-lg max-w-2xl mx-auto">{t("selectBranchReq")}</p>
           </div>
 
           {/* کارت‌های شعبه */}
@@ -200,8 +214,8 @@ export default function BranchesPage() {
                   key={branch.id}
                   className="group relative rounded-3xl overflow-hidden cursor-pointer h-64 mx-4" // ارتفاع کم
                   onClick={(e) => {
-                        e.stopPropagation();
-                        handleSelectBranch(branch);
+                    e.stopPropagation();
+                    handleSelectBranch(branch);
                   }}
                 >
                   {/* عکس پس‌زمینه */}
@@ -209,9 +223,10 @@ export default function BranchesPage() {
                     <Image
                       src={currentImage}
                       alt={`${branch.name_fa} - عکس ${currentIndex + 1}`}
-                      fill
                       className="object-cover transition-all duration-1000"
+                      fill
                       sizes="(max-width: 768px) 100vw, 50vw"
+                      loading="eager"
                       priority={currentIndex === 0}
                     />
 
@@ -243,8 +258,8 @@ export default function BranchesPage() {
                             {language === "en"
                               ? branch.name_en
                               : language === "fa"
-                              ? branch.name_fa
-                              : branch.name_ar}
+                                ? branch.name_fa
+                                : branch.name_ar}
                           </h3>
                         </div>
                       </div>
@@ -264,8 +279,8 @@ export default function BranchesPage() {
                           {language === "en"
                             ? branch.address_en
                             : language === "fa"
-                            ? branch.address_fa
-                            : branch.address_ar}
+                              ? branch.address_fa
+                              : branch.address_ar}
                         </p>
                       </div>
 
@@ -302,7 +317,9 @@ export default function BranchesPage() {
           {/* اگر شعبه‌ای وجود نداشت */}
           {branches.length === 0 && (
             <div className="text-center py-12">
-              <div className="text-5xl mb-4 p-6 bg-accent/10 text-white rounded-full inline-flex"><Building2 size={50} /></div>
+              <div className="text-5xl mb-4 p-6 bg-accent/10 text-white rounded-full inline-flex">
+                <Building2 size={50} />
+              </div>
               <h3 className="text-2xl font-bold text-white mb-3">
                 هیچ شعبه فعالی یافت نشد
               </h3>

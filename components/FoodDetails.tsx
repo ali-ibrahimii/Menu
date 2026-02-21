@@ -122,7 +122,6 @@ export default function FoodDetails({
                 <Image
                   width={120}
                   height={120}
-                  // quality={70}
                   loading="lazy"
                   src={images[selectedImageIndex]}
                   alt={getFoodName(food)}
