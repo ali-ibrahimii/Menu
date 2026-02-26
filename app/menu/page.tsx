@@ -16,8 +16,8 @@ import { translations } from "@/translations/translation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Input } from "@/components/ui/input";
-import CartDrawer from "@/components/CartDrawer";
-import FoodDetails from "@/components/FoodDetails";
+import CartDrawer from "@/components/menu/CartDrawer";
+import FoodDetails from "@/components/menu/FoodDetails";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import Link from "next/link";
@@ -36,8 +36,8 @@ import {
   useTransform,
   AnimatePresence,
 } from "framer-motion";
-import FoodCard from "@/components/FoodCard";
-import CategoryButton from "@/components/CategoryButton";
+import FoodCard from "@/components/menu/FoodCard";
+import CategoryButton from "@/components/menu/CategoryButton";
 import { useMenuData } from "@/hooks/useMenuData";
 
 
