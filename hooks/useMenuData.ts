@@ -115,14 +115,14 @@ export function useMenuData({
       // بهینه‌سازی کوئری‌ها
       const foodsPromise = supabase
         .from("foods")
-        .select("id, name, name_ar, price, category, image, description, is_available, branch_id")
+        .select("*")
         .eq("is_available", true)
         .or(`branch_id.eq.${selectedBranchId},branch_id.is.null`)
         .abortSignal(abortControllerRef.current.signal);
 
       const categoriesPromise = supabase
         .from("categories")
-        .select("id, name, name_ar, slug, order_number, image")
+        .select("*")
         .order("order_number", { ascending: true, nullsFirst: false })
         .abortSignal(abortControllerRef.current.signal);
 
