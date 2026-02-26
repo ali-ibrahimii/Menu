@@ -1,7 +1,7 @@
 // app/branches/page.tsx
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React ,{ useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { MapPin, Phone, Check, Building2 } from "lucide-react";
@@ -16,7 +16,6 @@ import { Branch } from "@/types/index";
 import Loader from "@/components/Loader";
 import { DotPattern } from "@/components/ui/dot-pattern";
 import { cn } from "@/lib/utils";
-import React from "react";
 
 // لیست عکس‌های هر شعبه (بهبود یافته)
 const branchImageGalleries: Record<string, string[]> = {
@@ -155,7 +154,7 @@ const BranchCard = React.memo(({
 
         {/* دکمه - حالا بدون onClick مجزا */}
         <button
-          className="w-full bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-2 rounded-full font-semibold shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
+          className="w-full bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 rounded-full font-semibold shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
           onClick={handleClick} // همان handler را استفاده می‌کنیم
         >
           <Check className="w-5 h-5" />

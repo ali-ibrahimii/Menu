@@ -1,11 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Food, Category } from "@/types";
 
 interface UseMenuDataProps {
   selectedBranchId?: string;
+  initialData?: {
+    foods: Food[];
+    categories: Category[];
+  };
+  enableRealtime?: boolean;
 }
 
 interface UseMenuDataReturn {
@@ -14,101 +19,124 @@ interface UseMenuDataReturn {
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
+  isStale: boolean;
 }
 
-export function useMenuData({ selectedBranchId }: UseMenuDataProps): UseMenuDataReturn {
-  const [foods, setFoods] = useState<Food[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+// ثابت‌ها
+const CACHE_DURATION = 10 * 60 * 1000; // افزایش به 10 دقیقه
+const STALE_WHILE_REVALIDATE = true;
+
+export function useMenuData({ 
+  selectedBranchId, 
+  initialData,
+  enableRealtime = false 
+}: UseMenuDataProps): UseMenuDataReturn {
+  const [foods, setFoods] = useState<Food[]>(initialData?.foods || []);
+  const [categories, setCategories] = useState<Category[]>(initialData?.categories || []);
+  const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState<Error | null>(null);
+  const [isStale, setIsStale] = useState(false);
+  
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const subscriptionRef = useRef<any>(null);
+  const lastFetchRef = useRef<number>(0);
 
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 دقیقه
-
-  // تابع بررسی کش
-  const checkCache = () => {
-    if (!selectedBranchId) return false;
+  // تابع بررسی کش با مدیریت بهینه‌تر
+  const getCachedData = useCallback(() => {
+    if (!selectedBranchId) return null;
 
     try {
-      const cachedFoods = sessionStorage.getItem(`cached_foods_${selectedBranchId}`);
-      const cachedCategories = sessionStorage.getItem(`cached_categories_${selectedBranchId}`);
-      const cacheTimestamp = sessionStorage.getItem(`cache_timestamp_${selectedBranchId}`);
-      const cacheAge = cacheTimestamp ? Date.now() - parseInt(cacheTimestamp) : Infinity;
+      const cacheKey = `menu_${selectedBranchId}`;
+      const cached = sessionStorage.getItem(cacheKey);
+      
+      if (!cached) return null;
 
-      if (cachedFoods && cachedCategories && cacheAge < CACHE_DURATION) {
-        setFoods(JSON.parse(cachedFoods));
-        setCategories(JSON.parse(cachedCategories));
-        return true;
+      const { data, timestamp } = JSON.parse(cached);
+      const age = Date.now() - timestamp;
+
+      if (age < CACHE_DURATION) {
+        return data;
+      } else if (STALE_WHILE_REVALIDATE) {
+        setIsStale(true);
+        return data; // داده قدیمی را برمی‌گردانیم ولی با علامت stale
       }
     } catch (err) {
-      console.error("Error reading cache:", err);
+      console.error("Cache read error:", err);
     }
-    return false;
-  };
+    return null;
+  }, [selectedBranchId]);
 
-  // ذخیره در کش
-  const saveToCache = (foodsData: Food[], categoriesData: Category[]) => {
+  // ذخیره در کش با متادیتا
+  const saveToCache = useCallback((foodsData: Food[], categoriesData: Category[]) => {
     if (!selectedBranchId) return;
 
     try {
-      sessionStorage.setItem(`cached_foods_${selectedBranchId}`, JSON.stringify(foodsData));
-      sessionStorage.setItem(`cached_categories_${selectedBranchId}`, JSON.stringify(categoriesData));
-      sessionStorage.setItem(`cache_timestamp_${selectedBranchId}`, Date.now().toString());
+      const cacheKey = `menu_${selectedBranchId}`;
+      const cacheData = {
+        data: { foods: foodsData, categories: categoriesData },
+        timestamp: Date.now()
+      };
+      sessionStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      setIsStale(false);
     } catch (err) {
-      console.error("Error saving to cache:", err);
+      console.error("Cache save error:", err);
     }
-  };
+  }, [selectedBranchId]);
 
-  // پاک کردن کش
-  const clearCache = () => {
-    if (!selectedBranchId) return;
-
-    sessionStorage.removeItem(`cached_foods_${selectedBranchId}`);
-    sessionStorage.removeItem(`cached_categories_${selectedBranchId}`);
-    sessionStorage.removeItem(`cache_timestamp_${selectedBranchId}`);
-  };
-
-  // تابع اصلی واکشی داده
-  const fetchData = async () => {
+  // تابع اصلی واکشی داده با قابلیت abort
+  const fetchData = useCallback(async (ignoreCache = false) => {
     if (!selectedBranchId) {
       setLoading(false);
       return;
     }
 
+    // کنسل کردن درخواست قبلی
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    abortControllerRef.current = new AbortController();
+
     try {
       setLoading(true);
       setError(null);
 
-      // بررسی کش
-      if (checkCache()) {
-        setLoading(false);
-        return;
+      // بررسی کش اگر ignoreCache false باشد
+      if (!ignoreCache) {
+        const cachedData = getCachedData();
+        if (cachedData && !isStale) {
+          setFoods(cachedData.foods);
+          setCategories(cachedData.categories);
+          setLoading(false);
+          return;
+        }
       }
 
-      // ساخت کوئری غذاها
-      let foodsQuery = supabase
+      // بهینه‌سازی کوئری‌ها
+      const foodsPromise = supabase
         .from("foods")
-        .select("*")
-        .eq("is_available", true);
+        .select("id, name, name_ar, price, category, image, description, is_available, branch_id")
+        .eq("is_available", true)
+        .or(`branch_id.eq.${selectedBranchId},branch_id.is.null`)
+        .abortSignal(abortControllerRef.current.signal);
 
-      // فیلتر بر اساس شعبه
-      foodsQuery = foodsQuery.or(
-        `branch_id.eq.${selectedBranchId},branch_id.is.null`
-      );
+      const categoriesPromise = supabase
+        .from("categories")
+        .select("id, name, name_ar, slug, order_number, image")
+        .order("order_number", { ascending: true, nullsFirst: false })
+        .abortSignal(abortControllerRef.current.signal);
 
-      // اجرای کوئری‌ها
+      // اجرای همزمان کوئری‌ها
       const [foodsResult, categoriesResult] = await Promise.all([
-        foodsQuery,
-        supabase
-          .from("categories")
-          .select("*")
-          .order("order_number", { ascending: true, nullsFirst: false }),
+        foodsPromise,
+        categoriesPromise
       ]);
 
       // بررسی خطاها
       if (foodsResult.error) throw foodsResult.error;
       if (categoriesResult.error) throw categoriesResult.error;
 
-      // پاکسازی داده‌ها
+      // پردازش داده‌ها
       const cleanedFoods = (foodsResult.data || []).map((food) => ({
         ...food,
         category: food.category?.trim(),
@@ -121,31 +149,67 @@ export function useMenuData({ selectedBranchId }: UseMenuDataProps): UseMenuData
         name_ar: cat.name_ar || "",
       }));
 
-      // ذخیره در state
+      // به‌روزرسانی state
       setFoods(cleanedFoods);
       setCategories(cleanedCategories);
 
       // ذخیره در کش
       saveToCache(cleanedFoods, cleanedCategories);
+      
+      lastFetchRef.current = Date.now();
 
-    } catch (err) {
-      console.error("Error fetching data:", err);
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        return; // درخواست کنسل شده، خطا را نادیده بگیر
+      }
+      
+      console.error("Fetch error:", err);
       setError(err instanceof Error ? err : new Error("خطا در دریافت اطلاعات"));
       
-      // در صورت خطا، سعی کن از کش استفاده کنی (حتی اگر منقضی شده باشد)
-      if (selectedBranchId) {
-        const cachedFoods = sessionStorage.getItem(`cached_foods_${selectedBranchId}`);
-        const cachedCategories = sessionStorage.getItem(`cached_categories_${selectedBranchId}`);
-        
-        if (cachedFoods && cachedCategories) {
-          setFoods(JSON.parse(cachedFoods));
-          setCategories(JSON.parse(cachedCategories));
-        }
+      // استفاده از کش منقضی شده در صورت خطا
+      const cachedData = getCachedData();
+      if (cachedData && !foods.length) {
+        setFoods(cachedData.foods);
+        setCategories(cachedData.categories);
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedBranchId, getCachedData, saveToCache, foods.length, isStale]);
+
+  // تنظیم realtime subscription
+  useEffect(() => {
+    if (!enableRealtime || !selectedBranchId) return;
+
+    // لغو subscription قبلی
+    if (subscriptionRef.current) {
+      subscriptionRef.current.unsubscribe();
+    }
+
+    // ایجاد subscription جدید
+    subscriptionRef.current = supabase
+      .channel(`menu_${selectedBranchId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'foods',
+          filter: `branch_id=eq.${selectedBranchId}`
+        },
+        () => {
+          // به‌روزرسانی خودکار هنگام تغییر
+          fetchData(true);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (subscriptionRef.current) {
+        subscriptionRef.current.unsubscribe();
+      }
+    };
+  }, [selectedBranchId, enableRealtime, fetchData]);
 
   // اثر برای واکشی اولیه
   useEffect(() => {
@@ -157,18 +221,28 @@ export function useMenuData({ selectedBranchId }: UseMenuDataProps): UseMenuData
       }
     };
 
-    initFetch();
+    // اگر داده اولیه داریم، فقط stale بودن را بررسی کن
+    if (initialData) {
+      const shouldRefetch = Date.now() - lastFetchRef.current > CACHE_DURATION;
+      if (shouldRefetch) {
+        fetchData(true);
+      }
+    } else {
+      initFetch();
+    }
 
     return () => {
       isMounted = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
-  }, [selectedBranchId]); // وابستگی به selectedBranchId
+  }, [selectedBranchId, initialData, fetchData]);
 
   // تابع برای واکشی مجدد
-  const refetch = async () => {
-    clearCache(); // پاک کردن کش برای واکشی مجدد
-    await fetchData();
-  };
+  const refetch = useCallback(async () => {
+    await fetchData(true);
+  }, [fetchData]);
 
   return {
     foods,
@@ -176,5 +250,6 @@ export function useMenuData({ selectedBranchId }: UseMenuDataProps): UseMenuData
     loading,
     error,
     refetch,
+    isStale,
   };
 }
