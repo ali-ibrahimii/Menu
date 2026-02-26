@@ -229,7 +229,7 @@ export default function BranchesPage() {
       try {
         const { data, error } = await supabase
           .from("branches")
-          .select("id, name_fa, name_en, name_ar, slug, address_fa, address_en, address_ar, phone_1, phone_2, is_active, created_at")
+          .select("*")
           .eq("is_active", true)
           .order("created_at", { ascending: false });
 
