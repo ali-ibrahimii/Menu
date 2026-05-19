@@ -4,7 +4,7 @@
 import React ,{ useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, Check, Building2 } from "lucide-react";
+import { MapPin, Phone, Check, Building2, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useBranch } from "@/contexts/BranchContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -16,6 +16,7 @@ import { Branch } from "@/types/index";
 import Loader from "@/components/Loader";
 import { DotPattern } from "@/components/ui/dot-pattern";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 // لیست عکس‌های هر شعبه (بهبود یافته)
 const branchImageGalleries: Record<string, string[]> = {
@@ -286,7 +287,7 @@ export default function BranchesPage() {
       dir={language === "en" ? "ltr" : "rtl"}
       className="relative min-h-screen overflow-hidden bg-background"
     >
-      <div className="fixed inset-0 -z-[1] pointer-events-none">
+      <div className="fixed inset-0 z-[1] pointer-events-none">
         <DotPattern
           glow={true}
           className={cn(
@@ -297,8 +298,11 @@ export default function BranchesPage() {
 
       <div className="z-10 px-4 py-6">
         <div className="max-w-6xl mx-auto">
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-between mb-4">
             <LanguageSwitcher />
+            <Link href="/" className="border p-2 rounded-full bg-secondary">
+              <ChevronLeft />
+            </Link>
           </div>
 
           {/* هدر */}
@@ -345,14 +349,14 @@ export default function BranchesPage() {
           {/* اگر شعبه‌ای وجود نداشت */}
           {branches.length === 0 && (
             <div className="text-center py-12">
-              <div className="text-5xl mb-4 p-6 bg-accent/10 text-white rounded-full inline-flex">
+              <div className="text-5xl mb-4 p-6 bg-accent-foreground opacity-65 border text-white rounded-full inline-flex">
                 <Building2 size={50} />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">
-                {t("noActiveBranch") || "هیچ شعبه فعالی یافت نشد"}
+              <h3 className="text-xl font-bold dark:text-white mb-3">
+                {t("noActiveBranch")}
               </h3>
-              <p className="text-green-200">
-                {t("pleaseTryAgain") || "لطفاً بعداً مجدداً مراجعه کنید"}
+              <p className="dark:text-white">
+                {t("pleaseTryAgain")}
               </p>
             </div>
           )}

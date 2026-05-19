@@ -196,8 +196,11 @@ export const translations = {
     restored: "بازیابی شده",
     updated: "به‌روزرسانی شد",
     created: "ایجاد شد",
+    noActiveBranch: "شعبه فعالی وجود ندارد",
+    test: "این یک متن تستی هست در قسمت در ما",
+    pleaseTryAgain: "شعبه یافت نشد لطفا دوباره تلاش کنید",
   },
-
+  
   ar: {
     menu: "القائمة",
     restaurantName: "مطعم وطندار",
@@ -396,8 +399,11 @@ export const translations = {
     restored: "تم الاستعادة",
     updated: "تم التحديث",
     created: "تم الإنشاء",
+    noActiveBranch: "No Active Branch",
+    test: "این یک متن تستی هست در قسمت در ما",
+    pleaseTryAgain: "لطفا دوباره تلاش کنید",
   },
-
+  
   en: {
     menu: "Menu",
     restaurantName: "Watandar Restaurant",
@@ -596,5 +602,8 @@ export const translations = {
     restored: "Restored",
     updated: "Updated",
     created: "Created",
+    noActiveBranch: "No Active Branch",
+    test: "This is some text for test the about us page This is some text for test the about us page This is some text for test the about us page This is some text for test the about us page This is some text for test the about us page",
+    pleaseTryAgain: "Please try again",
   },
 };

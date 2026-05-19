@@ -25,8 +25,8 @@ export const metadata: Metadata = {
   // آیکون‌ها
   icons: {
     icon: [
-      { url: "/logo1.png", sizes: "32x32", type: "image/png" },
-      { url: "/logo1.png", sizes: "16x16", type: "image/png" },
+      { url: "/logo1.png", sizes: "50x50", type: "image/png" },
+      { url: "/logo1.png", sizes: "40x40", type: "image/png" },
     ],
     apple: [{ url: "/logo1.png", sizes: "180x180", type: "image/png" }],
     shortcut: "/logo1.png",
@@ -66,13 +66,6 @@ export const metadata: Metadata = {
   creator: "Ali Ibrahimi",
   publisher: "Vatandar Restaurant",
 
-  // قالب
-  formatDetection: {
-    email: false,
-    address: true,
-    telephone: true,
-  },
-
   // متادیتای شبکه‌های اجتماعی
   openGraph: {
     title: "رستوران وطندار | منوی دیجیتال ",
@@ -85,29 +78,8 @@ export const metadata: Metadata = {
     type: "website",
   },
 
-  // توییتر کارت
-  twitter: {
-    card: "summary_large_image",
-    title: "رستوران وطندار | منوی دیجیتال",
-    description: "سفارش آنلاین غذا از رستوران وطندار مشهد",
-    images: ["/card-image.jpg"], // تصویر مخصوص توییتر
-    creator: "@vatandar", // اگر توییتر داری
-  },
 
-  // ربات‌ها و ایندکس کردن
-  robots: {
-    index: true,
-    follow: true,
-    nocache: false,
-    googleBot: {
-      index: true,
-      follow: true,
-      noimageindex: false,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
+
 
   // تأییدیه‌ها
   verification: {
@@ -117,25 +89,6 @@ export const metadata: Metadata = {
     other: {
       "google-site-verification": "googleec72074d61f7d798",
       me: ["ali-ibrahimii@example.com"],
-    },
-  },
-
-  // آرشیو
-  archives: "none",
-
-  // لنگر (anchor)
-  assets: ["https://vatandar-menu.vercel.app/assets"],
-
-  // کتابخانه
-  bookmarks: "https://vatandar-menu.vercel.app",
-
-  // کاننیکال
-  alternates: {
-    canonical: "https://vatandar-menu.vercel.app",
-    languages: {
-      "fa-IR": "https://vatandar-menu.vercel.app",
-      "en-US": "https://vatandar-menu.vercel.app/en",
-      "ar-SA": "https://vatandar-menu.vercel.app/ar",
     },
   },
 
@@ -234,24 +187,24 @@ export default function RootLayout({
         <link
           rel="apple-touch-icon"
           sizes="180x180"
-          href="/apple-touch-icon.png"
+          href="/logo1.png"
         />
         <link
           rel="icon"
           type="image/png"
-          sizes="32x32"
-          href="/favicon-32x32.png"
+          sizes="320x320"
+          href="/logo1.png"
         />
         <link
           rel="icon"
           type="image/png"
-          sizes="16x16"
-          href="/favicon-16x16.png"
+          sizes="160x160"
+          href="/logo1.png"
         />
         <link rel="manifest" href="/manifest.json" />
-        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#d62828" />
-        <meta name="msapplication-TileColor" content="#d62828" />
-        <meta name="theme-color" content="#d62828" />
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#fff" />
+        <meta name="msapplication-TileColor" content="#fff" />
+        <meta name="theme-color" content="#fff" />
 
         {/* Additional SEO */}
         <meta
@@ -268,7 +221,7 @@ export default function RootLayout({
                   <AdminAuthProvider>
                     <Toaster position="top-center" />
                     {children}
-                    <Analytics /> {/* برای آنالیز بازدیدها (اختیاری) */}
+                    <Analytics /> {/* آنالیز بازدیدها */}
                   </AdminAuthProvider>
                 </BranchProvider>
               </LanguageProvider>

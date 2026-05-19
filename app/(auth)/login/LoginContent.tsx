@@ -31,6 +31,7 @@ export default function LoginPage() {
         console.log('LocalStorage not available yet');
       }
     };
+    console.log("this is", router)
 
     checkAuth();
   }, [router]);
@@ -105,7 +106,7 @@ export default function LoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="نام کاربری خود را وارد کنید"
-                  className="w-full pr-10 pl-4 py-4 border border-gray-300 rounded-xl focus:ring-1 focus:ring-blue-600 focus:border-blue-600 outline-none transition text-right"
+                  className="w-full pr-10 pl-4 py-4 border border-gray-300 rounded-xl focus:ring-1 focus:ring-blue-600 text-accent-foreground focus:border-blue-600 outline-none transition text-right"
                   required
                   dir="rtl"
                 />
@@ -126,7 +127,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="رمز عبور خود را وارد کنید"
-                  className="w-full pr-10 pl-4 py-4 border border-gray-300 rounded-xl focus:ring-1 focus:ring-blue-600 focus:border-blue-600 outline-none transition text-right"
+                  className="w-full pr-10 pl-4 py-4 border border-gray-300 rounded-xl focus:ring-1 focus:ring-blue-600 text-accent-foreground focus:border-blue-600 outline-none transition text-right"
                   required
                   dir="rtl"
                 />

@@ -95,13 +95,13 @@ export function useRestaurantInfo() {
         name: 'شعبه مرکزی',
         phone: '021-88561000',
         phone2: '',
-        address: 'تهران، خیابان ولیعصر، پلاک ۱۲۳'
+        address: 'مشهد'
       },
       branch2: {
         name: 'شعبه ۲',
         phone: '021-77543210',
         phone2: '',
-        address: 'تهران، میدان ونک، برج ونک'
+        address: 'شمهد'
       },
       instagram: 'https://instagram.com/vatandar.restaurant',
       whatsapp: '09123456789'

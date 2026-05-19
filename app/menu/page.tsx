@@ -1,15 +1,5 @@
 "use client";
 
-import {
-  useId,
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-  memo,
-  useDeferredValue,
-  useRef,
-} from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Food, Category } from "@/types";
 import { translations } from "@/translations/translation";
@@ -30,15 +20,25 @@ import { SearchIcon, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddToCartButton from "@/components/AddToCartButton";
 import { useRouter } from "next/navigation";
+import FoodCard from "@/components/FoodCard";
+import CategoryButton from "@/components/CategoryButton";
+import { useMenuData } from "@/hooks/useMenuData";
+import {
+  useId,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  memo,
+  useDeferredValue,
+  useRef,
+} from "react";
 import {
   motion,
   useScroll,
   useTransform,
   AnimatePresence,
 } from "framer-motion";
-import FoodCard from "@/components/FoodCard";
-import CategoryButton from "@/components/CategoryButton";
-import { useMenuData } from "@/hooks/useMenuData";
 
 
 
