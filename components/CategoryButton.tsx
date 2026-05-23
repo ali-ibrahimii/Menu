@@ -1,28 +1,40 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
-// ==================== کامپوننت دکمه دسته‌بندی ====================
+interface Props {
+  isSelected: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}
+
 const CategoryButton = memo(function CategoryButton({
   isSelected,
   onClick,
   children,
-}: {
-  isSelected: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
+}: Props) {
+  
+  const handleClick = useCallback(() => {
+    onClick();
+  }, [onClick]);
+
   return (
-    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} layout>
+    <motion.div
+      whileHover={{ scale: 1.04 }}
+      whileTap={{ scale: 0.96 }}
+      layout
+      className="rounded-full"
+    >
       <Button
-        onClick={onClick}
-        className={`${
-          isSelected
-            ? "dark:bg-white rounded-full dark:text-black border transition-all duration-200 overflow-hidden"
-            : "bg-transparent border dark:text-white rounded-full text-black transition-all duration-200 overflow-hidden"
-        } text-[13px] min-w-max`}
+        onClick={handleClick}
+        variant="outline"
+        className={`text-[13px] min-w-max rounded-full transition-all duration-200 border 
+          ${isSelected 
+            ? "bg-black text-white dark:bg-white dark:text-black border-transparent shadow-md" 
+            : "bg-transparent text-black dark:text-white border-neutral-300 dark:border-neutral-600"
+          }`}
       >
         {children}
       </Button>

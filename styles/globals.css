@@ -1,6 +1,24 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* پنهان کردن اسکرول و حذف خطوط سایه زیر آن */
+.no-scrollbar {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE + Edge */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important; /* Chrome + Safari */
+}
+
+/* حذف سایه هنگام اسکرول */
+.hide-scroll-shadow {
+  -webkit-overflow-scrolling: touch;
+  background-clip: padding-box !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /* globals.css یا index.css */

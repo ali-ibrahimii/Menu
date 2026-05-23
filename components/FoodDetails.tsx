@@ -1,17 +1,8 @@
 "use client";
 
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
-import { useState } from "react";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { useState, useMemo, useCallback } from "react";
 import { Food } from "@/types";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Clock,
@@ -19,7 +10,6 @@ import {
   Star,
   Flame,
   Leaf,
-  ShoppingCart,
   ChevronDown,
   ChevronUp,
   Tag,
@@ -29,7 +19,6 @@ import { useCartStore } from "@/stores/cartStore";
 import RatingSystem, { RatingStats } from "@/components/RatingSystem";
 import { translations } from "@/translations/translation";
 import { toast } from "sonner";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import Image from "next/image";
 
 interface FoodDetailsProps {
@@ -51,6 +40,7 @@ export default function FoodDetails({
 }: FoodDetailsProps) {
   const { language } = useLanguage();
   const { addToCart } = useCartStore();
+
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [ratingStats, setRatingStats] = useState<RatingStats>({
@@ -58,103 +48,109 @@ export default function FoodDetails({
     totalReviews: 0,
   });
 
-  const handleRatingStatsChange = (stats: RatingStats) => {
-    setRatingStats(stats);
-  };
-  const t = (key: string) => {
-    const langTranslations = translations[language] as Record<string, string>;
-    return langTranslations[key] || key;
-  };
+  /** ترجمه سریع و کم‌هزینه */
+  const t = useCallback(
+    (key: string) => translations[language]?.[key] || key,
+    [language],
+  );
 
-  const toggleDescription = () => {
-    setIsExpanded(!isExpanded);
-  };
-  const getDescriptionButtonText = () => {
-    if (isExpanded) {
-      return language === "fa"
-        ? "نمایش کمتر"
-        : language === "ar"
-          ? "عرض أقل"
-          : "Show Less";
-    } else {
-      return language === "fa"
-        ? "مشاهده بیشتر"
-        : language === "ar"
-          ? "عرض المزيد"
-          : "Read More";
-    }
-  };
+  /** memo → جلوگیری از محاسبه دوباره */
+  const name = useMemo(() => getFoodName(food), [food, getFoodName]);
+  const description = useMemo(
+    () => getFoodDescription(food),
+    [food, getFoodDescription],
+  );
+  const ingredients = useMemo(
+    () => getIngredients(food),
+    [food, getIngredients],
+  );
 
-  const handleAddToCart = () => {
-    if (!food) return;
+  const images = useMemo(
+    () => (food.images?.length ? food.images : [food.image_url]),
+    [food.images, food.image_url],
+  );
 
-    const cartItem = {
+  const priceText = useMemo(
+    () => `${food.price.toLocaleString()} ${t("price")}`,
+    [food.price, t],
+  );
+
+  /** جلوگیری از ساخت تابع جدید در هر رندر */
+  const handleToggleDescription = useCallback(
+    () => setIsExpanded((prev) => !prev),
+    [],
+  );
+
+  const handleAddToCart = useCallback(() => {
+    addToCart({
       id: food.id,
       name_fa: food.name_fa,
       name_ar: food.name_ar,
       name_en: food.name_en,
       price: food.price,
       image_url: food.image_url,
-    };
+    });
 
-    addToCart(cartItem);
-    toast.success("به سفارشات شما اضافه شد!");
+    toast.success(t("addedToCart"));
     onClose();
-  };
+  }, [food, addToCart, onClose, t]);
 
-  const images =
-    food.images && food.images.length > 0 ? food.images : [food.image_url];
+  const descriptionButtonText = useMemo(() => {
+    return isExpanded
+      ? language === "fa"
+        ? "نمایش کمتر"
+        : language === "ar"
+          ? "عرض أقل"
+          : "Show Less"
+      : language === "fa"
+        ? "مشاهده بیشتر"
+        : language === "ar"
+          ? "عرض المزيد"
+          : "Read More";
+  }, [isExpanded, language]);
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerTitle></DrawerTitle>
-      <DrawerDescription></DrawerDescription>
       <DrawerContent className="h-[90vh] glass-drawer">
         <div
           dir={language === "en" ? "ltr" : "rtl"}
           className="flex-1 overflow-y-auto"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden">
-            {/* بخش تصاویر */}
+            {/* تصاویر */}
             <div className="relative mb-2 p-2 rounded-3xl overflow-hidden">
-              {/* تصویر اصلی */}
               <div className="w-full h-90 rounded-3xl overflow-hidden">
                 <Image
-                  width={120}
-                  height={120}
-                  loading="lazy"
+                  fill
                   src={images[selectedImageIndex]}
-                  alt={getFoodName(food)}
-                  className="w-full h-full object-cover"
+                  alt={name}
+                  className="object-cover"
+                  sizes="100vw"
                 />
               </div>
 
-              {/* گالری تصاویر */}
               {images.length > 1 && (
                 <div className="relative">
-                  <div className="absolute left-1/2 -bottom-8 transform -translate-x-1/2 -translate-y-1/2">
+                  <div className="absolute left-1/2 -bottom-8 -translate-x-1/2">
                     <div className="bg-black/10 backdrop-blur-[1px] rounded-xl p-1.5 mb-2.5 border border-white/20">
-                      {/* اسکرول افقی فعال */}
                       <div className="w-[270px] px-2 overflow-x-auto scrollbar-hide">
                         <div className="flex gap-2">
-                          {images.map((image, index) => (
+                          {images.map((img, idx) => (
                             <button
-                              key={index}
-                              onClick={() => setSelectedImageIndex(index)}
-                              className={`flex-shrink-0 w-12 h-12 rounded-md overflow-hidden border-2 transition-all duration-200 ${
-                                selectedImageIndex === index
+                              key={idx}
+                              onClick={() => setSelectedImageIndex(idx)}
+                              className={`w-12 h-12 rounded-md overflow-hidden border-2 transition-all ${
+                                selectedImageIndex === idx
                                   ? "border-green-400"
-                                  : "border-white/30 hover:border-white/50 hover:scale-105"
+                                  : "border-white/30 hover:border-white/50"
                               }`}
                             >
                               <Image
-                                width={120}
-                                height={120}
-                                quality={40}
-                                loading="lazy"
-                                src={image}
-                                alt={`${getFoodName(food)} ${index + 1}`}
-                                className="w-full h-full object-cover"
+                                fill
+                                src={img}
+                                alt={`${name} ${idx + 1}`}
+                                className="object-cover"
+                                sizes="50px"
                               />
                             </button>
                           ))}
@@ -162,144 +158,106 @@ export default function FoodDetails({
                       </div>
                     </div>
                   </div>
-
-                  {/* شمارنده */}
-                  {/* {images.length > 4 && (
-                    <div className="absolute left-1/2 bottom-5 transform -translate-x-1/2 bg-black/50 text-white text-xs px-2 py-1 rounded-full border border-white/20 backdrop-blur-sm">
-                      {selectedImageIndex + 1} / {images.length}
-                    </div>
-                  )} */}
                 </div>
               )}
             </div>
 
-            {/* بخش اطلاعات */}
+            {/* اطلاعات */}
             <div className="space-y-5 px-6">
-              {/* عنوان و قیمت */}
+              {/* عنوان + قیمت */}
               <div>
-                <div className="mb-3">
-                  <div className="flex justify-between items-center">
-                    <Badge variant="default" className="text-[11px]">
-                      {food.category}
+                <div className="flex justify-between items-center">
+                  <Badge variant="default" className="text-[11px]">
+                    {food.category}
+                  </Badge>
+
+                  {ratingStats.totalReviews > 0 && (
+                    <div className="flex items-center gap-1">
+                      <Star
+                        size={14}
+                        className="fill-yellow-500 text-yellow-400"
+                      />
+                      <span className="text-[11px] font-semibold">
+                        {ratingStats.averageRating.toFixed(1)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-between items-center mt-2">
+                  <h1 className="text-2xl font-bold">{name}</h1>
+
+                  <div>
+                    <Badge
+                      variant={food.is_available ? "default" : "destructive"}
+                    >
+                      {food.is_available ? t("available") : t("notAvailable")}
                     </Badge>
 
-                    {ratingStats.totalReviews > 0 && (
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          <Star
-                            size={14}
-                            className="fill-yellow-500 text-yellow-400"
-                          />
-                          <span className="text-[11px] font-semibold">
-                            {ratingStats.averageRating.toFixed(1)}
-                          </span>
-                        </div>
-                        <span className="text-xs">
-                          {/* ({ratingStats.totalReviews}) */}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">{getFoodName(food)}</h1>
-                    <div
-                      className={`${language === "en" ? "text-right" : "text-left"}`}
-                    >
-                      <Badge
-                        variant={food.is_available ? "default" : "destructive"}
-                        className=""
-                      >
-                        {food.is_available ? t("available") : t("notAvailable")}
-                      </Badge>
-                      <div className="text-sm font-bold dark:text-yellow-300">
-                        {food.price.toLocaleString()} {t("price")}
-                      </div>
+                    <div className="text-sm font-bold dark:text-yellow-300">
+                      {priceText}
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* دسته‌بندی و تگ‌ها */}
-                <div className="flex flex-wrap gap-2">
-                  {food.is_spicy && (
-                    <Badge
-                      // variant="secondary"
-                      className="flex items-center rounded-full border border-white/10 bg-red-300/15 gap-1 text-[12px]"
-                    >
-                      <Flame size={14} />
-                      {t("spicy")}
-                    </Badge>
-                  )}
+              {/* تگ‌ها */}
+              <div className="flex flex-wrap gap-2">
+                {food.is_spicy && (
+                  <Badge className="flex gap-1 text-[12px] bg-red-300/15 border-white/10">
+                    <Flame size={14} />
+                    {t("spicy")}
+                  </Badge>
+                )}
 
-                  {food.is_vegetarian && (
-                    <Badge
-                      // variant="secondary"
-                      className="flex items-center rounded-full border border-white/10 bg-green-400/20 gap-1 text-[12px]"
-                    >
-                      <Leaf size={14} />
-                      {t("vegetarian")}
-                    </Badge>
-                  )}
+                {food.is_vegetarian && (
+                  <Badge className="flex gap-1 text-[12px] bg-green-400/20 border-white/10">
+                    <Leaf size={14} />
+                    {t("vegetarian")}
+                  </Badge>
+                )}
 
-                  {food.tags && (
-                    <Badge
-                      // variant="secondary"
-                      className="flex items-center rounded-full border border-white/10 dark:white text-foreground bg-purple-500/70 gap-1 text-[12px]"
-                    >
-                      <Tag size={14} />
-                      {food.tags.join(", ")}
-                    </Badge>
-                  )}
-                </div>
+                {food.tags && (
+                  <Badge className="flex gap-1 text-[12px] bg-purple-500/70 border-white/10">
+                    <Tag size={14} />
+                    {food.tags.join(", ")}
+                  </Badge>
+                )}
               </div>
 
               {/* توضیحات */}
-              <div className="prose max-w-none">
-                <h1 className="font-bold text-md">
-                  {language === "fa"
-                    ? "توضیحات:"
-                    : language === "ar"
-                      ? "الوصف:"
-                      : "Description:"}
-                </h1>
-                <div className="relative ">
-                  <p
-                    className={`leading-tight text-[13px] transition-all duration-300 ${
-                      isExpanded ? "line-clamp-none" : "line-clamp-4"
-                    }`}
-                  >
-                    {getFoodDescription(food)}
-                  </p>
+              <div>
+                <h1 className="font-bold text-md">{t("description")}:</h1>
 
-                  {/* دکمه نمایش بیشتر/کمتر */}
-                  {getFoodDescription(food).length > 200 && (
-                    <button
-                      onClick={toggleDescription}
-                      className="flex items-center gap-1.5 mt-2 text-sm text-green-700 hover:text-green-500 transition-colors"
-                    >
-                      {isExpanded ? (
-                        <>
-                          <ChevronUp size={16} />
-                          {getDescriptionButtonText()}
-                        </>
-                      ) : (
-                        <>
-                          <ChevronDown size={16} />
-                          {getDescriptionButtonText()}
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
+                <p
+                  className={`text-[13px] leading-tight transition-all ${
+                    isExpanded ? "line-clamp-none" : "line-clamp-4"
+                  }`}
+                >
+                  {description}
+                </p>
+
+                {description.length > 200 && (
+                  <button
+                    onClick={handleToggleDescription}
+                    className="flex items-center gap-1.5 mt-2 text-sm text-green-700"
+                  >
+                    {isExpanded ? (
+                      <ChevronUp size={16} />
+                    ) : (
+                      <ChevronDown size={16} />
+                    )}
+                    {descriptionButtonText}
+                  </button>
+                )}
               </div>
 
-              {/* مشخصات فنی */}
+              {/* اطلاعات فنی */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {food.cooking_time && (
-                  <div className="flex justify-center items-center p-2 space-x-3 bg-black/5 border-black/15 dark:bg-white/5 rounded-md border dark:border-white/10">
-                    <div className="">
-                      <Clock className="" size={18} />
-                    </div>
-                    <div className="">
+                  <div className="info-block">
+                    <Clock size={18} />
+                    <div>
                       <p className="text-xs">{t("cookingTime")}</p>
                       <p className="font-bold text-sm">
                         {food.cooking_time} {t("minutes")}
@@ -309,11 +267,9 @@ export default function FoodDetails({
                 )}
 
                 {food.serves && (
-                  <div className="flex justify-center items-center p-2 space-x-3 bg-black/5 border-black/15 dark:bg-white/5 rounded-md border dark:border-white/10">
-                    <div className="">
-                      <Users className="" size={18} />
-                    </div>
-                    <div className="">
+                  <div className="info-block">
+                    <Users size={18} />
+                    <div>
                       <p className="text-xs">{t("serves")}</p>
                       <p className="font-bold text-sm">
                         {food.serves} {t("people")}
@@ -323,28 +279,29 @@ export default function FoodDetails({
                 )}
               </div>
 
-              <div className="">
-                <h1 className="font-bold text-md my-1">
-                  {language === "fa"
-                    ? "مواد تشکیل‌دهنده:"
-                    : language === "ar"
-                      ? "المكونات:"
-                      : "Ingredients:"}
-                </h1>
-                {getIngredients(food) && (
-                  <p className=" text-[13px] leading-tight">
-                    {getIngredients(food).toString()}
-                  </p>
+              {/* مواد اولیه */}
+              <div>
+                <h1 className="font-bold text-md my-1">{t("ingredients")}:</h1>
+                {ingredients && (
+                  <p className="text-[13px] leading-tight">{ingredients}</p>
                 )}
               </div>
 
-              {/* سیستم امتیازدهی */}
+              {/* امتیازدهی */}
               <div className="mb-6">
                 <RatingSystem
                   foodId={food.id}
-                  onRatingStatsChange={handleRatingStatsChange}
+                  onRatingStatsChange={setRatingStats}
                 />
               </div>
+
+              {/* افزودن به سبد */}
+              <button
+                onClick={handleAddToCart}
+                className="primary-btn w-full py-3 rounded-xl bg-green-600 text-white font-bold text-lg"
+              >
+                {t("addToCart")}
+              </button>
             </div>
           </div>
         </div>
