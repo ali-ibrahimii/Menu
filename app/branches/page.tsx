@@ -287,7 +287,7 @@ export default function BranchesPage() {
       dir={language === "en" ? "ltr" : "rtl"}
       className="relative min-h-screen overflow-hidden bg-background"
     >
-      <div className="fixed inset-0 z-[1] pointer-events-none">
+      <div className="fixed inset-0 z-0 pointer-events-none">
         <DotPattern
           glow={true}
           className={cn(
@@ -296,7 +296,7 @@ export default function BranchesPage() {
         />
       </div>
 
-      <div className="z-10 px-4 py-6">
+      <div className="z-50 px-4 py-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between mb-4">
             <LanguageSwitcher />
