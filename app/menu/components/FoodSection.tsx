@@ -3,7 +3,17 @@
 import { memo } from "react";
 import FoodGrid from "./FoodGrid";
 
-function FoodSection({ title, foods, language, t, getFoodName, getIngredients, onSelectFood }) {
+type FoodSectionProps = {
+  title: string;
+  foods: any[];
+  language: string;
+  t: any;
+  getFoodName: (...args: any[]) => string;
+  getIngredients: (...args: any[]) => string;
+  onSelectFood: (...args: any[]) => void;
+};
+
+function FoodSection({ title, foods, language, t, getFoodName, getIngredients, onSelectFood }: FoodSectionProps) {
   return (
     <section className="space-y-4">
       <h2 className="font-bold font-[BTitr]">{title}</h2>
