@@ -51,7 +51,7 @@ export default function FoodDetails({
   /** ترجمه سازگار با تایپ‌اسکریپت */
   const t = useCallback(
     (key: string) => {
-      const dict = translations[language] || {};
+      const dict = translations[language] as Record<string, string>;
       return dict[key] || key;
     },
     [language]
