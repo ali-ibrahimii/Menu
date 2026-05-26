@@ -175,10 +175,10 @@ export default function HomeContent() {
               slug === "uncategorized"
                 ? t("uncategorized")
                 : language === "fa"
-                ? categoryObj?.name
+                ? categoryObj?.name || slug
                 : language === "ar"
-                ? categoryObj?.name_ar
-                : categoryObj?.slug;
+                ? categoryObj?.name_ar || slug
+                : categoryObj?.slug || slug;
 
             return (
               <FoodSection
@@ -196,11 +196,11 @@ export default function HomeContent() {
         ) : (
           <FoodSection
             title={
-              language === "fa"
+              (language === "fa"
                 ? categories.find((c) => c.slug === category)?.name
                 : language === "ar"
                 ? categories.find((c) => c.slug === category)?.name_ar
-                : category
+                : category) ?? ""
             }
             foods={displayedFoods}
             language={language}
