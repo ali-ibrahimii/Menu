@@ -16,7 +16,7 @@ type FoodSectionProps = {
 function FoodSection({ title, foods, language, t, getFoodName, getIngredients, onSelectFood }: FoodSectionProps) {
   return (
     <section className="space-y-4">
-      <h2 className="font-bold font-[BTitr]">{title}</h2>
+      <h2 className="font-bold font-[BTitr]" dir={language === "en" ? "ltr" : "rtl"}>{title}</h2>
       <div className="h-px bg-linear-to-r from-transparent via-black dark:via-gray-200 to-transparent" />
       <FoodGrid
         foods={foods}

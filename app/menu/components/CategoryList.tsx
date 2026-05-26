@@ -20,7 +20,7 @@ function CategoryList({
     <div className="w-full overflow-x-auto overflow-y-hidden no-scrollbar hide-scroll-shadow">
       <div
         dir={language === "en" ? "ltr" : "rtl"}
-        className="flex space-x-2 border min-w-max"
+        className="flex space-x-2 min-w-max"
       >
         <CategoryButton
           isSelected={active === null}
