@@ -3,7 +3,25 @@
 import { memo } from "react";
 import FoodDetails from "@/components/FoodDetails";
 
-function FoodModal({ food, isOpen, onClose, getFoodName, getIngredients, getDescription }) {
+type Food = any;
+
+interface FoodModalProps {
+  food: Food | null;
+  isOpen: boolean;
+  onClose: () => void;
+  getFoodName?: (food: Food) => string;
+  getIngredients?: (food: Food) => string[];
+  getDescription?: (food: Food) => string;
+}
+
+function FoodModal({
+  food,
+  isOpen,
+  onClose,
+  getFoodName,
+  getIngredients,
+  getDescription,
+}: FoodModalProps) {
   if (!food) return null;
 
   return (
@@ -11,9 +29,16 @@ function FoodModal({ food, isOpen, onClose, getFoodName, getIngredients, getDesc
       food={food}
       isOpen={isOpen}
       onClose={onClose}
-      getFoodName={getFoodName}
-      getIngredients={getIngredients}
-      getFoodDescription={getDescription}
+      // Always pass functions to match FoodDetailsProps expectations
+      getFoodName={
+        getFoodName ?? ((f: Food) => (f && (f.name ?? String(f))) ?? "")
+      }
+      getIngredients={
+        getIngredients ?? ((f: Food) => (f && f.ingredients) ?? [])
+      }
+      getFoodDescription={
+        getDescription ?? ((f: Food) => (f && f.description) ?? "")
+      }
     />
   );
 }
