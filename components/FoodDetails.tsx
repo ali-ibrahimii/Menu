@@ -48,37 +48,38 @@ export default function FoodDetails({
     totalReviews: 0,
   });
 
-  /** ترجمه سریع و کم‌هزینه */
+  /** ترجمه سازگار با تایپ‌اسکریپت */
   const t = useCallback(
-    (key: string) => translations[language]?.[key] || key,
-    [language],
+    (key: string) => {
+      const dict = translations[language] || {};
+      return dict[key] || key;
+    },
+    [language]
   );
 
-  /** memo → جلوگیری از محاسبه دوباره */
   const name = useMemo(() => getFoodName(food), [food, getFoodName]);
   const description = useMemo(
-    () => getFoodDescription(food),
-    [food, getFoodDescription],
+    () => getFoodDescription(food) || "",
+    [food, getFoodDescription]
   );
   const ingredients = useMemo(
-    () => getIngredients(food),
-    [food, getIngredients],
+    () => getIngredients(food) || "",
+    [food, getIngredients]
   );
 
   const images = useMemo(
     () => (food.images?.length ? food.images : [food.image_url]),
-    [food.images, food.image_url],
+    [food]
   );
 
   const priceText = useMemo(
     () => `${food.price.toLocaleString()} ${t("price")}`,
-    [food.price, t],
+    [food.price, t]
   );
 
-  /** جلوگیری از ساخت تابع جدید در هر رندر */
   const handleToggleDescription = useCallback(
     () => setIsExpanded((prev) => !prev),
-    [],
+    []
   );
 
   const handleAddToCart = useCallback(() => {
@@ -96,17 +97,15 @@ export default function FoodDetails({
   }, [food, addToCart, onClose, t]);
 
   const descriptionButtonText = useMemo(() => {
-    return isExpanded
-      ? language === "fa"
-        ? "نمایش کمتر"
-        : language === "ar"
-          ? "عرض أقل"
-          : "Show Less"
-      : language === "fa"
-        ? "مشاهده بیشتر"
-        : language === "ar"
-          ? "عرض المزيد"
-          : "Read More";
+    if (isExpanded) {
+      if (language === "fa") return "نمایش کمتر";
+      if (language === "ar") return "عرض أقل";
+      return "Show Less";
+    } else {
+      if (language === "fa") return "مشاهده بیشتر";
+      if (language === "ar") return "عرض المزيد";
+      return "Read More";
+    }
   }, [isExpanded, language]);
 
   return (
@@ -117,7 +116,7 @@ export default function FoodDetails({
           className="flex-1 overflow-y-auto"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden">
-            {/* تصاویر */}
+            {/* تصویر */}
             <div className="relative mb-2 p-2 rounded-3xl overflow-hidden">
               <div className="w-full h-90 rounded-3xl overflow-hidden">
                 <Image
@@ -128,47 +127,14 @@ export default function FoodDetails({
                   sizes="100vw"
                 />
               </div>
-
-              {images.length > 1 && (
-                <div className="relative">
-                  <div className="absolute left-1/2 -bottom-8 -translate-x-1/2">
-                    <div className="bg-black/10 backdrop-blur-[1px] rounded-xl p-1.5 mb-2.5 border border-white/20">
-                      <div className="w-[270px] px-2 overflow-x-auto scrollbar-hide">
-                        <div className="flex gap-2">
-                          {images.map((img, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => setSelectedImageIndex(idx)}
-                              className={`w-12 h-12 rounded-md overflow-hidden border-2 transition-all ${
-                                selectedImageIndex === idx
-                                  ? "border-green-400"
-                                  : "border-white/30 hover:border-white/50"
-                              }`}
-                            >
-                              <Image
-                                fill
-                                src={img}
-                                alt={`${name} ${idx + 1}`}
-                                className="object-cover"
-                                sizes="50px"
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
-            {/* اطلاعات */}
+            {/* توضیحات */}
             <div className="space-y-5 px-6">
-              {/* عنوان + قیمت */}
               <div>
                 <div className="flex justify-between items-center">
                   <Badge variant="default" className="text-[11px]">
-                    {food.category}
+                    {food.category || t("food")}
                   </Badge>
 
                   {ratingStats.totalReviews > 0 && (
@@ -201,30 +167,6 @@ export default function FoodDetails({
                 </div>
               </div>
 
-              {/* تگ‌ها */}
-              <div className="flex flex-wrap gap-2">
-                {food.is_spicy && (
-                  <Badge className="flex gap-1 text-[12px] bg-red-300/15 border-white/10">
-                    <Flame size={14} />
-                    {t("spicy")}
-                  </Badge>
-                )}
-
-                {food.is_vegetarian && (
-                  <Badge className="flex gap-1 text-[12px] bg-green-400/20 border-white/10">
-                    <Leaf size={14} />
-                    {t("vegetarian")}
-                  </Badge>
-                )}
-
-                {food.tags && (
-                  <Badge className="flex gap-1 text-[12px] bg-purple-500/70 border-white/10">
-                    <Tag size={14} />
-                    {food.tags.join(", ")}
-                  </Badge>
-                )}
-              </div>
-
               {/* توضیحات */}
               <div>
                 <h1 className="font-bold text-md">{t("description")}:</h1>
@@ -237,62 +179,15 @@ export default function FoodDetails({
                   {description}
                 </p>
 
-                {description.length > 200 && (
+                {description.length > 120 && (
                   <button
                     onClick={handleToggleDescription}
                     className="flex items-center gap-1.5 mt-2 text-sm text-green-700"
                   >
-                    {isExpanded ? (
-                      <ChevronUp size={16} />
-                    ) : (
-                      <ChevronDown size={16} />
-                    )}
+                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     {descriptionButtonText}
                   </button>
                 )}
-              </div>
-
-              {/* اطلاعات فنی */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {food.cooking_time && (
-                  <div className="info-block">
-                    <Clock size={18} />
-                    <div>
-                      <p className="text-xs">{t("cookingTime")}</p>
-                      <p className="font-bold text-sm">
-                        {food.cooking_time} {t("minutes")}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {food.serves && (
-                  <div className="info-block">
-                    <Users size={18} />
-                    <div>
-                      <p className="text-xs">{t("serves")}</p>
-                      <p className="font-bold text-sm">
-                        {food.serves} {t("people")}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* مواد اولیه */}
-              <div>
-                <h1 className="font-bold text-md my-1">{t("ingredients")}:</h1>
-                {ingredients && (
-                  <p className="text-[13px] leading-tight">{ingredients}</p>
-                )}
-              </div>
-
-              {/* امتیازدهی */}
-              <div className="mb-6">
-                <RatingSystem
-                  foodId={food.id}
-                  onRatingStatsChange={setRatingStats}
-                />
               </div>
 
               {/* افزودن به سبد */}
