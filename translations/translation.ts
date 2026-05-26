@@ -1,3 +1,5 @@
+import { Description } from "@radix-ui/react-dialog";
+
 export const translations = {
   fa: {
     menu: "منو",
@@ -199,6 +201,7 @@ export const translations = {
     noActiveBranch: "شعبه فعالی وجود ندارد",
     test: "این یک متن تستی هست در قسمت در ما",
     pleaseTryAgain: "شعبه یافت نشد لطفا دوباره تلاش کنید",
+    description: "وصف",
   },
   
   ar: {
@@ -402,6 +405,7 @@ export const translations = {
     noActiveBranch: "No Active Branch",
     test: "این یک متن تستی هست در قسمت در ما",
     pleaseTryAgain: "لطفا دوباره تلاش کنید",
+    description: "توضیحات",
   },
   
   en: {
@@ -605,5 +609,6 @@ export const translations = {
     noActiveBranch: "No Active Branch",
     test: "This is some text for test the about us page This is some text for test the about us page This is some text for test the about us page This is some text for test the about us page This is some text for test the about us page",
     pleaseTryAgain: "Please try again",
+    description: "Description",
   },
 };

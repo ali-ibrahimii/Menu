@@ -48,38 +48,38 @@ export default function FoodDetails({
     totalReviews: 0,
   });
 
-  /** ترجمه سازگار با تایپ‌اسکریپت */
+  /** نسخه بدون خطا */
   const t = useCallback(
     (key: string) => {
       const dict = translations[language] as Record<string, string>;
-      return dict[key] || key;
+      return dict[key] ?? key;
     },
-    [language]
+    [language],
   );
 
   const name = useMemo(() => getFoodName(food), [food, getFoodName]);
   const description = useMemo(
     () => getFoodDescription(food) || "",
-    [food, getFoodDescription]
+    [food, getFoodDescription],
   );
   const ingredients = useMemo(
     () => getIngredients(food) || "",
-    [food, getIngredients]
+    [food, getIngredients],
   );
 
   const images = useMemo(
     () => (food.images?.length ? food.images : [food.image_url]),
-    [food]
+    [food.images, food.image_url],
   );
 
   const priceText = useMemo(
     () => `${food.price.toLocaleString()} ${t("price")}`,
-    [food.price, t]
+    [food.price, t],
   );
 
   const handleToggleDescription = useCallback(
     () => setIsExpanded((prev) => !prev),
-    []
+    [],
   );
 
   const handleAddToCart = useCallback(() => {
@@ -116,7 +116,7 @@ export default function FoodDetails({
           className="flex-1 overflow-y-auto"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden">
-            {/* تصویر */}
+            {/* تصاویر */}
             <div className="relative mb-2 p-2 rounded-3xl overflow-hidden">
               <div className="w-full h-90 rounded-3xl overflow-hidden">
                 <Image
@@ -127,9 +127,41 @@ export default function FoodDetails({
                   sizes="100vw"
                 />
               </div>
+
+              {images.length > 1 && (
+                <div className="relative">
+                  <div className="absolute left-1/2 -bottom-8 -translate-x-1/2">
+                    <div className="bg-black/10 backdrop-blur-[1px] rounded-xl p-1.5 mb-2.5 border border-white/20">
+                      <div className="w-[270px] px-2 overflow-x-auto scrollbar-hide">
+                        <div className="flex gap-2">
+                          {images.map((img, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => setSelectedImageIndex(idx)}
+                              className={`w-12 h-12 rounded-md overflow-hidden border-2 transition-all ${
+                                selectedImageIndex === idx
+                                  ? "border-green-400"
+                                  : "border-white/30 hover:border-white/50"
+                              }`}
+                            >
+                              <Image
+                                fill
+                                src={img}
+                                alt={`${name} ${idx + 1}`}
+                                sizes="50px"
+                                className="object-cover"
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* توضیحات */}
+            {/* اطلاعات کامل غذا */}
             <div className="space-y-5 px-6">
               <div>
                 <div className="flex justify-between items-center">
@@ -150,27 +182,50 @@ export default function FoodDetails({
                   )}
                 </div>
 
-                <div className="flex justify-between items-center mt-2">
+                <div className="flex justify-between border items-center mt-2">
                   <h1 className="text-2xl font-bold">{name}</h1>
 
                   <div>
+                    <div className="text-sm font-bold dark:text-yellow-300">
+                      {priceText}
+                    </div>
                     <Badge
                       variant={food.is_available ? "default" : "destructive"}
                     >
                       {food.is_available ? t("available") : t("notAvailable")}
                     </Badge>
 
-                    <div className="text-sm font-bold dark:text-yellow-300">
-                      {priceText}
-                    </div>
                   </div>
                 </div>
+              </div>
+
+              {/* تگ‌ها */}
+              <div className="flex flex-wrap gap-2">
+                {food.is_spicy && (
+                  <Badge className="flex gap-1 text-[12px] bg-red-300/15 border-white/10">
+                    <Flame size={14} />
+                    {t("spicy")}
+                  </Badge>
+                )}
+
+                {food.is_vegetarian && (
+                  <Badge className="flex gap-1 text-[12px] bg-green-400/20 border-white/10">
+                    <Leaf size={14} />
+                    {t("vegetarian")}
+                  </Badge>
+                )}
+
+                {food.tags && (
+                  <Badge className="flex gap-1 text-[12px] bg-purple-500/70 border-white/10">
+                    <Tag size={14} />
+                    {food.tags.join(", ")}
+                  </Badge>
+                )}
               </div>
 
               {/* توضیحات */}
               <div>
                 <h1 className="font-bold text-md">{t("description")}:</h1>
-
                 <p
                   className={`text-[13px] leading-tight transition-all ${
                     isExpanded ? "line-clamp-none" : "line-clamp-4"
@@ -179,21 +234,72 @@ export default function FoodDetails({
                   {description}
                 </p>
 
-                {description.length > 120 && (
+                {description.length > 200 && (
                   <button
                     onClick={handleToggleDescription}
                     className="flex items-center gap-1.5 mt-2 text-sm text-green-700"
                   >
-                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    {isExpanded ? (
+                      <ChevronUp size={16} />
+                    ) : (
+                      <ChevronDown size={16} />
+                    )}
                     {descriptionButtonText}
                   </button>
                 )}
               </div>
 
-              {/* افزودن به سبد */}
+              {/* اطلاعات فنی (پخت، افراد) */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {food.cooking_time && (
+                  <div className="flex justify-center items-center gap-2 info-block border rounded-xl p-3">
+                    <div className="p-4 border rounded-full">
+                      <Clock size={18} />
+                    </div>
+                    <div>
+                      <p className="text-xs">{t("cookingTime")}</p>
+                      <p className="font-bold text-sm">
+                        {food.cooking_time} {t("minutes")}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {food.serves && (
+                  <div className="flex justify-center items-center gap-2 info-block border rounded-xl p-3">
+                    <div className="p-4 border rounded-full">
+                      <Users size={18} />
+                    </div>
+                    <div>
+                      <p className="text-xs">{t("serves")}</p>
+                      <p className="font-bold text-sm">
+                        {food.serves} {t("people")}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* مواد اولیه */}
+              <div>
+                <h1 className="font-bold text-md my-1">{t("ingredients")}:</h1>
+                {ingredients && (
+                  <p className="text-[13px] leading-tight">{ingredients}</p>
+                )}
+              </div>
+
+              {/* امتیازدهی */}
+              <div className="mb-6">
+                <RatingSystem
+                  foodId={food.id}
+                  onRatingStatsChange={setRatingStats}
+                />
+              </div>
+
+              {/* دکمه */}
               <button
                 onClick={handleAddToCart}
-                className="primary-btn w-full py-3 rounded-xl bg-green-600 text-white font-bold text-lg"
+                className="primary-btn w-full mb-6 py-3 rounded-xl bg-green-600 text-white font-bold text-lg"
               >
                 {t("addToCart")}
               </button>

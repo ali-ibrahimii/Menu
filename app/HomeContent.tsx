@@ -42,7 +42,7 @@ export default function HomeContent() {
   return (
     <main
       dir={language === "en" ? "ltr" : "rtl"}
-      className="relative min-h-screen overflow-hidden text-white"
+      className="relative h-screen overflow-hidden text-white"
     >
       {/* پس‌زمینه متحرک */}
       <BackgroundCarousel

@@ -29,6 +29,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "BTitr";
   src: url("../public/fonts/Titr-Bold.ttf") format("truetype");
@@ -36,6 +37,15 @@
   font-style: normal;
   font-display: swap;
 }
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("../public/fonts/Montserrat.otf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 @font-face {
   font-family: "Balbek";
   src: url("../public/fonts/Balbek.otf") format("truetype");

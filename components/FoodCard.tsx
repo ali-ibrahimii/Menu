@@ -92,7 +92,7 @@ const FoodCard = memo(function FoodCard({
       {/* اطلاعات غذا */}
       <div className="flex flex-col mx-3 w-8/12 overflow-hidden py-2">
         <div className="mb-4">
-          <h2 className="text-md font-bold truncate">{foodName}</h2>
+          <h2 className={`text-md font-bold truncate ${language === "en" ? "font-[Montserrat]" : ""}`}>{foodName}</h2>
 
           {hasIngredients && (
             <p className="text-[12px] line-clamp-2 leading-4.5 opacity-70">

@@ -6,9 +6,7 @@ import Link from "next/link";
 export default function Header({ title, language }: {title: string; language: string}) {
   return (
     <div
-      className={`text-3xl font-bold flex justify-between items-center ${
-        language === "en" ? "mb-1" : "mb-2"
-      }`}
+      className={`text-3xl font-bold flex justify-between items-center`}
       dir={language === "en" ? "ltr" : "rtl"}
     >
       <h1 className={`${language === "en" ? "font-[Balbek]" : "font-[BTitr]"}`}>
