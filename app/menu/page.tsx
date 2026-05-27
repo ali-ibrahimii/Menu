@@ -126,14 +126,14 @@ export default function HomeContent() {
   return (
     <main className="relative w-full min-h-screen px-5 py-5 overflow-y-auto touch-pan-y">
       {/* پس‌زمینه */}
-      <div className="fixed inset-0 -z-[1] pointer-events-none">
+      {/* <div className="fixed inset-0 -z-[1] pointer-events-none">
         <DotPattern
           glow={true}
           className={cn(
             "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]"
           )}
         />
-      </div>
+      </div> */}
 
       {/* هدر */}
       <Header title={t("menu")} language={language} />

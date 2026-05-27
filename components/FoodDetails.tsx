@@ -115,7 +115,7 @@ export default function FoodDetails({
           dir={language === "en" ? "ltr" : "rtl"}
           className="flex-1 overflow-y-auto"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden px-2">
             {/* تصاویر */}
             <div className="relative mb-2 p-2 rounded-3xl overflow-hidden">
               <div className="w-full h-90 rounded-3xl overflow-hidden">
@@ -130,7 +130,7 @@ export default function FoodDetails({
 
               {images.length > 1 && (
                 <div className="relative">
-                  <div className="absolute left-1/2 -bottom-8 -translate-x-1/2">
+                  <div className="absolute left-1/2 -bottom-2 -translate-x-1/2">
                     <div className="bg-black/10 backdrop-blur-[1px] rounded-xl p-1.5 mb-2.5 border border-white/20">
                       <div className="w-[270px] px-2 overflow-x-auto scrollbar-hide">
                         <div className="flex gap-2">
@@ -138,7 +138,7 @@ export default function FoodDetails({
                             <button
                               key={idx}
                               onClick={() => setSelectedImageIndex(idx)}
-                              className={`w-12 h-12 rounded-md overflow-hidden border-2 transition-all ${
+                              className={`relative -translate-x-1/2 left-1.5 w-12 h-12 rounded-md overflow-hidden border-2 transition-all ${
                                 selectedImageIndex === idx
                                   ? "border-green-400"
                                   : "border-white/30 hover:border-white/50"
@@ -182,7 +182,7 @@ export default function FoodDetails({
                   )}
                 </div>
 
-                <div className="flex justify-between border items-center mt-2">
+                <div className="flex justify-between items-center mt-2">
                   <h1 className="text-2xl font-bold">{name}</h1>
 
                   <div>

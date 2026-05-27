@@ -287,14 +287,14 @@ export default function BranchesPage() {
       dir={language === "en" ? "ltr" : "rtl"}
       className="relative min-h-screen overflow-hidden bg-background"
     >
-      <div className="fixed inset-0 z-0 pointer-events-none">
+      {/* <div className="fixed inset-0 z-0 pointer-events-none">
         <DotPattern
           glow={true}
           className={cn(
             "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
           )}
         />
-      </div>
+      </div> */}
 
       <div className="z-50 px-4 py-6">
         <div className="max-w-6xl mx-auto">
