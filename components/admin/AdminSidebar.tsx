@@ -127,7 +127,7 @@ export default function AdminSidebar({ onLogout }: AdminSidebarProps) {
   return (
     <div className="sticky top-0">
       {/* هدر سایدبار */}
-      <div className={`flex items-center justify-around backdrop-blur-md py-1 border-b border-gray-200/80`}>
+      <div className={`flex items-center justify-around bg-blue-100 backdrop-blur-md py-1 border-b border-gray-200/80`}>
         {/* اطلاعات کاربر */}
         <div className="">
           <div className="flex items-center gap-3">
