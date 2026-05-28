@@ -162,7 +162,7 @@ export default function FoodDetails({
             </div>
 
             {/* اطلاعات کامل غذا */}
-            <div className="space-y-5 px-6">
+            <div className="space-y-4 px-6">
               <div>
                 <div className="flex justify-between items-center">
                   <Badge variant="default" className="text-[11px]">
@@ -183,8 +183,7 @@ export default function FoodDetails({
                 </div>
 
                 <div className="flex justify-between items-center mt-2">
-                  <h1 className="text-2xl font-bold">{name}</h1>
-
+                  <h1 className={`text-2xl ${language === "en" ? "font-[Montserrat]" : "font-[Btitr]"}`}>{name}</h1>
                   <div>
                     <div className="text-sm font-bold dark:text-yellow-300">
                       {priceText}
@@ -299,7 +298,7 @@ export default function FoodDetails({
               {/* دکمه */}
               <button
                 onClick={handleAddToCart}
-                className="w-full mb-6 py-3 rounded-lg bg-accent dark:bg-card border text-white font-bold text-lg"
+                className="w-full mb-6 py-2 rounded-lg bg-accent dark:bg-card border text-white"
               >
                 {t("addToCart")}
               </button>

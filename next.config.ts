@@ -1,3 +1,5 @@
+import { allowedNodeEnvironmentFlags } from "process";
+
 // next.config.js
 const nextConfig = {
   images: {

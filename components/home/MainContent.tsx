@@ -12,6 +12,10 @@ interface MainContentProps {
   t: (key: string) => string;
 }
 
+const src = { 
+  logo: "/logo1.png"
+}
+
 export default function MainContent({ branch, t }: MainContentProps) {
   const { language } = useLanguage();
 
@@ -24,7 +28,7 @@ export default function MainContent({ branch, t }: MainContentProps) {
       <div className="flex flex-col items-center space-y-6 w-full px-8">
         <div className="flex-col flex items-center">
           <Image
-            src="/logo1.png"
+            src="/logo1.png"            // src={src.logo}
             alt={branch.name_fa}
             width={140}
             height={40}

@@ -106,7 +106,7 @@ export default function PhoneDrawer() {
       <div className="dark:bg-card bg-sidebar rounded-lg p-3 mb-2 border glass-card-3d">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <Phone size={16} className="" />
+            <Phone size={16}/>
             <span className="text-sm">{label}</span>
           </div>
         </div>
