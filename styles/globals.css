@@ -1,6 +1,104 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+
+/* app/globals.css - اضافه کنید */
+
+/* انیمیشن گرادیانت متحرک */
+@keyframes gradient-xy {
+  0%, 100% {
+    background-position: 0% 0%;
+  }
+  25% {
+    background-position: 100% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+}
+
+.animate-gradient-xy {
+  background-size: 400% 400%;
+  animation: gradient-xy 15s ease infinite;
+}
+
+/* حرکت دایره‌های نئونی */
+@keyframes neon-float-1 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+    opacity: 0.2;
+  }
+  33% {
+    transform: translate(50px, -50px) scale(1.1);
+    opacity: 0.3;
+  }
+  66% {
+    transform: translate(-30px, 30px) scale(0.9);
+    opacity: 0.15;
+  }
+}
+
+@keyframes neon-float-2 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+    opacity: 0.2;
+  }
+  33% {
+    transform: translate(-60px, 40px) scale(0.9);
+    opacity: 0.15;
+  }
+  66% {
+    transform: translate(40px, -40px) scale(1.1);
+    opacity: 0.3;
+  }
+}
+
+@keyframes neon-pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0.2;
+  }
+}
+
+.animate-neon-float-1 {
+  animation: neon-float-1 12s ease-in-out infinite;
+}
+
+.animate-neon-float-2 {
+  animation: neon-float-2 10s ease-in-out infinite;
+}
+
+.animate-neon-pulse {
+  animation: neon-pulse 8s ease-in-out infinite;
+}
+
+/* حرکت خطوط گلدانامه */
+@keyframes grid-move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50px 50px;
+  }
+}
+
+/* چشمک زدن نقاط */
+@keyframes dots-pulse {
+  0% {
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
+
 /* پنهان کردن اسکرول و حذف خطوط سایه زیر آن */
 .no-scrollbar {
   scrollbar-width: none !important; /* Firefox */

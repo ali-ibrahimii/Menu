@@ -17,11 +17,8 @@ function CategoryList({
   language: string;
 }) {
   return (
-    <div className="w-full overflow-x-auto overflow-y-hidden no-scrollbar hide-scroll-shadow">
-      <div
-        dir={language === "en" ? "ltr" : "rtl"}
-        className="flex space-x-2 min-w-max"
-      >
+    <div dir={language === "en" ? "ltr" : "rtl"} className="w-full overflow-x-auto overflow-y-hidden no-scrollbar hide-scroll-shadow">
+      <div className="flex space-x-2 min-w-max p-1">
         <CategoryButton
           isSelected={active === null}
           onClick={() => onSelect(null)}

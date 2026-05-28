@@ -186,7 +186,7 @@ export default function RatingSystem({
         {!showReviewForm && (
           <Button
             onClick={() => setShowReviewForm(true)}
-            className="w-full rounded-md p-3 border border-white/10"
+            className="w-full rounded-lg py-5 border dark:text-white border-white/10 bg-accent dark:bg-card"
           >
             {t("addReview")}
           </Button>
@@ -195,7 +195,7 @@ export default function RatingSystem({
 
       {/* فرم ثبت نظر */}
       {showReviewForm && (
-        <div className=" rounded-xl border bg-accent dark:bg-card p-6 space-y-4">
+        <div className=" rounded-lg border bg-accent dark:bg-card p-6 space-y-4">
           <h3 className="text-lg font-semibold">{t("addReview")}</h3>
 
           <div className="space-y-2">

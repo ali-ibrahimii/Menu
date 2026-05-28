@@ -282,7 +282,7 @@ export default function CartDrawer() {
               <Button
                 // variant="outline"
                 onClick={clearCart}
-                className="glass-cart-btn w-full"
+                className="w-full bg-accent dark:bg-card border dark:text-white py-5 rounded-xl"
                 disabled={isSubmitting}
               >
                 <Trash2 size={16} className="ml-1" />

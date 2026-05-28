@@ -57,7 +57,7 @@ const FoodCard = memo(function FoodCard({
       whileHover={{ scale: 1.015 }}
       whileTap={{ scale: 0.98 }}
       dir={language === "en" ? "ltr" : "rtl"}
-      className="relative flex items-center w-full h-34 bg-accent dark:bg-[#191919] rounded-2xl border overflow-hidden cursor-pointer shadow-sm transition-all"
+      className="relative flex items-center w-full h-34  dark:bg-[#191919] rounded-2xl border overflow-hidden cursor-pointer shadow-sm transition-all"
       onClick={onClickCard}
       style={{ transform: "translateZ(0)" }}
     >

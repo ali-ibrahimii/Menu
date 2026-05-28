@@ -17,6 +17,8 @@ import { DotPattern } from "@/components/ui/dot-pattern";
 import { cn } from "@/lib/utils";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CartDrawer from "@/components/CartDrawer";
+import MinimalNeonBackground from "@/components/MinimalNeonBackground";
+import WaveNeonBackground from "@/components/WaveNeonBackground";
 
 export default function HomeContent() {
   const { language } = useLanguage();
@@ -134,12 +136,16 @@ export default function HomeContent() {
           )}
         />
       </div> */}
+      {/* <div className="absolute inset-0 -z-10 pointer-events-none bg-gradient-to-b from-[#0a0a0a] via-[#111827] to-[#0f0f0f]" /> */}
+
+      {/* <MinimalNeonBackground /> */}
+      {/* <WaveNeonBackground /> */}
 
       {/* هدر */}
       <Header title={t("menu")} language={language} />
 
       {/* سرچ */}
-      <div className="mt-4 flex items-center">
+      <div className="mt-3 flex items-center">
         <SearchBar
           value={search}
           onChange={setSearch}
@@ -153,7 +159,7 @@ export default function HomeContent() {
       </div>
 
       {/* دسته‌بندی‌ها */}
-      <div className="mt-4">
+      <div className="mt-2">
         <CategoryList
           categories={activeCategories}
           active={category}
@@ -164,7 +170,7 @@ export default function HomeContent() {
       </div>
 
       {/* نمایش غذاها */}
-      <div className="mt-6 space-y-8">
+      <div className="mt-3 space-y-8">
         {!category ? (
           Object.entries(grouped).map(([slug, items]) => {
             const categoryObj = categories.find(

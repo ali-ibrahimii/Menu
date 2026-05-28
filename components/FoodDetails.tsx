@@ -131,14 +131,14 @@ export default function FoodDetails({
               {images.length > 1 && (
                 <div className="relative">
                   <div className="absolute left-1/2 -bottom-2 -translate-x-1/2">
-                    <div className="bg-black/10 backdrop-blur-[1px] rounded-xl p-1.5 mb-2.5 border border-white/20">
-                      <div className="w-[270px] px-2 overflow-x-auto scrollbar-hide">
+                    <div className="bg-black/10 backdrop-blur-[1px] rounded-md p-1.5 mb-2.5 border border-white/20">
+                      <div className="px-2 overflow-x-auto scrollbar-hide">
                         <div className="flex gap-2">
                           {images.map((img, idx) => (
                             <button
                               key={idx}
                               onClick={() => setSelectedImageIndex(idx)}
-                              className={`relative -translate-x-1/2 left-1.5 w-12 h-12 rounded-md overflow-hidden border-2 transition-all ${
+                              className={`relative w-12 h-12 rounded-md overflow-hidden border-2 transition-all ${
                                 selectedImageIndex === idx
                                   ? "border-green-400"
                                   : "border-white/30 hover:border-white/50"
@@ -299,7 +299,7 @@ export default function FoodDetails({
               {/* دکمه */}
               <button
                 onClick={handleAddToCart}
-                className="primary-btn w-full mb-6 py-3 rounded-xl bg-green-600 text-white font-bold text-lg"
+                className="w-full mb-6 py-3 rounded-lg bg-accent dark:bg-card border text-white font-bold text-lg"
               >
                 {t("addToCart")}
               </button>
