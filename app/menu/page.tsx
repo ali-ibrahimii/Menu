@@ -17,8 +17,6 @@ import { DotPattern } from "@/components/ui/dot-pattern";
 import { cn } from "@/lib/utils";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CartDrawer from "@/components/CartDrawer";
-import MinimalNeonBackground from "@/components/MinimalNeonBackground";
-import WaveNeonBackground from "@/components/WaveNeonBackground";
 
 export default function HomeContent() {
   const { language } = useLanguage();
@@ -138,8 +136,6 @@ export default function HomeContent() {
       </div> */}
       {/* <div className="absolute inset-0 -z-10 pointer-events-none bg-gradient-to-b from-[#0a0a0a] via-[#111827] to-[#0f0f0f]" /> */}
 
-      {/* <MinimalNeonBackground /> */}
-      {/* <WaveNeonBackground /> */}
 
       {/* هدر */}
       <Header title={t("menu")} language={language} />
