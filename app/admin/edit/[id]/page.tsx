@@ -364,7 +364,7 @@ export default function EditFoodPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center min-h-screen bg-slate-50 dark:bg-slate-950">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
           <p className="text-lg text-gray-600">در حال بارگذاری اطلاعات غذا...</p>
@@ -374,7 +374,7 @@ export default function EditFoodPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-8">
+    <div className="p-16 mx-auto space-y-8 bg-slate-50 dark:bg-slate-950">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl md:text-3xl font-bold">ویرایش غذا</h1>
         <Button
@@ -552,6 +552,7 @@ export default function EditFoodPage() {
                 placeholder="مثلا: Ghormeh Sabzi"
                 value={form.name_en}
                 onChange={handleInputChange}
+                dir="ltr"
               />
             </div>
           </div>
@@ -566,7 +567,7 @@ export default function EditFoodPage() {
                 placeholder="توضیحات کامل به فارسی"
                 value={form.description_fa}
                 onChange={handleInputChange}
-                rows={3}
+                rows={4}
               />
             </div>
 
@@ -591,7 +592,8 @@ export default function EditFoodPage() {
                   placeholder="توضیحات کامل به انگلیسی"
                   value={form.description_en}
                   onChange={handleInputChange}
-                  rows={3}
+                  rows={4}
+                  dir="ltr"
                 />
               </div>
             </div>
@@ -710,6 +712,7 @@ export default function EditFoodPage() {
                 value={form.ingredients_en}
                 onChange={handleInputChange}
                 rows={4}
+                dir="ltr"
               />
             </div>
           </div>
@@ -725,10 +728,10 @@ export default function EditFoodPage() {
             تنظیمات و اطلاعات اضافی
           </h2>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-2 gap-6">
             {/* ستون اول: تنظیمات شعبه و تگ‌ها */}
-            <div className="space-y-4 lg:col-span-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4 ">
+              <div className="">
                 {/* انتخاب شعبه */}
                 <div className="space-y-2">
                   <Label htmlFor="branch_id">
@@ -783,7 +786,7 @@ export default function EditFoodPage() {
 
             {/* ستون دوم: سوئیچ‌ها */}
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition">
+              <div className="flex items-center justify-between p-3 border rounded-lg transition">
                 <div className="space-y-1">
                   <Label htmlFor="is_available" className="cursor-pointer font-medium">
                     موجود است
@@ -799,7 +802,7 @@ export default function EditFoodPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition">
+              <div className="flex items-center justify-between p-3 border rounded-lg transition">
                 <div className="space-y-1">
                   <Label htmlFor="is_spicy" className="cursor-pointer font-medium">
                     تند است
@@ -815,7 +818,7 @@ export default function EditFoodPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition">
+              <div className="flex items-center justify-between p-3 border rounded-lg transition">
                 <div className="space-y-1">
                   <Label htmlFor="is_vegetarian" className="cursor-pointer font-medium">
                     گیاهی است
@@ -835,7 +838,7 @@ export default function EditFoodPage() {
         </div>
 
         {/* دکمه‌های ثبت */}
-        <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm pt-4 border-t">
+        <div className="backdrop-blur-sm pt-4 border-t">
           <div className="max-w-4xl mx-auto">
             <div className="flex flex-col sm:flex-row gap-3">
               <Button

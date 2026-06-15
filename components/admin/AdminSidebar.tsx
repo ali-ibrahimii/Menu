@@ -9,17 +9,12 @@ import {
   Utensils,
   PlusCircle,
   ShoppingCart,
-  Menu as MenuIcon,
-  Users,
-  Settings,
-  BarChart3,
+  ChevronLeft,
   LogOut,
   ChevronRight,
-  ChevronLeft,
-  Package,
-  CreditCard,
-  Bell,
-  HelpCircle,
+  TrendingUp,
+  Clock,
+  CheckCircle2,
   User,
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
@@ -50,19 +45,17 @@ interface Order {
 
 interface AdminSidebarProps {
   onLogout: () => void;
+  children?: React.ReactNode;
 }
 
-export default function AdminSidebar({ onLogout }: AdminSidebarProps) {
+export default function AdminSidebar({ onLogout, children }: AdminSidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
 
-  // دریافت سفارشات از دیتابیس
   const fetchOrders = async () => {
     try {
       const { data, error } = await supabase.from("orders").select("*");
-
       if (error) throw error;
       setOrders(data || []);
     } catch (error) {
@@ -75,11 +68,8 @@ export default function AdminSidebar({ onLogout }: AdminSidebarProps) {
     fetchOrders();
   }, []);
 
-  // آمار و اطلاعات
   const stats = {
-    total: orders.length,
     pending: orders.filter((o) => o.status === "pending").length,
-    confirmed: orders.filter((o) => o.status === "confirmed").length,
     completed: orders.filter((o) => o.status === "completed").length,
     totalRevenue: orders
       .filter((o) => o.status === "completed")
@@ -91,100 +81,123 @@ export default function AdminSidebar({ onLogout }: AdminSidebarProps) {
       ? localStorage.getItem("admin_username") || "ادمین"
       : "ادمین";
 
-  const mainMenuItems = [
-    {
-      href: "/admin",
-      label: "داشبورد",
-      active: pathname === "/admin",
-    },
-    {
-      href: "/admin/add-food",
-      label: "افزودن به منو",
-      active: pathname?.startsWith("/admin/add-food"),
-    },
-    {
-      href: "/admin/foods",
-      label: "لیست منو",
-      active: pathname?.startsWith("/admin/foods"),
-    },
-    {
-      href: "/admin/orders",
-      label: "شفارشات",
-      active: pathname?.startsWith("/admin/orders"),
-    },
-    {
-      href: "/admin/branches",
-      label: "شعبه",
-      active: pathname?.startsWith("/admin/branches"),
-    },
-    {
-      href: "/menu",
-      label: "رفتن به منو",
-      active: pathname?.startsWith("/menu"),
-    },
+  const menuItems = [
+    { href: "/admin", label: "داشبورد", icon: Home },
+    { href: "/admin/add-food", label: "افزودن منو", icon: PlusCircle },
+    { href: "/admin/foods", label: "لیست منو", icon: Utensils },
+    { href: "/admin/orders", label: "سفارشات", icon: ShoppingCart },
+    { href: "/menu", label: "نمایش منو", icon: TrendingUp },
   ];
 
   return (
-    <div className="sticky top-0">
-      {/* هدر سایدبار */}
-      <div className={`flex items-center justify-around bg-blue-100 backdrop-blur-md py-1 border-b border-gray-200/80`}>
-        {/* اطلاعات کاربر */}
-        <div className="">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-12 h-12 bg-linear-to-br from-blue-20 to-blue-200 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 font-bold text-lg">
-                  <User />
-                </span>
+    <div className={`flex h-screen`}>
+      {/* Sidebar */}
+      <div
+        className={`${
+          collapsed ? "w-20" : "w-64"
+        } bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white transition-all duration-300 flex flex-col border-r border-slate-700/50 shadow-2xl`}
+      >
+        {/* Logo Section */}
+        <div className="p-6 border-b border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <div className={`${collapsed ? "hidden" : "flex"} items-center gap-3`}>
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
+                <Utensils size={20} className="text-white" />
               </div>
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+              <div>
+                <h1 className="font-bold text-lg">منو</h1>
+                <p className="text-xs text-slate-400">مدیریت</p>
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-gray-800">{username}</h3>
-              <p className="text-xs text-gray-500">مدیر سیستم</p>
-            </div>
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            >
+              {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+            </button>
           </div>
         </div>
 
-        <div className="flex space-x-3 font-bold">
-          {mainMenuItems.map((item) => {
-            return (
-              <div key={item.label}>
-                <Link
-                  href={item.href}
-                  className={`flex items-center flex-row gap-1 py-2 px-3 rounded-lg text-[12px] font-semibold transition-all duration-200 group ${
-                    item.active
-                      ? "bg-blue-100 justify-center text-blue-600 shadow-md"
-                      : "text-gray-700 hover:bg-blue-100/90 justify-center hover:text-gray-900"
-                  }`}
-                >
-                  <div className="flex-1 flex items-center justify-between">
-                    <span>{item.label}</span>
-                  </div>
-                </Link>
+        {/* Stats Section */}
+        {!collapsed && (
+          <div className="px-4 py-4 border-b border-slate-700/50">
+            <p className="text-xs font-semibold text-slate-400 mb-3">آمار سریع</p>
+            <div className="space-y-2">
+              <div className="bg-slate-700/50 rounded-lg p-3 hover:bg-slate-700 transition-colors">
+                <div className="flex items-center gap-2 mb-1">
+                  <Clock size={16} className="text-amber-400" />
+                  <span className="text-xs text-slate-400">در انتظار</span>
+                </div>
+                <p className="text-xl font-bold">{stats.pending}</p>
               </div>
-            );
-          })}
-        </div>
+              <div className="bg-slate-700/50 rounded-lg p-3 hover:bg-slate-700 transition-colors">
+                <div className="flex items-center gap-2 mb-1">
+                  <CheckCircle2 size={16} className="text-green-400" />
+                  <span className="text-xs text-slate-400">تکمیل شده</span>
+                </div>
+                <p className="text-xl font-bold">{stats.completed}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
-        {/* فوتر سایدبار */}
-        <div className="p-2">
+        {/* Navigation */}
+        <nav className="flex-1 px-4 py-4 overflow-y-auto">
+          <p className={`${collapsed ? "hidden" : "text-xs"} font-semibold text-slate-400 mb-3`}>
+            منو
+          </p>
+          <div className="space-y-2">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href || pathname?.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                    isActive
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
+                      : "text-slate-400 hover:bg-slate-700/50 hover:text-white"
+                  }`}
+                  title={collapsed ? item.label : ""}
+                >
+                  <Icon size={20} className="flex-shrink-0" />
+                  {!collapsed && <span className="font-medium text-sm">{item.label}</span>}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+
+        {/* User Profile Section */}
+        <div className="p-4 border-t border-slate-700/50">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <User size={18} className="text-white" />
+            </div>
+            {!collapsed && (
+              <div className="min-w-0">
+                <p className="font-semibold text-sm truncate">{username}</p>
+                <p className="text-xs text-slate-400">مدیر سیستم</p>
+              </div>
+            )}
+          </div>
           <button
             onClick={onLogout}
-            className={`flex items-center gap-1 p-1.5 justify-center bg-blue-600 rounded-lg w-full text-white hover:bg-blue-500 transition`}
+            className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600/40 transition-colors font-medium text-sm ${
+              collapsed ? "justify-center" : ""
+            }`}
           >
-            <LogOut size={16} />
-            <span className="mb-1">خروج</span>
+            <LogOut size={18} />
+            {!collapsed && <span>خروج</span>}
           </button>
-
-          {/* <div className="mt-4 pt-4 border-t">
-            <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>ورژن 1.0.0</span>
-              <span>© 2024</span>
-            </div>
-          </div> */}
         </div>
       </div>
+
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-50 to-slate-100">
+        <div className="mx-auto">{children}</div>
+      </main>
     </div>
   );
 }
