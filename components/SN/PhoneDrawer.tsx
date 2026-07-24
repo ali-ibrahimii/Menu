@@ -153,7 +153,7 @@ export default function PhoneDrawer() {
   return (
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <DrawerTrigger asChild>
-        <button className="bg-white/5 rounded-full p-3 border border-white/10">
+        <button className="bg-white/5 rounded-full p-3 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
           <Phone size={20} className="" />
         </button>
       </DrawerTrigger>

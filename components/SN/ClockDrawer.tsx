@@ -181,7 +181,7 @@ export default function ClockDrawer() {
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <DrawerTrigger asChild>
         <button
-          className="bg-white/5 rounded-full p-3 border border-white/10"
+          className="bg-white/5 rounded-full p-3 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
           onClick={() => setIsDrawerOpen(true)}
         >
           <Clock size={20} />

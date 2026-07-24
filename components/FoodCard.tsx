@@ -29,18 +29,24 @@ const FoodCard = memo(function FoodCard({
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
 
-  /** جلوگیری از ساخت توابع جدید هر رندر */
-  const onClickCard = useCallback(() => handleFoodClick(food), [food, handleFoodClick]);
+  const onClickCard = useCallback(
+    () => handleFoodClick(food),
+    [food, handleFoodClick],
+  );
 
   const onImageLoad = useCallback(() => setIsImageLoading(false), []);
+
   const onImageError = useCallback(() => {
     setIsImageLoading(false);
     setImageError(true);
   }, []);
 
-  /** از محاسبات تکراری جلوگیری می‌شود */
   const foodName = useMemo(() => getFoodName(food), [food, getFoodName]);
-  const ingredients = useMemo(() => getIngredients(food), [food, getIngredients]);
+
+  const ingredients = useMemo(
+    () => getIngredients(food),
+    [food, getIngredients],
+  );
 
   const priceText = useMemo(() => {
     return `${food.price.toLocaleString()} ${t("price")}`;
@@ -57,7 +63,7 @@ const FoodCard = memo(function FoodCard({
       whileHover={{ scale: 1.015 }}
       whileTap={{ scale: 0.98 }}
       dir={language === "en" ? "ltr" : "rtl"}
-      className="relative flex items-center w-full h-34  dark:bg-[#191919] rounded-2xl border overflow-hidden cursor-pointer shadow-sm transition-all"
+      className="relative flex items-center w-full h-34 bg-[#fffdf8]/90 dark:bg-slate-950/90 text-slate-50 dark:text-white rounded-2xl border border-black/10 dark:border-white/10 overflow-hidden cursor-pointer shadow-md shadow-black/5 dark:shadow-black/30 transition-all backdrop-blur-xl"
       onClick={onClickCard}
       style={{ transform: "translateZ(0)" }}
     >
@@ -83,7 +89,7 @@ const FoodCard = memo(function FoodCard({
             sizes="120px"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+          <div className="w-full h-full flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs">
             No Image
           </div>
         )}
@@ -92,15 +98,21 @@ const FoodCard = memo(function FoodCard({
       {/* اطلاعات غذا */}
       <div className="flex flex-col mx-3 w-8/12 overflow-hidden py-2">
         <div className="mb-4">
-          <h2 className={`text-md font-bold truncate ${language === "en" ? "font-[Montserrat]" : ""}`}>{foodName}</h2>
+          <h2
+            className={`text-md font-bold truncate text-slate-950 dark:text-white ${
+              language === "en" ? "font-[Montserrat]" : ""
+            }`}
+          >
+            {foodName}
+          </h2>
 
           {hasIngredients && (
-            <p className="text-[12px] line-clamp-2 leading-4.5 opacity-70">
+            <p className="text-[12px] line-clamp-2 leading-4.5 text-slate-600 dark:text-white/70">
               {ingredients}
             </p>
           )}
 
-          <span className="text-[13px] font-bold text-green-600 mt-1 inline-block">
+          <span className="text-[13px] font-bold text-emerald-600 dark:text-emerald-300 mt-1 inline-block">
             {priceText}
           </span>
         </div>

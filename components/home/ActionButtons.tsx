@@ -18,7 +18,7 @@ export default function ActionButtons() {
           e.stopPropagation();
           router.push("/branches");
         }}
-        className=" bg-white/5 rounded-full p-3 border border-white/10 hover:bg-white/10 transition-colors"
+        className=" bg-white/5 rounded-full p-3 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
       >
         <Building2 size={20} />
       </button>
@@ -26,7 +26,7 @@ export default function ActionButtons() {
         href="https://www.instagram.com/vatandar_restaurant?igsh=N3R3a3VlOXUwYXF6ZQ=="
         target="_blank"
         rel="noopener noreferrer"
-        className="bg-white/5 rounded-full p-3 border border-white/10 hover:bg-white/10 transition-colors"
+        className="bg-white/5 rounded-full p-3 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
       >
         <Instagram size={20} />
       </Link>
