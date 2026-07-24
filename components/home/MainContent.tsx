@@ -12,12 +12,24 @@ interface MainContentProps {
   t: (key: string) => string;
 }
 
-const src = { 
-  logo: "/logo1.png"
-}
+const src = {
+  logo: "/logo1.png",
+};
 
 export default function MainContent({ branch, t }: MainContentProps) {
   const { language } = useLanguage();
+
+  const branchName =
+    language === "en"
+      ? branch.name_en
+      : language === "ar"
+        ? branch.name_ar
+        : branch.name_fa;
+
+  // این slug را با slug واقعی آجیل فروشی داخل دیتابیس یکی کن
+  const isNutShop = branch.slug === "vatandar-shop"; // جایگزین با slug واقعی آجیل فروشی
+
+  const title = isNutShop ? branchName : t("restaurantName");
 
   return (
     <div className="absolute bottom-0 w-full z-30 glass-card">
@@ -28,17 +40,19 @@ export default function MainContent({ branch, t }: MainContentProps) {
       <div className="flex flex-col items-center space-y-6 w-full px-8">
         <div className="flex-col flex items-center">
           <Image
-            src="/logo1.png"            // src={src.logo}
-            alt={branch.name_fa}
+            src={src.logo}
+            alt={title}
             width={140}
             height={40}
             className="object-cover"
-            // priority
           />
+
           <h1
-            className={`${language === "en" ? "font-[Balbek]" : "font-[BTitr]"} text-2xl text-center`}
+            className={`${
+              language === "en" ? "font-[Balbek]" : "font-[BTitr]"
+            } text-2xl text-center`}
           >
-            {t("restaurantName")}
+            {title}
           </h1>
         </div>
 

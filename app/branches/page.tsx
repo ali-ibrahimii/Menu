@@ -2,7 +2,17 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { MapPin, Phone, Check, Building2, ChevronLeft, ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
+import {
+  MapPin,
+  Phone,
+  Check,
+  Building2,
+  ChevronLeft,
+  ArrowRight,
+  ArrowLeft,
+  Sparkles,
+  Navigation,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useBranch } from "@/contexts/BranchContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -14,153 +24,216 @@ import { Branch } from "@/types/index";
 import Loader from "@/components/Loader";
 import Link from "next/link";
 
-const branchImageGalleries: Record<string, string[]> = {
-  main: ["/branch1/1.jpg", "/branch1/2.jpg", "/branch1/3.jpg", "/branch1/4.jpg"],
-  branch2: ["/branch2/1.jpg", "/branch2/2.jpg", "/branch2/3.jpg", "/branch2/4.jpg", "/branch2/5.jpg", "/branch2/6.jpg", "/branch2/7.jpg"],
-  default: ["/bg.jpg", "/bg1.jpg", "/bg2.jpg", "/bg3.jpg", "/sonati-bg.jpg", "/sonati1-bg.jpg"],
+/**
+ * فقط برای رنگ‌های حالت روشن/تاریک استفاده شده؛
+ * ساختار، فاصله‌ها، سایزها و layout تغییر نکرده‌اند.
+ */
+const theme = {
+  page:
+    "bg-[#fff8ed] text-slate-950 dark:bg-slate-950 dark:text-white transition-colors duration-500",
+  panel:
+    "border border-black/10 bg-white/75 shadow-xl shadow-emerald-950/5 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.055] dark:shadow-black/30",
+  mutedText: "text-slate-600 dark:text-white/60",
+  strongText: "text-slate-950 dark:text-white",
+  iconBox:
+    "border border-emerald-500/15 bg-emerald-500/10 text-emerald-700 dark:border-emerald-300/15 dark:bg-emerald-400/10 dark:text-emerald-300",
+  accentButton:
+    "bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-500 text-white shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/35 dark:from-emerald-400 dark:via-emerald-500 dark:to-teal-500 dark:text-slate-950",
 };
 
-const getImages = (slug: string) => branchImageGalleries[slug] || branchImageGalleries.default;
 
-const BranchCard = React.memo(({
-  branch,
-  language,
-  onSelect,
-  currentIndex,
-  images,
-  index,
-}: {
+const branchImageGalleries: Record<string, string[]> = {
+  main: [
+    "/branch1/1.jpg",
+    "/branch1/2.jpg",
+    "/branch1/3.jpg",
+    "/branch1/4.jpg",
+  ],
+  branch2: [
+    "/branch2/1.jpg",
+    "/branch2/2.jpg",
+    "/branch2/3.jpg",
+    "/branch2/4.jpg",
+    "/branch2/5.jpg",
+    "/branch2/6.jpg",
+    "/branch2/7.jpg",
+  ],
+  default: [
+    "/bg.jpg",
+    "/bg1.jpg",
+    "/bg2.jpg",
+    "/bg3.jpg",
+    "/sonati-bg.jpg",
+    "/sonati1-bg.jpg",
+  ],
+};
+
+const getImages = (slug: string) =>
+  branchImageGalleries[slug] || branchImageGalleries.default;
+
+const getBranchName = (branch: Branch, language: string) => {
+  if (language === "en") return branch.name_en;
+  if (language === "fa") return branch.name_fa;
+  return branch.name_ar;
+};
+
+const getBranchAddress = (branch: Branch, language: string) => {
+  if (language === "en") return branch.address_en;
+  if (language === "fa") return branch.address_fa;
+  return branch.address_ar;
+};
+
+type BranchCardProps = {
   branch: Branch;
   language: string;
   onSelect: (b: Branch) => void;
   currentIndex: number;
   images: string[];
   index: number;
-}) => {
-  const handleSelect = () => onSelect(branch);
-  const name = language === "en" ? branch.name_en : language === "fa" ? branch.name_fa : branch.name_ar;
-  const address = language === "en" ? branch.address_en : language === "fa" ? branch.address_fa : branch.address_ar;
-  const [isHovered, setIsHovered] = useState(false);
+  onImageChange: (branchId: string | number, imageIndex: number) => void;
+};
 
-  return (
-    <div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={handleSelect}
-      style={{
-        animation: `slideInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.15}s both`,
-      }}
-      className="group relative rounded-3xl overflow-hidden cursor-pointer h-96 mx-auto max-w-md w-full border border-white/10 hover:border-emerald-400/30 transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-500/10 shadow-xl shadow-black/20"
-    >
-      {/* Background Image Container */}
-      <div className="absolute inset-0">
-        <Image
-          src={images[currentIndex]}
-          alt={name}
-          className="object-cover transition-all duration-700 group-hover:scale-110"
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
-        />
-      </div>
+const BranchCard = React.memo(
+  ({
+    branch,
+    language,
+    onSelect,
+    currentIndex,
+    images,
+    index,
+    onImageChange,
+  }: BranchCardProps) => {
+    const handleSelect = () => onSelect(branch);
+    const name = getBranchName(branch, language);
+    const address = getBranchAddress(branch, language);
+    const isEnglish = language === "en";
 
-      {/* Overlay Gradient - بهتر شده */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-black/20 group-hover:via-black/40 transition-all duration-500" />
-      
-      {/* Top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400/0 via-emerald-400 to-emerald-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-      {/* Image Dots - بهبود شده */}
-      <div className="absolute bottom-32 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-        {images.map((_, i) => (
-          <button
-            key={i}
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className={`transition-all duration-300 rounded-full ${
-              i === currentIndex
-                ? "bg-emerald-400 w-6 h-2"
-                : "bg-white/30 hover:bg-white/50 w-2 h-2"
-            }`}
-            aria-label={`Image ${i + 1}`}
+    return (
+      <article
+        onClick={handleSelect}
+        style={{
+          animation: `branchCardEnter 700ms cubic-bezier(0.16, 1, 0.3, 1) ${index * 120}ms both`,
+        }}
+        className="group relative h-[430px] w-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-2xl shadow-black/30 outline-none transition-all duration-500 hover:-translate-y-2 hover:border-emerald-300/40 hover:shadow-emerald-500/20 focus-visible:ring-2 focus-visible:ring-emerald-400"
+        tabIndex={0}
+        role="button"
+        aria-label={name}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") handleSelect();
+        }}
+      >
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <Image
+            src={images[currentIndex] || images[0]}
+            alt={name}
+            fill
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="object-cover transition duration-700 ease-out group-hover:scale-110"
+            priority={index < 2}
           />
-        ))}
-      </div>
-
-      {/* Content Container */}
-      <div className="relative h-full p-6 flex flex-col justify-between z-10">
-        {/* Top Section */}
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <div className="inline-flex items-center gap-2 mb-2 opacity-0 group-hover:opacity-100 transition-all duration-500">
-              <Sparkles className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
-                {language === "fa" ? "نزدیکترین شعبه" : language === "ar" ? "أقرب فرع" : "Nearest Branch"}
-              </span>
-            </div>
-            <h3 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg leading-tight font-[BTitr]">
-              {name}
-            </h3>
-          </div>
-          <div className="glass-check-status-branch text-[11px] backdrop-blur-md bg-white/10 px-3 py-2 rounded-xl border border-white/20">
-            <CheckRestaurantStatus />
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/55 to-slate-950/10" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_10%,rgba(52,211,153,0.22),transparent_38%)] opacity-0 transition duration-500 group-hover:opacity-100" />
         </div>
 
-        {/* Bottom Section */}
-        <div className="space-y-3">
-          {/* Address */}
-          <div className="flex items-start gap-3 group/item">
-            <div className="p-2.5 rounded-xl bg-emerald-400/10 backdrop-blur-sm group-hover/item:bg-emerald-400/20 transition-colors duration-300 flex-shrink-0">
-              <MapPin className="w-4 h-4 text-emerald-400" />
-            </div>
-            <p className="text-sm text-white/90 line-clamp-2 leading-relaxed font-medium">{address}</p>
-          </div>
+        {/* Decorative border glow */}
+        {/* <div className="pointer-events-none absolute inset-px rounded-[calc(2rem-1px)] ring-1 ring-inset ring-white/10" /> */}
+        <div className="pointer-events-none absolute -inset-24 bg-[conic-gradient(from_180deg_at_50%_50%,transparent,rgba(52,211,153,.22),transparent_35%)] opacity-0 blur-2xl transition duration-700 group-hover:opacity-100" />
 
-          {/* Phone */}
-          {branch.phone_1 && (
-            <div className="flex items-center gap-3 group/item">
-              <div className="p-2.5 rounded-xl bg-emerald-400/10 backdrop-blur-sm group-hover/item:bg-emerald-400/20 transition-colors duration-300 flex-shrink-0">
-                <Phone className="w-4 h-4 text-emerald-400" />
+        {/* Top content */}
+        <div className="relative z-10 flex h-full flex-col justify-between p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1.5 text-xs font-bold text-emerald-200 shadow-lg shadow-emerald-950/20 backdrop-blur-md">
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>
+                  {language === "fa"
+                    ? "شعبه فعال"
+                    : language === "ar"
+                      ? "فرع نشط"
+                      : "Active Branch"}
+                </span>
               </div>
-              <a 
+              <h3 className="font-[BTitr] text-3xl font-black leading-tight text-white drop-shadow-lg md:text-4xl">
+                {name}
+              </h3>
+            </div>
+
+            <div className="shrink-0 rounded-2xl border border-white/15 bg-white/10 px-3 py-2 text-[11px] shadow-xl shadow-black/20 backdrop-blur-xl">
+              <CheckRestaurantStatus />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-emerald-300/15 bg-emerald-400/10 text-emerald-300">
+                <MapPin className="h-4 w-4" />
+              </span>
+              <p className="line-clamp-2 text-sm font-medium leading-7 text-white/85">
+                {address}
+              </p>
+            </div>
+
+            {branch.phone_1 && (
+              <a
                 href={`tel:${branch.phone_1}`}
                 onClick={(e) => e.stopPropagation()}
-                className="text-sm text-white/90 ltr font-medium hover:text-emerald-400 transition-colors duration-300" 
-                dir="ltr"
+                className="flex items-center gap-3 rounded-2xl transition hover:bg-white/5"
+                dir="rtl"
               >
-                {branch.phone_1}
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-emerald-300/15 bg-emerald-400/10 text-emerald-300">
+                  <Phone className="h-4 w-4" />
+                </span>
+                <span className="text-sm font-bold text-white/85 transition hover:text-emerald-300">
+                  {branch.phone_1}
+                </span>
               </a>
-            </div>
-          )}
-
-          {/* Select Button */}
-          <button 
-            onClick={handleSelect}
-            className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-3.5 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2.5 text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-1 group/btn active:translate-y-0"
+            )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSelect();
+            }}
+            className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-500 px-5 py-3.5 text-sm font-black text-slate-950 shadow-xl shadow-emerald-500/25 transition duration-300 hover:-translate-y-0.5 hover:shadow-emerald-400/40 active:translate-y-0"
           >
-            <Check className="w-4 h-4" />
+            <Check className="h-4 w-4" />
             <span>
-              {translations[language as keyof typeof translations]?.selectBranch || "انتخاب شعبه"}
+              {translations[language as keyof typeof translations]
+                ?.selectBranch || "انتخاب شعبه"}
             </span>
-            {language === "en" ? (
-              <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+            {isEnglish ? (
+              <ArrowRight className="h-4 w-4" />
             ) : (
-              <ArrowLeft className="w-4 h-4 group-hover/btn:-translate-x-1 transition-transform duration-300" />
+              <ArrowLeft className="h-4 w-4" />
             )}
           </button>
+          {/* Image dots */}
+          {images.length > 1 && (
+            <div className="flex items-center justify-center gap-2">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onImageChange(branch.id, i);
+                  }}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    i === currentIndex
+                      ? "w-8 bg-emerald-300 shadow-lg shadow-emerald-400/40"
+                      : "w-2 bg-white/35 hover:bg-white/70"
+                  }`}
+                  aria-label={`Image ${i + 1}`}
+                />
+              ))}
+            </div>
+          )}
+          </div>
         </div>
-      </div>
-
-      {/* Shine effect on hover */}
-      {isHovered && (
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl animate-pulse" />
-        </div>
-      )}
-    </div>
-  );
-});
+      </article>
+    );
+  },
+);
 
 BranchCard.displayName = "BranchCard";
 
@@ -171,34 +244,63 @@ export default function BranchesPage() {
   const { setSelectedBranch } = useBranch();
   const { language } = useLanguage();
   const router = useRouter();
-  const intervalsRef = useRef<Record<string, NodeJS.Timeout>>({});
+  const intervalsRef = useRef<Record<string, ReturnType<typeof setInterval>>>(
+    {},
+  );
+
+  const isEnglish = language === "en";
 
   const t = (key: string) =>
-    (translations[language as keyof typeof translations] as Record<string, string>)?.[key] || key;
+    (
+      translations[language as keyof typeof translations] as Record<
+        string,
+        string
+      >
+    )?.[key] || key;
 
-  const handleSelect = useCallback((branch: Branch) => {
-    setSelectedBranch(branch);
-    router.push("/");
-  }, [setSelectedBranch, router]);
+  const handleSelect = useCallback(
+    (branch: Branch) => {
+      setSelectedBranch(branch);
+      router.push("/");
+    },
+    [setSelectedBranch, router],
+  );
 
-  // چرخش عکس‌ها
+  const handleImageChange = useCallback(
+    (branchId: string | number, imageIndex: number) => {
+      setImageIndexes((prev) => ({
+        ...prev,
+        [String(branchId)]: imageIndex,
+      }));
+    },
+    [],
+  );
+
+  // Image carousel per branch
   useEffect(() => {
+    Object.values(intervalsRef.current).forEach(clearInterval);
+    intervalsRef.current = {};
+
     branches.forEach((branch) => {
       const images = getImages(branch.slug);
       if (images.length <= 1) return;
 
-      intervalsRef.current[branch.id] = setInterval(() => {
+      intervalsRef.current[String(branch.id)] = setInterval(() => {
         setImageIndexes((prev) => ({
           ...prev,
-          [branch.id]: ((prev[branch.id] || 0) + 1) % images.length,
+          [String(branch.id)]:
+            ((prev[String(branch.id)] || 0) + 1) % images.length,
         }));
-      }, 4000);
+      }, 4500);
     });
 
-    return () => Object.values(intervalsRef.current).forEach(clearInterval);
+    return () => {
+      Object.values(intervalsRef.current).forEach(clearInterval);
+      intervalsRef.current = {};
+    };
   }, [branches]);
 
-  // واکشی شعبه‌ها
+  // Fetch active branches
   useEffect(() => {
     let mounted = true;
 
@@ -215,120 +317,159 @@ export default function BranchesPage() {
         }
       });
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   if (loading) {
     return (
-      <div dir={language === "en" ? "ltr" : "rtl"} className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+      <div
+        dir={isEnglish ? "ltr" : "rtl"}
+        className={`min-h-screen ${theme.page} flex items-center justify-center flex-col`}
+      >
+        <div className="flex justify-center items-center flex-col">
           <Loader />
-          <p className="mt-4 text-muted-foreground">{t("loading")}</p>
+          <p className={`mt-3 text-sm font-medium ${theme.mutedText}`}>
+            {t("loading")}
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div dir={language === "en" ? "ltr" : "rtl"} className="relative min-h-screen bg-slate-950 overflow-hidden">
-      {/* بک‌گراند بهتر شده */}
+    <main
+      dir={isEnglish ? "ltr" : "rtl"}
+      className={`relative min-h-screen overflow-hidden ${theme.page}`}
+    >
+      {/* Background */}
       <div className="fixed inset-0 -z-10">
-        {/* Base gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
-        
-        {/* Animated blurs */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-emerald-500/5 rounded-full blur-3xl opacity-40 animate-pulse" />
-        <div className="absolute bottom-1/4 right-0 w-[600px] h-[600px] bg-cyan-500/3 rounded-full blur-3xl opacity-30" />
-        
-        {/* Grid pattern - optional */}
-        <div className="absolute inset-0 opacity-[0.02] bg-[linear-gradient(0deg,transparent_24%,rgba(255,255,255,.05)_25%,rgba(255,255,255,.05)_26%,transparent_27%,transparent_74%,rgba(255,255,255,.05)_75%,rgba(255,255,255,.05)_76%,transparent_77%,transparent),linear-gradient(90deg,transparent_24%,rgba(255,255,255,.05)_25%,rgba(255,255,255,.05)_26%,transparent_27%,transparent_74%,rgba(255,255,255,.05)_75%,rgba(255,255,255,.05)_76%,transparent_77%,transparent)] bg-[length:50px_50px]" />
+        {/* Light background */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_34%),linear-gradient(180deg,#fff8ed_0%,#f8ead4_48%,#fff8ed_100%)] dark:hidden" />
+        <div className="absolute -top-32 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-emerald-300/25 blur-3xl dark:hidden" />
+        <div className="absolute bottom-0 right-0 h-[440px] w-[440px] rounded-full bg-amber-300/25 blur-3xl dark:hidden" />
+
+        {/* Dark background - همان ظاهر قبلی تاریک */}
+        <div className="absolute inset-0 hidden bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_35%),linear-gradient(180deg,#020617_0%,#0f172a_52%,#020617_100%)] dark:block" />
+        <div className="absolute -top-32 left-1/2 hidden h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-emerald-400/10 blur-3xl dark:block" />
+        <div className="absolute bottom-0 right-0 hidden h-[440px] w-[440px] rounded-full bg-cyan-400/10 blur-3xl dark:block" />
+
+        {/* Shared pattern */}
+        <div className="absolute inset-0 opacity-[0.12] [background-image:linear-gradient(rgba(15,23,42,.32)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,.32)_1px,transparent_1px)] [background-size:56px_56px] dark:opacity-[0.05] dark:[background-image:linear-gradient(rgba(255,255,255,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.8)_1px,transparent_1px)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/10 to-[#fff8ed] dark:via-slate-950/20 dark:to-slate-950" />
       </div>
 
-      {/* Content */}
-      <div className="px-4 py-8 max-w-6xl mx-auto relative z-10">
-        {/* Header Bar */}
-        <div className="flex justify-between items-center mb-12 animate-fadeIn" style={{ animation: "fadeIn 0.6s ease-out" }}>
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        {/* Header */}
+        <header className="mb-12 flex items-center justify-between gap-4 animate-fade-in">
           <LanguageSwitcher />
-          <Link 
-            href="/" 
-            className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-400/30 transition-all duration-300 backdrop-blur-sm group"
+
+          <Link
+            href="/"
+            className={`group inline-flex h-12 w-12 items-center justify-center rounded-2xl transition duration-300 hover:border-emerald-500/30 hover:bg-white/90 dark:hover:border-emerald-300/30 dark:hover:bg-white/10 ${theme.panel}`}
+            aria-label="Back"
           >
-            {language === "en" ? (
-              <ChevronLeft className="rotate-180 group-hover:translate-x-1 transition-transform duration-300" />
+            {isEnglish ? (
+              <ChevronLeft className="h-5 w-5 rotate-180 transition group-hover:translate-x-0.5" />
             ) : (
-              <ChevronLeft className="group-hover:-translate-x-1 transition-transform duration-300" />
+              <ChevronLeft className="h-5 w-5 transition group-hover:-translate-x-0.5" />
             )}
           </Link>
-        </div>
+        </header>
 
-        {/* Hero Section */}
-        <div className="text-center mb-16 animate-fadeIn" style={{ animation: "fadeIn 0.6s ease-out 0.2s both" }}>
-          {/* Logo */}
-          <div className="inline-block mb-8 p-5 rounded-3xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 backdrop-blur-md shadow-2xl shadow-emerald-500/10 hover:border-emerald-400/20 transition-all duration-500 hover:-translate-y-1">
-            <Image 
-              src="/logo1.png" 
-              alt="logo" 
-              width={160} 
-              height={40} 
-              className="object-contain drop-shadow-lg" 
-              priority 
+        {/* Hero */}
+        <div className="mx-auto mb-7 max-w-3xl text-center animate-fade-in-delayed">
+          <div
+            className={`mb-5 inline-flex rounded-2xl p-4 transition duration-500 hover:-translate-y-1 hover:border-emerald-500/25 dark:hover:border-emerald-300/25 ${theme.panel}`}
+          >
+            <Image
+              src="/logo1.png"
+              alt="logo"
+              width={175}
+              height={48}
+              className="object-contain drop-shadow-2xl"
+              priority
             />
           </div>
 
-          {/* Heading */}
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 font-[BTitr] text-white leading-tight">
+          <div className="mb-4 flex items-center justify-center gap-3">
+            <span className="h-px w-16 bg-gradient-to-r from-transparent to-emerald-300/70" />
+            <span className={`inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-700 backdrop-blur-md dark:border-emerald-300/20 dark:bg-emerald-400/10 dark:text-emerald-200`}>
+              <Navigation className="h-3.5 w-3.5" />
+              {language === "fa"
+                ? "انتخاب شعبه"
+                : language === "ar"
+                  ? "اختيار الفرع"
+                  : "Choose Branch"}
+            </span>
+            <span className="h-px w-16 bg-gradient-to-l from-transparent to-emerald-300/70" />
+          </div>
+
+          <h1
+            className={`font-[BTitr] text-4xl font-black leading-tight tracking-tight drop-shadow-sm sm:text-5xl lg:text-6xl ${theme.strongText}`}
+          >
             {t("restaurantName")}
           </h1>
 
-          {/* Subheading */}
-          <p className="text-lg text-white/60 max-w-md mx-auto leading-relaxed font-medium">
+          <p
+            className={`mx-auto mt-5 max-w-xl text-base font-medium leading-8 sm:text-lg ${theme.mutedText}`}
+          >
             {t("selectBranchReq")}
           </p>
-
-          {/* Decorative line */}
-          <div className="mt-8 flex items-center justify-center gap-3">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-emerald-400/50" />
-            <Sparkles className="w-4 h-4 text-emerald-400" />
-            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-emerald-400/50" />
-          </div>
         </div>
 
-        {/* Branches Grid */}
+        {/* Branches */}
         {branches.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
+          <div className="grid grid-cols-1 gap-7 pb-20 lg:grid-cols-2 xl:gap-8">
             {branches.map((branch, index) => (
               <BranchCard
                 key={branch.id}
                 branch={branch}
                 language={language}
                 onSelect={handleSelect}
-                currentIndex={imageIndexes[branch.id] || 0}
+                currentIndex={imageIndexes[String(branch.id)] || 0}
                 images={getImages(branch.slug)}
                 index={index}
+                onImageChange={handleImageChange}
               />
             ))}
           </div>
         ) : (
-          /* Empty State */
-          <div 
-            className="text-center py-24 animate-fadeIn" 
-            style={{ animation: "fadeIn 0.6s ease-out 0.4s both" }}
-          >
-            <div className="w-24 h-24 mx-auto mb-8 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur-md">
-              <Building2 className="w-12 h-12 text-white/40" />
+          <div className="mx-auto max-w-lg animate-fade-in-delayed py-24 text-center">
+            <div
+              className={`mx-auto mb-7 flex h-24 w-24 items-center justify-center rounded-[2rem] ${theme.panel}`}
+            >
+              <Building2 className={`h-12 w-12 ${theme.mutedText}`} />
             </div>
-            <h3 className="text-2xl font-bold mb-3 font-[BTitr] text-white">{t("noActiveBranch")}</h3>
-            <p className="text-white/60 text-base">{t("pleaseTryAgain")}</p>
+            <h3
+              className={`font-[BTitr] text-2xl font-black ${theme.strongText}`}
+            >
+              {t("noActiveBranch")}
+            </h3>
+            <p className={`mt-3 text-sm font-medium ${theme.mutedText}`}>
+              {t("pleaseTryAgain")}
+            </p>
           </div>
         )}
-      </div>
+      </section>
 
-      {/* CSS Animations */}
       <style>{`
-        @keyframes slideInUp {
+        @keyframes branchCardEnter {
           from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(28px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
           }
           to {
             opacity: 1;
@@ -336,28 +477,14 @@ export default function BranchesPage() {
           }
         }
 
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
+        .animate-fade-in {
+          animation: fadeIn 650ms ease both;
         }
 
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.5;
-          }
-        }
-
-        .animate-pulse {
-          animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        .animate-fade-in-delayed {
+          animation: fadeIn 650ms ease 120ms both;
         }
       `}</style>
-    </div>
+    </main>
   );
 }

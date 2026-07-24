@@ -17,6 +17,7 @@ import { DotPattern } from "@/components/ui/dot-pattern";
 import { cn } from "@/lib/utils";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CartDrawer from "@/components/CartDrawer";
+import Footer from "./components/Footer";
 
 export default function HomeContent() {
   const { language } = useLanguage();
@@ -35,30 +36,38 @@ export default function HomeContent() {
 
   // ========= توابع نام غذا / توضیحات / مواد تشکیل‌دهنده =========
   const getFoodName = useCallback(
-    (food: { name_fa: any; name_ar: any; name_en: any; }) => {
+    (food: { name_fa: any; name_ar: any; name_en: any }) => {
       if (language === "fa") return food.name_fa;
       if (language === "ar") return food.name_ar;
       return food.name_en;
     },
-    [language]
+    [language],
   );
 
   const getIngredients = useCallback(
-    (food: { ingredients_fa: any; ingredients_ar: any; ingredients_en: any; }) => {
+    (food: {
+      ingredients_fa: any;
+      ingredients_ar: any;
+      ingredients_en: any;
+    }) => {
       if (language === "fa") return food.ingredients_fa || "";
       if (language === "ar") return food.ingredients_ar || "";
       return food.ingredients_en || "";
     },
-    [language]
+    [language],
   );
 
   const getFoodDescription = useCallback(
-    (food: { description_fa: any; description_ar: any; description_en: any; }) => {
+    (food: {
+      description_fa: any;
+      description_ar: any;
+      description_en: any;
+    }) => {
       if (language === "fa") return food.description_fa;
       if (language === "ar") return food.description_ar;
       return food.description_en;
     },
-    [language]
+    [language],
   );
 
   // ========= جستجو =========
@@ -70,7 +79,7 @@ export default function HomeContent() {
       (f) =>
         f.name_fa.toLowerCase().includes(searchLower) ||
         f.name_ar.toLowerCase().includes(searchLower) ||
-        f.name_en.toLowerCase().includes(searchLower)
+        f.name_en.toLowerCase().includes(searchLower),
     );
   }, [foods, search]);
 
@@ -94,7 +103,7 @@ export default function HomeContent() {
   // ========= دسته‌بندی‌های فعال =========
   const activeCategories = useMemo(() => {
     const usedSlugs = new Set(
-      foods.map((f) => f.category?.trim()).filter(Boolean)
+      foods.map((f) => f.category?.trim()).filter(Boolean),
     );
 
     return categories
@@ -113,30 +122,41 @@ export default function HomeContent() {
     setSelectedFood(null);
   }, []);
 
+  /**
+   * فقط برای رنگ‌های حالت روشن/تاریک استفاده شده؛
+   * ساختار، فاصله‌ها، سایزها و layout تغییر نکرده‌اند.
+   */
+  const theme = {
+    page: "bg-[#fff8ed] text-slate-950 dark:bg-slate-950 dark:text-white transition-colors duration-500",
+    panel:
+      "border border-black/10 bg-white/75 shadow-xl shadow-emerald-950/5 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.055] dark:shadow-black/30",
+    mutedText: "text-slate-600 dark:text-white/80",
+    strongText: "text-slate-950 dark:text-white",
+    iconBox:
+      "border border-emerald-500/15 bg-emerald-500/10 text-emerald-700 dark:border-emerald-300/15 dark:bg-emerald-400/10 dark:text-emerald-300",
+    accentButton:
+      "bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-500 text-white shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/35 dark:from-emerald-400 dark:via-emerald-500 dark:to-teal-500 dark:text-slate-950",
+  };
+
   // ========= لودر =========
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center flex-col">
-        <Loader />
-        <p className="mt-2">{t("loading")}</p>
+      <div
+        dir={language === "en" ? "ltr" : "rtl"}
+        className={`min-h-screen ${theme.page} flex items-center justify-center flex-col`}
+      >
+        <div className="flex justify-center items-center flex-col">
+          <Loader />
+          <p className={`mt-3 text-sm font-medium ${theme.mutedText}`}>
+            {t("loading")}
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <main className="relative w-full min-h-screen px-5 py-5 overflow-y-auto touch-pan-y">
-      {/* پس‌زمینه */}
-      {/* <div className="fixed inset-0 -z-[1] pointer-events-none">
-        <DotPattern
-          glow={true}
-          className={cn(
-            "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]"
-          )}
-        />
-      </div> */}
-      {/* <div className="absolute inset-0 -z-10 pointer-events-none bg-gradient-to-b from-[#0a0a0a] via-[#111827] to-[#0f0f0f]" /> */}
-
-
+    <main className={`relative w-full min-h-screen px-5 py-5 overflow-y-auto touch-pan-y ${theme.page}`}>
       {/* هدر */}
       <Header title={t("menu")} language={language} />
 
@@ -170,17 +190,17 @@ export default function HomeContent() {
         {!category ? (
           Object.entries(grouped).map(([slug, items]) => {
             const categoryObj = categories.find(
-              (c) => c.slug?.trim() === slug?.trim()
+              (c) => c.slug?.trim() === slug?.trim(),
             );
 
             const title =
               slug === "uncategorized"
                 ? t("uncategorized")
                 : language === "fa"
-                ? categoryObj?.name || slug
-                : language === "ar"
-                ? categoryObj?.name_ar || slug
-                : categoryObj?.slug || slug;
+                  ? categoryObj?.name || slug
+                  : language === "ar"
+                    ? categoryObj?.name_ar || slug
+                    : categoryObj?.slug || slug;
 
             return (
               <FoodSection
@@ -201,8 +221,8 @@ export default function HomeContent() {
               (language === "fa"
                 ? categories.find((c) => c.slug === category)?.name
                 : language === "ar"
-                ? categories.find((c) => c.slug === category)?.name_ar
-                : category) ?? ""
+                  ? categories.find((c) => c.slug === category)?.name_ar
+                  : category) ?? ""
             }
             foods={displayedFoods}
             language={language}
@@ -224,11 +244,7 @@ export default function HomeContent() {
         getDescription={getFoodDescription}
       />
 
-      {/* فوتر */}
-      <div className="text-center dark:text-gray-200 text-sm py-6 mt-6 opacity-70">
-        <p>{selectedBranch?.name_fa || selectedBranch?.name_en}</p>
-        © 2025 Vatandar Restaurant
-      </div>
+      <Footer />
     </main>
   );
 }

@@ -46,7 +46,7 @@ export function useBranchData() {
             .eq("slug", branchSlug)
             .eq("is_active", true)
             .single();
-
+            
           if (!error && data) {
             setSelectedBranch(data);
             setBgImages(getBranchImageGallery(data.slug));

@@ -410,7 +410,7 @@ export const translations = {
   
   en: {
     menu: "Menu",
-    restaurantName: "Watandar Restaurant",
+    restaurantName: "Vatandar Restaurant",
     viewMenu: "View Menu",
     open: "Open",
     closed: "Closed",
