@@ -18,10 +18,6 @@ import Loader from "@/components/Loader";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CartDrawer from "@/components/CartDrawer";
 
-/**
- * فقط برای پوشش حالت روشن/تاریک استفاده شده؛
- * ساختار، فاصله‌ها، سایزها و layout اصلی صفحه تغییر نکرده‌اند.
- */
 const theme = {
   page: "bg-[#fff8ed] text-slate-950 dark:bg-slate-950 dark:text-white transition-colors duration-500",
   mutedText: "text-slate-600 dark:text-white/80",
@@ -41,79 +37,76 @@ export default function HomeContent() {
     selectedBranchId: selectedBranch?.id,
   });
 
-  // ========= توابع نام غذا / توضیحات / مواد تشکیل‌دهنده =========
+  // ========= فیکس اصلی اینجاست: باید حتما string برگردونیم =========
   const getFoodName = useCallback(
-    (food: Food) => {
-      if (language === "fa") return food.name_fa;
-      if (language === "ar") return food.name_ar;
-      return food.name_en;
+    (food: Food): string => {
+      if (language === "fa") return String(food.name_fa ?? "");
+      if (language === "ar") return String(food.name_ar ?? "");
+      return String(food.name_en ?? "");
     },
     [language],
   );
 
   const getIngredients = useCallback(
-    (food: Food) => {
-      if (language === "fa") return food.ingredients_fa || "";
-      if (language === "ar") return food.ingredients_ar || "";
-      return food.ingredients_en || "";
+    (food: Food): string => {
+      if (language === "fa") return String(food.ingredients_fa ?? "");
+      if (language === "ar") return String(food.ingredients_ar ?? "");
+      return String(food.ingredients_en ?? "");
     },
     [language],
   );
 
   const getFoodDescription = useCallback(
-    (food: Food) => {
-      if (language === "fa") return food.description_fa || "";
-      if (language === "ar") return food.description_ar || "";
-      return food.description_en || "";
+    (food: Food): string => {
+      if (language === "fa") return String(food.description_fa ?? "");
+      if (language === "ar") return String(food.description_ar ?? "");
+      return String(food.description_en ?? "");
     },
     [language],
   );
 
-  // ========= جستجو =========
+  // ========= جستجو - با String برای جلوگیری از خطای Text =========
   const filteredFoods = useMemo(() => {
     if (!search.trim()) return foods;
-
     const searchLower = search.toLowerCase();
-
     return foods.filter(
       (f) =>
-        f.name_fa?.toLowerCase().includes(searchLower) ||
-        f.name_ar?.toLowerCase().includes(searchLower) ||
-        f.name_en?.toLowerCase().includes(searchLower),
+        String(f.name_fa ?? "")
+          .toLowerCase()
+          .includes(searchLower) ||
+        String(f.name_ar ?? "")
+          .toLowerCase()
+          .includes(searchLower) ||
+        String(f.name_en ?? "")
+          .toLowerCase()
+          .includes(searchLower),
     );
   }, [foods, search]);
 
-  // ========= فیلتر دسته‌بندی =========
   const displayedFoods = useMemo(() => {
     if (!category) return filteredFoods;
     return filteredFoods.filter((f) => f.category?.trim() === category);
   }, [filteredFoods, category]);
 
-  // ========= گروه‌بندی غذاها =========
   const grouped = useMemo(() => {
     const groups: Record<string, Food[]> = {};
-
     displayedFoods.forEach((f) => {
       const slug = f.category || "uncategorized";
       if (!groups[slug]) groups[slug] = [];
       groups[slug].push(f);
     });
-
     return groups;
   }, [displayedFoods]);
 
-  // ========= دسته‌بندی‌های فعال =========
   const activeCategories = useMemo(() => {
     const usedSlugs = new Set(
       foods.map((f) => f.category?.trim()).filter(Boolean),
     );
-
     return categories
       .filter((cat) => usedSlugs.has(cat.slug?.trim()))
       .sort((a, b) => (a.order_number ?? 999) - (b.order_number ?? 999));
   }, [foods, categories]);
 
-  // ========= انتخاب غذا =========
   const handleFoodClick = useCallback((food: Food) => {
     setSelectedFood(food);
     setIsDetailsOpen(true);
@@ -124,7 +117,6 @@ export default function HomeContent() {
     setSelectedFood(null);
   }, []);
 
-  // ========= لودر =========
   if (loading) {
     return (
       <div
@@ -146,12 +138,9 @@ export default function HomeContent() {
       dir={language === "en" ? "ltr" : "rtl"}
       className={`relative w-full min-h-screen px-5 py-5 overflow-y-auto touch-pan-y ${theme.page} flex flex-col`}
     >
-      {/* محتوای اصلی - flex-1 باعث می‌شود Footer پایین صفحه بماند */}
       <div className="flex-1">
-        {/* هدر */}
         <Header title={t("menu")} language={language} />
 
-        {/* سرچ */}
         <div className="mt-3 flex items-center">
           <SearchBar
             value={search}
@@ -159,14 +148,12 @@ export default function HomeContent() {
             placeholder={t("search")}
             language={language}
           />
-
           <div className="flex items-center">
             <LanguageSwitcher />
             <CartDrawer />
           </div>
         </div>
 
-        {/* دسته‌بندی‌ها */}
         <div className="mt-2">
           <CategoryList
             categories={activeCategories}
@@ -177,22 +164,20 @@ export default function HomeContent() {
           />
         </div>
 
-        {/* نمایش غذاها */}
         <div className="mt-3 space-y-8">
           {!category ? (
             Object.entries(grouped).map(([slug, items]) => {
               const categoryObj = categories.find(
                 (c) => c.slug?.trim() === slug?.trim(),
               );
-
               const title =
                 slug === "uncategorized"
                   ? t("uncategorized")
                   : language === "fa"
-                    ? categoryObj?.name || slug
+                    ? String(categoryObj?.name ?? slug)
                     : language === "ar"
-                      ? categoryObj?.name_ar || slug
-                      : categoryObj?.slug || slug;
+                      ? String(categoryObj?.name_ar ?? slug)
+                      : String(categoryObj?.slug ?? slug);
 
               return (
                 <FoodSection
@@ -209,13 +194,13 @@ export default function HomeContent() {
             })
           ) : (
             <FoodSection
-              title={
+              title={String(
                 (language === "fa"
                   ? categories.find((c) => c.slug === category)?.name
                   : language === "ar"
                     ? categories.find((c) => c.slug === category)?.name_ar
-                    : category) ?? ""
-              }
+                    : category) ?? "",
+              )}
               foods={displayedFoods}
               language={language}
               t={t}
@@ -227,7 +212,6 @@ export default function HomeContent() {
         </div>
       </div>
 
-      {/* مودال جزئیات */}
       <FoodModal
         food={selectedFood}
         isOpen={isDetailsOpen}
@@ -237,7 +221,6 @@ export default function HomeContent() {
         getDescription={getFoodDescription}
       />
 
-      {/* فوتر */}
       <div className="mt-auto">
         <Footer />
       </div>

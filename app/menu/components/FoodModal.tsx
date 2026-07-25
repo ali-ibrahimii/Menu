@@ -10,7 +10,7 @@ interface FoodModalProps {
   isOpen: boolean;
   onClose: () => void;
   getFoodName?: (food: Food) => string;
-  getIngredients?: (food: Food) => string[];
+  getIngredients?: (food: Food) => string | string[];
   getDescription?: (food: Food) => string;
 }
 
