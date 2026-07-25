@@ -20,7 +20,7 @@ export default function ThemeToggle() {
   }
 
   return (
-    <div className="flex items-center justify-evenly bg-black dark:bg-card-foreground backdrop-blur-sm rounded-full p-1">
+    <div className="flex items-center w-full justify-evenly bg-black dark:bg-card-foreground backdrop-blur-sm rounded-full p-1">
       <button
         onClick={() => setTheme("light")}
         className={`p-2 rounded-full transition-all ${
@@ -43,18 +43,6 @@ export default function ThemeToggle() {
         aria-label="حالت شب"
       >
         <Moon size={18} />
-      </button>
-      
-      <button
-        onClick={() => setTheme("system")}
-        className={`p-2 rounded-full transition-all ${
-          theme === "system"
-            ? "bg-blue-500 text-white"
-            : "dark:text-black text-accent hover:bg-gray-800"
-        }`}
-        aria-label="حالت سیستم"
-      >
-        <Monitor size={18} />
       </button>
     </div>
   );
