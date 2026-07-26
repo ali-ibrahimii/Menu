@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { Food, Category } from "@/types";
+import type { Food, Category } from "@/types";
 
 interface UseMenuDataProps {
   selectedBranchId?: string;

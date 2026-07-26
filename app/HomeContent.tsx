@@ -10,19 +10,13 @@ import BackgroundCarousel from "@/components/home/BackgroundCarousel";
 import BranchDrawer from "@/components/home/BranchDrawer";
 import MainContent from "@/components/home/MainContent";
 import { useBranchData } from "@/components/hooks/useBranchData";
-import { useCallback } from "react";
+import { useTranslate } from "@/hooks/useTranslate";
 export default function HomeContent() {
   const { language } = useLanguage();
   const { clearSelectedBranch } = useBranch();
   const { selectedBranch, bgImages, isRedirecting } = useBranchData();
+  const t = useTranslate();
 
-  const t = useCallback(
-    (key: string) => {
-      const langTranslations = translations[language] as Record<string, string>;
-      return langTranslations[key] || key;
-    },
-    [language],
-  );
 
   /**
    * فقط برای رنگ‌های حالت روشن/تاریک استفاده شده؛

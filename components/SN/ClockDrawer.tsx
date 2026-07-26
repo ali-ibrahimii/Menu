@@ -11,16 +11,14 @@ import {
 import { PhoneCall, MapPin, Building, Phone, Map, Clock } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState, useEffect, useMemo } from "react";
-import { useRestaurantInfo } from "@/hooks/useRestaurantInfo";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/translations/translation";
-import { Separator } from "../ui/separator";
 import { useBranch } from "@/contexts/BranchContext";
 import { useSearchParams, useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
-import { Branch } from "@/types/index";
+import type { Branch } from "@/types";
 import { Badge, badgeVariants } from "../ui/badge";
 import type { VariantProps } from "class-variance-authority";
+import { useTranslate } from "@/hooks/useTranslate";
 
 type BadgeVariant = VariantProps<typeof badgeVariants>["variant"];
 
@@ -32,6 +30,7 @@ export default function ClockDrawer() {
     useBranch();
   const searchParams = useSearchParams();
   const branchSlug = searchParams?.get("branch");
+  const t = useTranslate();
 
   // ساعت‌های کاری رستوران
   const OPEN_HOUR = 8; // 8 AM
@@ -60,11 +59,6 @@ export default function ClockDrawer() {
       }
     }
   }, [branchSlug, branches, selectedBranch]);
-
-  const t = (key: string) => {
-    const langTranslations = translations[language] as Record<string, string>;
-    return langTranslations[key] || key;
-  };
 
   // تابع محاسبه زمان باقی‌مانده
   const calculateRemainingTime = () => {

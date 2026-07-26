@@ -20,9 +20,11 @@ import { translations } from "@/translations/translation";
 import Image from "next/image";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CheckRestaurantStatus from "@/components/CheckRestaurantStatus";
-import { Branch } from "@/types/index";
+import { Branch } from "@/types";
 import Loader from "@/components/Loader";
 import Link from "next/link";
+import { useTranslate } from "@/hooks/useTranslate"; // <-- ترجمه مرکزی
+
 
 /**
  * فقط برای رنگ‌های حالت روشن/تاریک استفاده شده؛
@@ -178,7 +180,7 @@ const BranchCard = React.memo(
                 href={`tel:${branch.phone_1}`}
                 onClick={(e) => e.stopPropagation()}
                 className="flex items-center gap-3 rounded-2xl transition hover:bg-white/5"
-                dir="rtl"
+                dir={isEnglish ? "ltr" : "rtl"}
               >
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-emerald-300/15 bg-emerald-400/10 text-emerald-300">
                   <Phone className="h-4 w-4" />
@@ -243,21 +245,14 @@ export default function BranchesPage() {
   const [imageIndexes, setImageIndexes] = useState<Record<string, number>>({});
   const { setSelectedBranch } = useBranch();
   const { language } = useLanguage();
+  const t = useTranslate(); // <-- استفاده از هوک ترجمه مرکزی
   const router = useRouter();
   const intervalsRef = useRef<Record<string, ReturnType<typeof setInterval>>>(
     {},
   );
 
   const isEnglish = language === "en";
-
-  const t = (key: string) =>
-    (
-      translations[language as keyof typeof translations] as Record<
-        string,
-        string
-      >
-    )?.[key] || key;
-
+  
   const handleSelect = useCallback(
     (branch: Branch) => {
       setSelectedBranch(branch);

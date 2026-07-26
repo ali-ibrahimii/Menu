@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useBranch } from "@/contexts/BranchContext";
 import { useTranslate } from "@/hooks/useTranslate";
 import { useMenuData } from "@/hooks/useMenuData";
-import { Food } from "@/types";
+import type { Food } from "@/types";
 
 import Header from "./components/Header";
 import SearchBar from "./components/SearchBar";

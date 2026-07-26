@@ -20,12 +20,12 @@ export default function ThemeToggle() {
   }
 
   return (
-    <div className="flex items-center w-full justify-evenly bg-black dark:bg-card-foreground backdrop-blur-sm rounded-full p-1">
+    <div className="flex items-center w-full mx-3 justify-evenly bg-black dark:bg-card-foreground backdrop-blur-sm rounded-xl p-1">
       <button
         onClick={() => setTheme("light")}
         className={`p-2 rounded-full transition-all ${
           theme === "light"
-            ? "bg-white text-gray-900"
+            ? "bg-slate-200 text-gray-900"
             : "text-background hover:bg-white/10"
         }`}
         aria-label="حالت روز"

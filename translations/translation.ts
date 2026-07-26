@@ -4,6 +4,7 @@ export const translations = {
   fa: {
     menu: "منو",
     restaurantName: "رستوران وطندار",
+    branches: "شعبه ها",
     viewMenu: "مشاهده منو",
     open: "باز",
     closed: "بسته",
@@ -202,11 +203,15 @@ export const translations = {
     test: "این یک متن تستی هست در قسمت در ما",
     pleaseTryAgain: "شعبه یافت نشد لطفا دوباره تلاش کنید",
     description: "وصف",
+    guideBranch: "برای دیدن منوی شعبه دیگر، شعبه را تغییر دهید",
+    badgeBranches: "اصالت طعم افغانستانی",
+    quickActions: "دسترسی سریع",
   },
-  
+
   ar: {
     menu: "القائمة",
     restaurantName: "مطعم وطندار",
+    branches: "الفروع",
     viewMenu: "عرض القائمة",
     open: "مفتوح",
     closed: "مغلق",
@@ -406,9 +411,13 @@ export const translations = {
     test: "این یک متن تستی هست در قسمت در ما",
     pleaseTryAgain: "لطفا دوباره تلاش کنید",
     description: "توضیحات",
+    guideBranch: "لرؤية قائمة فرع آخر، يرجى تغيير الفرع",
+    badgeBranches: "اصالت طعم افغانستانی",
+    quickActions: "إجراءات سريعة",
   },
-  
+
   en: {
+    branches: "Branches",
     menu: "Menu",
     restaurantName: "Vatandar Restaurant",
     viewMenu: "View Menu",
@@ -610,5 +619,12 @@ export const translations = {
     test: "This is some text for test the about us page This is some text for test the about us page This is some text for test the about us page This is some text for test the about us page This is some text for test the about us page",
     pleaseTryAgain: "Please try again",
     description: "Description",
+    guideBranch: "To view the menu of another branch, please change the branch",
+    badgeBranches: "Authentic Afghan Taste",
+    quickActions: "Quick Actions",
   },
 };
+// Types برای امنیت
+export type Language = "fa" | "ar" | "en";
+export type TranslationDict = typeof translations.fa;
+export type TranslationKeys = keyof TranslationDict;

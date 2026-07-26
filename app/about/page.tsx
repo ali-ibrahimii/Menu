@@ -24,6 +24,8 @@ import {
   ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslate } from "@/hooks/useTranslate";
+import type { Branch } from "@/types";
 
 const ImageGallery = [
   "/bg.jpg",
@@ -33,18 +35,6 @@ const ImageGallery = [
   "/bg.jpg",
   "/bg1.jpg",
 ];
-
-type Branch = {
-  id: string;
-  name_fa: string;
-  name_en?: string;
-  name_ar?: string;
-  slug: string;
-  address?: string;
-  address_fa?: string;
-  phone?: string;
-  phone_number?: string;
-};
 
 const theme = {
   page: "min-h-screen w-full bg-[#fff8ed] text-slate-900 dark:bg-slate-950 dark:text-white transition-colors duration-500",
@@ -59,16 +49,7 @@ export default function AboutPage() {
   const [branches, setBranches] = useState<Branch[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loadingBranches, setLoadingBranches] = useState(true);
-
-  const t = useCallback(
-    (key: string) => {
-      const dict = translations[
-        language as keyof typeof translations
-      ] as Record<string, string>;
-      return dict?.[key] || key;
-    },
-    [language],
-  );
+  const t = useTranslate();
 
   const isRTL = language !== "en";
 
@@ -104,28 +85,66 @@ export default function AboutPage() {
     {
       icon: Award,
       value: "10+",
-      label: language === "fa" ? "سال تجربه" : "Years",
-      sub: language === "fa" ? "از ۲۰۱۴" : "Since 2014",
+      label:
+        language === "fa" ? "سال تجربه" : language === "ar" ? "سنوات" : "Years",
+      sub:
+        language === "fa"
+          ? "از ۲۰۱۴"
+          : language === "ar"
+            ? "منذ 2014"
+            : "Since 2014",
     },
     {
       icon: Building2,
-      value: `${branches.length || 3}+`,
-      label: language === "fa" ? "شعبه فعال" : "Branches",
-      sub: language === "fa" ? "در سراسر شهر" : "Citywide",
+      value: `${2}`,
+      label:
+        language === "fa"
+          ? "شعبه فعال"
+          : language === "ar"
+            ? "الفروع النشطة"
+            : "Branches",
+      sub:
+        language === "fa"
+          ? "در مشهد"
+          : language === "ar"
+            ? "في مشهد"
+            : "In Mashhad",
     },
     {
       icon: UtensilsCrossed,
       value: "80+",
-      label: language === "fa" ? "غذای اصیل" : "Dishes",
-      sub: language === "fa" ? "افغانی و ایرانی" : "Afghan & Iranian",
+      label:
+        language === "fa"
+          ? "غذای اصیل"
+          : language === "ar"
+            ? "الأطعمة الأصلية"
+            : "Authentic Dishes",
+      sub:
+        language === "fa"
+          ? "افغانستانی و ایرانی"
+          : language === "ar"
+            ? "أفغانستانی و إيراني"
+            : "Afghan & Iranian",
     },
     {
       icon: Users,
-      value: "50K+",
-      label: language === "fa" ? "مشتری راضی" : "Happy Clients",
-      sub: language === "fa" ? "خانواده وطندار" : "Watandar Family",
+      value: "300K+",
+      label:
+        language === "fa"
+          ? "مشتری راضی"
+          : language === "ar"
+            ? "العملاء الرضا"
+            : "Happy Clients",
+      sub:
+        language === "fa"
+          ? "خانواده وطندار"
+          : language === "ar"
+            ? "عائلة وطندار"
+            : "Vatandar Family",
     },
   ];
+
+  const isOpen = (branches as any).is_open ?? true; //
 
   return (
     <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
@@ -181,7 +200,6 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6">
           <div className={`${theme.card} p-6 sm:p-8 space-y-4`}>
             <h2 className="flex items-center gap-2 text-xl font-black">
-              <Heart size={20} className="text-red-500" />
               {t("aboutUs")}
             </h2>
             <p className="leading-8 text-[15px] text-slate-700 dark:text-slate-300">
@@ -191,16 +209,46 @@ export default function AboutPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
               {[
                 {
-                  title: language === "fa" ? "مواد تازه" : "Fresh Ingredients",
-                  desc: language === "fa" ? "روزانه از بازار" : "Daily market",
+                  title:
+                    language === "fa"
+                      ? "مواد تازه"
+                      : language === "ar"
+                        ? "المكونات الطازجة"
+                        : "Fresh Ingredients",
+                  desc:
+                    language === "fa"
+                      ? "روزانه از بازار"
+                      : language === "ar"
+                        ? "السوق اليومي"
+                        : "Daily market",
                 },
                 {
-                  title: language === "fa" ? "پخت سنتی" : "Traditional",
-                  desc: language === "fa" ? "به روش مادربزرگ" : "Grandma's way",
+                  title:
+                    language === "fa"
+                      ? "پخت سنتی"
+                      : language === "ar"
+                        ? "الطبخ التقليدي"
+                        : "Traditional",
+                  desc:
+                    language === "fa"
+                      ? "به روش مادربزرگ"
+                      : language === "ar"
+                        ? "الطريقة العائلية"
+                        : "Grandma's way",
                 },
                 {
-                  title: language === "fa" ? "سرو خانوادگی" : "Family Service",
-                  desc: language === "fa" ? "گرم و صمیمی" : "Warm & cozy",
+                  title:
+                    language === "fa"
+                      ? "سرو خانوادگی"
+                      : language === "ar"
+                        ? "خدمة العائلة"
+                        : "Family Service",
+                  desc:
+                    language === "fa"
+                      ? "گرم و صمیمی"
+                      : language === "ar"
+                        ? "دافئ و مريح"
+                        : "Warm & cozy",
                 },
               ].map((f, i) => (
                 <div key={i} className={`${theme.softCard} p-3.5`}>
@@ -269,8 +317,11 @@ export default function AboutPage() {
         {/* شعبه‌ها */}
         <div className="space-y-4">
           <h2 className="text-xl font-black flex items-center gap-2">
-            <Building2 size={20} />
-            {language === "fa" ? "شعبه‌های ما" : "Our Branches"}
+            {language === "fa"
+              ? "شعبه‌های ما"
+              : language === "ar"
+                ? "الفروع النشطة"
+                : "Our Branches"}
           </h2>
 
           {loadingBranches ? (
@@ -303,9 +354,27 @@ export default function AboutPage() {
                         </div>
                         <div>
                           <p className="font-bold">{name}</p>
-                          <p className={`text-xs ${theme.muted}`}>
-                            {branch.slug}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            {!branch.is_active && (
+                              <span className="flex h-1 w-1  border rounded-full bg-red-500 animate-ping"></span>
+                            )}
+                            {branch.is_active && (
+                              <span className="flex h-1 w-1  border rounded-full bg-green-500 animate-ping"></span>
+                            )}
+                            <p className={`text-xs ${theme.muted}`}>
+                              {branch.is_active
+                                ? language === "fa"
+                                  ? "فعال"
+                                  : language === "ar"
+                                    ? "نشط"
+                                    : "Active"
+                                : language === "fa"
+                                  ? " غیرفعال"
+                                  : language === "ar"
+                                    ? "غير نشط"
+                                    : "Inactive"}
+                            </p>
+                          </div>
                         </div>
                       </div>
 
@@ -316,9 +385,11 @@ export default function AboutPage() {
                             className="shrink-0 text-slate-400"
                           />
                           <span className="line-clamp-2">
-                            {(branch as any).address_fa ||
-                              (branch as any).address ||
-                              "آدرس به زودی..."}
+                            {language === "en"
+                              ? branch.address_en
+                              : language === "ar"
+                                ? branch.address_ar
+                                : branch.address_fa || "به زودی اضافه می‌شود"}
                           </span>
                         </div>
                         <div className="flex gap-2">
@@ -327,9 +398,9 @@ export default function AboutPage() {
                             className="shrink-0 text-slate-400"
                           />
                           <span dir="ltr">
-                            {(branch as any).phone ||
-                              (branch as any).phone_number ||
-                              "۰۷۰۰ ۰۰۰ ۰۰۰"}
+                            {(branch as any).phone_1 ||
+                              (branch as any).phone_number_2 ||
+                              "به زودی اضافه می‌شود"}
                           </span>
                         </div>
                         <div className="flex gap-2">
@@ -337,7 +408,16 @@ export default function AboutPage() {
                             size={16}
                             className="shrink-0 text-slate-400"
                           />
-                          <span>۸:۰۰ تا ۲۳:۳۰ هر روز</span>
+                          <span>
+                            {branch.open !== undefined &&
+                            branch.close !== undefined
+                              ? `${language === "fa"
+                                  ? "هر روز"
+                                  : language === "ar"
+                                    ? "كل يوم" 
+                                    : "Every Day"} AM ${branch.open}:00 - PM ${branch.close}:00`
+                              : "ساعت بازگویی به زودی..."}
+                          </span>
                         </div>
                       </div>
 

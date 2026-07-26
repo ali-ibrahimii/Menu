@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Branch } from "@/types";
+import type { Branch } from "@/types";
 import CheckRestaurantStatus from "@/components/CheckRestaurantStatus";
 import ActionButtons from "./ActionButtons";
 

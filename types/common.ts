@@ -1,0 +1,32 @@
+export type Language = "fa" | "ar" | "en";
+
+export type RestaurantInfo = {
+  id: string;
+  name_fa: string;
+  name_ar: string;
+  name_en: string;
+  branch1_name_fa: string;
+  branch1_name_ar: string;
+  branch1_name_en: string;
+  branch1_phone: string;
+  branch1_phone2: string;
+  branch1_address_fa: string;
+  branch1_address_ar: string;
+  branch1_address_en: string;
+  branch2_name_fa: string;
+  branch2_name_ar: string;
+  branch2_name_en: string;
+  branch2_phone: string;
+  branch2_phone2: string;
+  branch2_address_fa: string;
+  branch2_address_ar: string;
+  branch2_address_en: string;
+  working_hours_fa: string;
+  working_hours_ar: string;
+  working_hours_en: string;
+  instagram_url: string;
+  whatsapp_number: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
