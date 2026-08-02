@@ -2,58 +2,58 @@
 
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   ShoppingCart,
   Plus,
   Minus,
   Trash2,
-  Notebook,
-  NotebookText,
   User,
-  Heart,
   Hash,
+  MapPin,
+  Phone,
+  Store,
+  Bike,
+  Banknote,
+  CreditCard,
+  Receipt,
+  Clock,
 } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { translations } from "@/translations/translation";
-import { useState } from "react";
+import { useBranch } from "@/contexts/BranchContext";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
 import Image from "next/image";
+import Link from "next/link";
 
-
+// ========== Device ID - برای پیگیری سفارشات مشتری ==========
 const getDeviceId = () => {
-  if (typeof window === "undefined") return "unknown";
-
-  let deviceId = localStorage.getItem("deviceId");
-
-  if (!deviceId) {
-    deviceId =
-      "device_" +
-      Math.random().toString(36).substr(2, 9) +
-      "_" +
-      Date.now().toString(36);
-    localStorage.setItem("deviceId", deviceId);
-    localStorage.setItem("customerName", "مهمان");
+  if (typeof window === "undefined") return "device_unknown";
+  let id = localStorage.getItem("watandar_device_id");
+  if (!id) {
+    id = `device_${Math.random().toString(36).slice(2, 11)}_${Date.now().toString(36)}`;
+    localStorage.setItem("watandar_device_id", id);
   }
-
-  return deviceId;
+  return id;
 };
 
+type OrderType = "dine_in" | "delivery";
+type PaymentMethod = "cash" | "online";
+
 export default function CartDrawer() {
-  const { language } = useLanguage();
+  const { selectedBranch } = useBranch();
   const {
     items,
     updateQuantity,
@@ -63,113 +63,136 @@ export default function CartDrawer() {
     getTotalItems,
   } = useCartStore();
 
-  const [customerName, setCustomerName] = useState("");
-  const [tableNumber, setTableNumber] = useState("");
+  const [open, setOpen] = useState(false);
+  const [orderType, setOrderType] = useState<OrderType>("dine_in");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
+  const [loading, setLoading] = useState(false);
+
+  // فرم
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [table, setTable] = useState("");
+  const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const t = (key: string) => {
-    const langTranslations = translations[language] as Record<string, string>;
-    return langTranslations[key] || key;
-  };
+  const subtotal = getTotalPrice();
+  const deliveryFee = orderType === "delivery" ? 30000 : 0;
+  const finalPrice = subtotal + deliveryFee;
 
-  const getFoodName = (item: any) => {
-    return item[`name_${language || "fa"}`];
-  };
-
-  const handleSaveOrder = async () => {
-    if (!customerName.trim()) {
-      alert(t("customerNameRequired"));
-      return;
+  useEffect(() => {
+    if (open) {
+      setName(localStorage.getItem("watandar_name") || "");
+      setPhone(localStorage.getItem("watandar_phone") || "");
+      setTable(localStorage.getItem("watandar_table") || "");
+      setAddress(localStorage.getItem("watandar_address") || "");
     }
+  }, [open]);
 
-    if (items.length === 0) {
-      alert(t("emptyCartError"));
-      return;
-    }
+  const handleSubmit = async () => {
+    if (!name.trim()) return toast.error("نام الزامی است");
+    if (orderType === "delivery" && !phone.trim())
+      return toast.error("شماره تماس الزامی است");
+    if (orderType === "delivery" && !address.trim())
+      return toast.error("آدرس الزامی است");
+    if (orderType === "dine_in" && !table.trim())
+      return toast.error("شماره میز الزامی است");
+    if (items.length === 0) return toast.error("سبد خالی است");
 
-    setIsSubmitting(true);
-
+    setLoading(true);
     try {
-      
       const deviceId = getDeviceId();
 
-     
-      const orderData = {
-        customer_name: customerName.trim(),
-        table_number: tableNumber.trim() || null,
-        notes: notes.trim() || null,
-        total_price: getTotalPrice(),
-        items: items,
-        status: "pending",
+      // ذخیره برای دفعه بعد
+      localStorage.setItem("watandar_name", name.trim());
+      localStorage.setItem("watandar_phone", phone.trim());
+      localStorage.setItem("watandar_table", table.trim());
+      localStorage.setItem("watandar_address", address.trim());
+
+      const orderPayload = {
         device_id: deviceId,
-        created_at: new Date().toISOString(),
+        customer_name: name.trim(),
+        customer_phone: phone.trim() || null,
+        order_type: orderType,
+        table_number: orderType === "dine_in" ? table.trim() : null,
+        delivery_address: orderType === "delivery" ? address.trim() : null,
+        branch_id: selectedBranch?.id || null,
+        total_price: subtotal,
+        delivery_fee: deliveryFee,
+        final_price: finalPrice,
+        payment_method: paymentMethod,
+        payment_status:
+          paymentMethod === "cash" ? "pending" : "awaiting_payment",
+        status: "pending",
+        notes: notes.trim() || null,
+        items: items.map((i) => ({
+          id: i.id,
+          name_fa: i.name_fa,
+          price: i.price,
+          quantity: i.quantity,
+          image_url: i.image_url,
+        })),
       };
 
-      console.log("📦 ثبت سفارش با device_id:", deviceId);
-      console.log("📊 داده‌های سفارش:", orderData);
-
-   
-      const { data, error } = await supabase
+      // 1. ثبت در orders
+      const { data: order, error } = await supabase
         .from("orders")
-        .insert([orderData])
-        .select();
+        .insert([orderPayload])
+        .select()
+        .single();
+      if (error) throw error;
 
-      if (error) {
-        console.error("خطا در ثبت سفارش:", error);
-        throw error;
+      // 2. ثبت در order_items برای حسابداری دقیق (اختیاری)
+      const itemsPayload = items.map((i) => ({
+        order_id: order.id,
+        food_id: i.id,
+        food_name_fa: i.name_fa,
+        food_price: i.price,
+        quantity: i.quantity,
+        subtotal: i.price * i.quantity,
+      }));
+      await supabase.from("order_items").insert(itemsPayload);
+
+      // 3. اگر پرداخت آنلاین باشه
+      if (paymentMethod === "online") {
+        toast.success("سفارش ثبت شد، انتقال به درگاه...");
+        // اینجا به API پرداخت وصل شو
+        // const res = await fetch("/api/payment/zarinpal", { method: "POST", body: JSON.stringify({ orderId: order.id, amount: finalPrice }) })
+        // const { url } = await res.json();
+        // window.location.href = url;
+        // فعلا:
+        toast.info("پرداخت آنلاین به زودی - سفارش با پرداخت در محل ثبت شد");
+      } else {
+        toast.success(
+          orderType === "delivery"
+            ? "سفارش بیرون‌بر ثبت شد 🛵"
+            : "سفارش شما ثبت شد 🍽️ - منتظر تایید مدیر",
+        );
       }
 
-      console.log("سفارش با موفقیت ثبت شد:", data);
-
-      localStorage.setItem("customerName", customerName.trim());
-      if (tableNumber.trim()) {
-        localStorage.setItem("tableNumber", tableNumber.trim());
-      }
-
-      // نمایش پیام موفقیت
-      toast.success(t("orderSubmitted"));
-
-      // ریست فرم و سبد خرید
       clearCart();
-      setCustomerName("");
-      setTableNumber("");
-      setNotes("");
-
-      setIsDrawerOpen(false);
-    } catch (error: any) {
-      console.error("Error saving order:", error);
-      alert(t("orderError") + ": " + error.message);
+      setOpen(false);
+      // لینک به صفحه پیگیری سفارشات
+      setTimeout(() => {
+        window.location.href = `/my-orders?device=${deviceId}`;
+      }, 1500);
+    } catch (e: any) {
+      toast.error("خطا: " + e.message);
     } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // وقتی دراور باز می‌شه، اطلاعات قبلی رو از localStorage بیار
-  const handleDrawerOpen = () => {
-    const savedName = localStorage.getItem("customerName");
-
-    if (savedName && savedName !== "مهمان") {
-      setCustomerName(savedName);
+      setLoading(false);
     }
   };
 
   return (
-    <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+    <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button
-          variant="ghost"
           size="icon"
-          className="relative"
-          onClick={handleDrawerOpen}
+          variant="ghost"
+          className="relative h-11 w-11 rounded-full bg-white/10 border border-white/10"
         >
-          <NotebookText className="opacity-60" size={20} />
+          <ShoppingCart size={20} />
           {getTotalItems() > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-            >
+            <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500 rounded-full">
               {getTotalItems()}
             </Badge>
           )}
@@ -177,130 +200,234 @@ export default function CartDrawer() {
       </DrawerTrigger>
 
       <DrawerContent
-        className="min-h-[70vh] glass-drawer"
-        dir={language === "en" ? "ltr" : "rtl"}
+        className="max-h-[95vh] bg-[#fff8ed] dark:bg-slate-950"
+        dir="rtl"
       >
-        {/* هدر با نام شعبه */}
-        <div className="flex flex-col items-center space-y-2">
-          <h1 className="font-bold text-xl text-center font-[BTitr]">
-            {t("shoppingCart")}
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400">{t("cartDescription")}</p>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-3 w-full py-4 space-y-4">
-          {/* آیتم‌های سبد خرید */}
-          {items.length === 0 ? (
-            <div className="text-center  py-10">
-              <NotebookText size={48} className="mx-auto mb-4 opacity-60" />
-              <p>{t("emptyCart")}</p>
-            </div>
-          ) : (
-            <>
-              <div className="space-y-2 p-2">
-                {items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="relative flex items-center w-full p-2 gap-2 glass-cart bg-accent dark:bg-[#191919] border rounded-2xl overflow-hidden cursor-pointer"
-                  >
-                    <Image
-                      width={120}
-                      height={120}
-                      src={item.image_url}
-                      alt={getFoodName(item)}
-                      className="w-12 h-12 rounded-md object-cover"
-                      loading="lazy"
-                      quality={50}
-                    />
-
-                    <div className="flex-1">
-                      <h4 className="font-medium text-sm">
-                        {getFoodName(item)}
-                      </h4>
-                      <p className="text-green-600 text-[12px] font-bold">
-                        {item.price.toLocaleString()} {t("price")}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity - 1)
-                        }
-                        className="h-7 w-7 p-0 glass-cart-btn"
-                      >
-                        <Minus size={14} />
-                      </Button>
-
-                      <span className="text-[13px] font-medium min-w-5 text-center">
-                        {item.quantity}
-                      </span>
-
-                      <Button
-                        size="sm"
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
-                        }
-                        className="h-7 w-7 p-0 glass-cart-btn"
-                      >
-                        <Plus size={14} />
-                      </Button>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFromCart(item.id)}
-                        className="h-7 w-7 p-0 text-red-500"
-                      >
-                        <Trash2 size={14} />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/*  خط جدا کننده  */}
-              <div className="h-px bg-linear-to-r from-transparent dark:via-white via-black to-transparent" />
-
-              {/* جمع کل   */}
-              <div className="pt-2 px-6">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">{t("total")}:</span>
-                  <span className="text-sm font-bold text-green-600">
-                    {getTotalPrice().toLocaleString()} {t("price")}
-                  </span>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-
-        <DrawerFooter className="flex flex-row w-full">
-          {items.length > 0 && (
-            <>
-              <Button
-                // variant="outline"
-                onClick={clearCart}
-                className="w-full bg-accent dark:bg-card border dark:text-white py-5 rounded-xl"
-                disabled={isSubmitting}
+        <div className="mx-auto w-full max-w-lg flex flex-col max-h-[95vh]">
+          <DrawerHeader>
+            <DrawerTitle className="flex items-center justify-between">
+              <span className="text-xl font-black">سبد خرید شما</span>
+              <Link
+                href="/my-orders"
+                className="text-xs font-medium text-emerald-600 flex items-center gap-1"
               >
-                <Trash2 size={16} className="ml-1" />
-                {t("clearCart")}
-              </Button>
-            </>
-          )}
+                <Clock size={12} /> سفارشات من
+              </Link>
+            </DrawerTitle>
+            <DrawerDescription>
+              {getTotalItems()} آیتم •{" "}
+              {orderType === "delivery" ? "ارسال با پیک" : "سرو داخل رستوران"}
+            </DrawerDescription>
+          </DrawerHeader>
 
-          {/* <DrawerClose asChild>
+          <div className="flex-1 overflow-y-auto px-4 space-y-4">
+            {items.length === 0 ? (
+              <div className="py-20 text-center">
+                <ShoppingCart className="mx-auto opacity-20 mb-3" size={48} />
+                <p>سبد خالی است</p>
+                <Button
+                  variant="outline"
+                  className="mt-3 rounded-full"
+                  onClick={() => setOpen(false)}
+                >
+                  رفتن به منو
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  {items.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-3 p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-black/5 dark:border-white/10"
+                    >
+                      <Image
+                        src={item.image_url || "/bg.jpg"}
+                        alt={item.name_fa}
+                        width={56}
+                        height={56}
+                        className="rounded-xl object-cover h-14 w-14"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-sm truncate">
+                          {item.name_fa}
+                        </p>
+                        <p className="text-xs text-emerald-600 font-bold">
+                          {item.price.toLocaleString()} تومان
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 rounded-full bg-black/5 dark:bg-white/5"
+                          onClick={() =>
+                            updateQuantity(item.id, item.quantity - 1)
+                          }
+                        >
+                          <Minus size={12} />
+                        </Button>
+                        <span className="w-6 text-center text-sm font-bold">
+                          {item.quantity}
+                        </span>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 rounded-full bg-black/5 dark:bg-white/5"
+                          onClick={() =>
+                            updateQuantity(item.id, item.quantity + 1)
+                          }
+                        >
+                          <Plus size={12} />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 text-red-500"
+                          onClick={() => removeFromCart(item.id)}
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* نوع سفارش */}
+                <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-black/5 dark:bg-white/5">
+                  {[
+                    { key: "dine_in", label: "داخل رستوران", icon: Store },
+                    { key: "delivery", label: "بیرون‌بر", icon: Bike },
+                  ].map((t) => (
+                    <button
+                      key={t.key}
+                      onClick={() => setOrderType(t.key as OrderType)}
+                      className={`h-12 rounded-xl flex items-center justify-center gap-2 font-bold text-sm transition-all ${orderType === t.key ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow" : "text-slate-600 dark:text-slate-400"}`}
+                    >
+                      <t.icon size={16} /> {t.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* فرم */}
+                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-black/5 dark:border-white/10 p-4 space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold flex items-center gap-1">
+                      <User size={12} /> نام *
+                    </Label>
+                    <Input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="نام شما"
+                    />
+                  </div>
+                  {orderType === "dine_in" ? (
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold flex items-center gap-1">
+                        <Hash size={12} /> شماره میز *
+                      </Label>
+                      <Input
+                        value={table}
+                        onChange={(e) => setTable(e.target.value)}
+                        placeholder="مثلا 12"
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-bold flex items-center gap-1">
+                          <Phone size={12} /> شماره تماس *
+                        </Label>
+                        <Input
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="09xx xxx xxxx"
+                          dir="ltr"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-bold flex items-center gap-1">
+                          <MapPin size={12} /> آدرس *
+                        </Label>
+                        <Textarea
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                          placeholder="خیابان، کوچه، پلاک، واحد..."
+                          rows={2}
+                        />
+                      </div>
+                    </>
+                  )}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold">یادداشت</Label>
+                    <Textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="بدون فلفل، ..."
+                      rows={2}
+                    />
+                  </div>
+                </div>
+
+                {/* پرداخت */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setPaymentMethod("cash")}
+                    className={`h-12 rounded-xl border flex items-center justify-center gap-2 font-bold text-sm ${paymentMethod === "cash" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900" : "bg-white dark:bg-slate-900 border-black/10 dark:border-white/10"}`}
+                  >
+                    <Banknote size={16} /> نقدی
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod("online")}
+                    className={`h-12 rounded-xl border flex items-center justify-center gap-2 font-bold text-sm ${paymentMethod === "online" ? "bg-emerald-600 text-white border-emerald-600" : "bg-white dark:bg-slate-900 border-black/10 dark:border-white/10"}`}
+                  >
+                    <CreditCard size={16} /> آنلاین
+                  </button>
+                </div>
+
+                {/* جمع */}
+                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-black/5 dark:border-white/10 p-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>جمع جزء</span>
+                    <span>{subtotal.toLocaleString()} تومان</span>
+                  </div>
+                  {orderType === "delivery" && (
+                    <div className="flex justify-between">
+                      <span>ارسال</span>
+                      <span>{deliveryFee.toLocaleString()} تومان</span>
+                    </div>
+                  )}
+                  <div className="h-px bg-black/10 dark:bg-white/10" />
+                  <div className="flex justify-between font-black text-base">
+                    <span>قابل پرداخت</span>
+                    <span className="text-emerald-600">
+                      {(subtotal + deliveryFee).toLocaleString()} تومان
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <DrawerFooter className="flex-row gap-2 px-4 mb-40">
             <Button
-              // variant="outline"
-              className="glass-cart-btn w-full"
-              disabled={isSubmitting}
+              variant="outline"
+              className="flex-1 h-12 rounded-xl"
+              onClick={() => setOpen(false)}
             >
-              {t("close")}
+              ادامه خرید
             </Button>
-          </DrawerClose> */}
-        </DrawerFooter>
+            {items.length > 0 && (
+              <Button
+                className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? "ثبت..." : "ثبت سفارش"}
+              </Button>
+            )}
+          </DrawerFooter>
+        </div>
       </DrawerContent>
     </Drawer>
   );

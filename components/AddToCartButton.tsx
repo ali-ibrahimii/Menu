@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus, ShoppingCart } from "lucide-react";
 import { useCartStore, CartItem } from "@/stores/cartStore";
-import { Food } from "@/types";
+import type { Food } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/translations/translation";
 
