@@ -346,7 +346,7 @@ export default function AdminOrdersWithNotifications() {
               </Button>
 
               {showNotifPanel && (
-                <Card className="absolute left-0 sm:right-0 top-12 z-50 w-80 sm:w-96 rounded-2xl shadow-2xl border-black/10 dark:border-white/10 max-h-[70vh] flex flex-col">
+                <Card className="absolute left-20 sm:right-0 top-12 z-80 w-30 sm:w-96 rounded-2xl shadow-2xl border-black/10 dark:border-white/10 max-h-[70vh] flex flex-col">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-base">
                       اعلان‌ها ({notifications.length})
@@ -602,7 +602,7 @@ export default function AdminOrdersWithNotifications() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-7 w-7 p-0 rounded-full"
+                                className="h-7 w-7 p-0 rounded-full cursor-pointer"
                                 onClick={() => setSelected(order)}
                               >
                                 <Eye size={12} />
@@ -647,7 +647,7 @@ export default function AdminOrdersWithNotifications() {
         </div>
 
         {/* رسید مخفی برای چاپ */}
-        <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
+        <div className="absolute top-0 left-0">
           <div id="receipt-hidden">
             {selected && (
               <div
