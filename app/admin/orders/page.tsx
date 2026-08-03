@@ -647,7 +647,7 @@ export default function AdminOrdersWithNotifications() {
         </div>
 
         {/* رسید مخفی برای چاپ */}
-        <div className="absolute top-0 left-0">
+        <div style={{ position: "absolute", left: "-999px", top: "-999px" }}>
           <div id="receipt-hidden">
             {selected && (
               <div

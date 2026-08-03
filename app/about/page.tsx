@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { translations } from "@/translations/translation";
 import Link from "next/link";
 import Image from "next/image";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -27,7 +26,10 @@ import { Button } from "@/components/ui/button";
 import { useTranslate } from "@/hooks/useTranslate";
 import type { Branch } from "@/types";
 
-const ImageGallery = [
+const BUCKET = "images";
+const GALLERY_FOLDER = "gallery";
+const AVATAR_FOLDER = "avatar";
+const DEFAULT_GALLERY = [
   "/bg.jpg",
   "/bg1.jpg",
   "/bg2.jpg",
@@ -44,41 +46,104 @@ const theme = {
     "rounded-2xl border border-black/5 bg-white/60 dark:border-white/10 dark:bg-white/[0.04]",
 };
 
+async function fetchGalleryFromSupabase(): Promise<string[]> {
+  try {
+    const { data, error } = await supabase.storage
+      .from(BUCKET)
+      .list(GALLERY_FOLDER, {
+        limit: 100,
+        sortBy: { column: "name", order: "asc" },
+      });
+    if (error) throw error;
+    if (!data || data.length === 0) return [];
+    const images = data.filter(
+      (f: any) => f.id && /\.(jpe?g|png|webp)$/i.test(f.name),
+    );
+    if (images.length === 0) return [];
+    return images.map((file: any) => {
+      const { data: urlData } = supabase.storage
+        .from(BUCKET)
+        .getPublicUrl(`${GALLERY_FOLDER}/${file.name}`);
+      return urlData.publicUrl;
+    });
+  } catch {
+    // fallback اگر policy نبود - مستقیم
+    return ["1.jpg", "2.jpg", "3.jpg", "4.jpg"].map((n) => {
+      const { data } = supabase.storage
+        .from(BUCKET)
+        .getPublicUrl(`${GALLERY_FOLDER}/${n}`);
+      return data.publicUrl;
+    });
+  }
+}
+
 export default function AboutPage() {
   const { language } = useLanguage();
   const [branches, setBranches] = useState<Branch[]>([]);
+  const [galleryImages, setGalleryImages] = useState<string[]>(DEFAULT_GALLERY);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loadingBranches, setLoadingBranches] = useState(true);
+  const [loadingGallery, setLoadingGallery] = useState(true);
+  const [managerAvatar, setManagerAvatar] = useState<string | null>(null);
+  const [managerInfo, setManagerInfo] = useState<any>(null);
+  const [loadingManager, setLoadingManager] = useState(true);
   const t = useTranslate();
-
   const isRTL = language !== "en";
 
-  // داستان رستوران - اگر t("test") خالیه، این متن پیش‌فرض نشون داده میشه
   const storyText =
-    t("test") !== "test"
-      ? t("test")
-      : language === "fa"
-        ? "رستوران وطندار با بیش از یک دهه تجربه در طبخ اصیل‌ترین غذاهای افغانی، محلی برای دور هم جمع شدن خانواده‌هاست. ما با استفاده از بهترین مواد اولیه، ادویه‌های اصل و دستور پخت مادربزرگ‌ها، طعمی را خلق می‌کنیم که شما را به خانه می‌برد. از قابلی پلو افسانه‌ای تا منتو و بولانی داغ، هر لقمه داستانی از فرهنگ ماست."
-        : language === "ar"
-          ? "مطعم وطندار مع أكثر من عقد من الخبرة في طهي أشهى الأطباق الأفغانية الأصيلة، هو مكان لتجمع العائلات. نستخدم أفضل المكونات والتوابل الأصلية ووصفات الجدات لنخلق طعمًا يأخذك إلى المنزل."
-          : "Watandar Restaurant, with over a decade of experience cooking the most authentic Afghan dishes, is a place for families to gather. Using the finest ingredients, original spices, and grandmothers' recipes, we create a taste that takes you home.";
+    language === "fa"
+      ? "رستوران وطندار با بیش از یک دهه تجربه در طبخ اصیل‌ترین غذاهای افغانی، محلی برای دور هم جمع شدن خانواده‌هاست. ما با استفاده از بهترین مواد اولیه، ادویه‌های اصل و دستور پخت مادربزرگ‌ها، طعمی را خلق می‌کنیم که شما را به خانه می‌برد. از قابلی پلو افسانه‌ای تا منتو و بولانی داغ، هر لقمه داستانی از فرهنگ ماست."
+      : language === "ar"
+        ? "مطعم وطندار مع أكثر من عقد من الخبرة في طهي أشهى الأطباق الأفغانية الأصيلة، هو مكان لتجمع العائلات."
+        : "Watandar Restaurant, with over a decade of experience cooking authentic Afghan dishes, is a place for families to gather.";
 
   useEffect(() => {
-    const fetchBranches = async () => {
+    const load = async () => {
+      // شعبه‌ها
+      const { data: branchesData } = await supabase
+        .from("branches")
+        .select("*")
+        .order("created_at");
+      setBranches((branchesData as any) || []);
+
+      // گالری
+      const gallery = await fetchGalleryFromSupabase();
+      setGalleryImages(gallery);
+
+      // اطلاعات مدیر - از جدول public_info
+      setLoadingManager(true);
       try {
+        console.log("🔍 در حال خواندن public_info...");
         const { data, error } = await supabase
-          .from("branches")
+          .from("public_info")
           .select("*")
-          .order("created_at");
-        if (error) throw error;
-        setBranches(data || []);
-      } catch (e) {
-        console.error(e);
+          .limit(1)
+          .maybeSingle();
+        if (error) {
+          console.error("❌ خطا در public_info:", error);
+          // اگر با public_info نشد، با public-info امتحان کن
+          const { data: data2, error: error2 } = await supabase
+            .from("public-info" as any)
+            .select("*")
+            .limit(1)
+            .maybeSingle();
+          if (!error2 && data2) {
+            setManagerInfo(data2);
+            console.log("✅ از public-info خوانده شد:", data2);
+          } else {
+            console.error("❌ هر دو نام جدول خطا:", error, error2);
+          }
+        } else {
+          console.log("✅ اطلاعات مدیر:", data);
+          setManagerInfo(data);
+        }
+      } catch (e: any) {
+        console.error("Exception public_info:", e.message);
       } finally {
-        setLoadingBranches(false);
+        setLoadingManager(false);
       }
     };
-    fetchBranches();
+    load();
   }, []);
 
   const stats = [
@@ -96,7 +161,7 @@ export default function AboutPage() {
     },
     {
       icon: Building2,
-      value: `${2}`,
+      value: "2",
       label:
         language === "fa"
           ? "شعبه فعال"
@@ -144,11 +209,8 @@ export default function AboutPage() {
     },
   ];
 
-  const isOpen = (branches as any).is_open ?? true; //
-
   return (
     <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
-      {/* هدر */}
       <div className="sticky top-0 z-30 backdrop-blur-xl bg-[#fff8ed]/80 dark:bg-slate-950/80 border-b border-black/5 dark:border-white/10">
         <div className="mx-auto max-w-6xl flex items-center justify-between p-4 sm:p-5">
           <div className="flex items-center gap-2 rounded-xl bg-white dark:bg-slate-900 border border-black/10 dark:border-white/10 p-1">
@@ -168,7 +230,6 @@ export default function AboutPage() {
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 space-y-8 sm:space-y-12">
-        {/* لوگو + نام */}
         <div className="flex flex-col items-center gap-5">
           <div className="rounded-[2rem] border border-black/10 bg-white p-5 shadow-xl shadow-black/5 dark:border-white/10 dark:bg-slate-900 dark:shadow-black/20">
             <Image
@@ -196,16 +257,14 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* درباره ما + ویژگی‌ها */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6">
           <div className={`${theme.card} p-6 sm:p-8 space-y-4`}>
             <h2 className="flex items-center gap-2 text-xl font-black">
               {t("aboutUs")}
             </h2>
-            <p className="leading-8 text-[15px] text-slate-700 dark:text-slate-300">
+            <p className="leading-5 text-[15px] text-slate-700 dark:text-slate-300">
               {storyText}
             </p>
-
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
               {[
                 {
@@ -276,7 +335,7 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* گالری */}
+        {/* گالری - از سوپابیس */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-black flex items-center gap-2">
@@ -288,42 +347,54 @@ export default function AboutPage() {
                   : "Gallery"}
             </h2>
             <p className={`text-xs ${theme.muted}`}>
-              {ImageGallery.length} عکس
+              {loadingGallery
+                ? "در حال بارگذاری از Supabase..."
+                : `${galleryImages.length} عکس • از پوشه gallery`}
             </p>
           </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-            {ImageGallery.map((item, idx) => (
-              <button
-                key={`${item}-${idx}`}
-                onClick={() => setSelectedImage(item)}
-                className="group relative aspect-[4/3] overflow-hidden rounded-[1.25rem] border border-black/10 dark:border-white/10 bg-slate-100 dark:bg-slate-900"
-              >
-                <img
-                  src={item}
-                  alt={`gallery-${idx}`}
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          {loadingGallery ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="aspect-[4/3] rounded-[1.25rem] bg-black/5 dark:bg-white/5 animate-pulse"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                  <span className="text-white text-xs font-bold bg-white/20 backdrop-blur px-2 py-1 rounded-full">
-                    نمایش
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+              {galleryImages.map((item, idx) => (
+                <button
+                  key={`${item}-${idx}`}
+                  onClick={() => setSelectedImage(item)}
+                  className="group relative aspect-[4/3] overflow-hidden rounded-[1.25rem] border border-black/10 dark:border-white/10 bg-slate-100 dark:bg-slate-900"
+                >
+                  <img
+                    src={item}
+                    alt={`gallery-${idx}`}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                    <span className="text-white text-xs font-bold bg-white/20 backdrop-blur px-2 py-1 rounded-full">
+                      نمایش
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* شعبه‌ها */}
+        {/* شعبه‌ها - کارت مثل قبلی */}
         <div className="space-y-4">
           <h2 className="text-xl font-black flex items-center gap-2">
+            <Building2 size={18} />
             {language === "fa"
               ? "شعبه‌های ما"
               : language === "ar"
                 ? "الفروع النشطة"
                 : "Our Branches"}
           </h2>
-
           {loadingBranches ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[1, 2].map((i) => (
@@ -339,9 +410,9 @@ export default function AboutPage() {
                 branches.map((branch) => {
                   const name =
                     language === "en"
-                      ? branch.name_en || branch.name_fa
+                      ? (branch as any).name_en || branch.name_fa
                       : language === "ar"
-                        ? branch.name_ar || branch.name_fa
+                        ? (branch as any).name_ar || branch.name_fa
                         : branch.name_fa;
                   return (
                     <div
@@ -355,24 +426,19 @@ export default function AboutPage() {
                         <div>
                           <p className="font-bold">{name}</p>
                           <div className="flex items-center gap-2">
-                            {!branch.is_active && (
-                              <span className="flex h-1 w-1  border rounded-full bg-red-500 animate-ping"></span>
-                            )}
-                            {branch.is_active && (
-                              <span className="flex h-1 w-1  border rounded-full bg-green-500 animate-ping"></span>
-                            )}
+                            <span
+                              className={`flex h-1 w-1 border rounded-full ${(branch as any).is_active ? "bg-green-500" : "bg-red-500"} animate-ping`}
+                            />
                             <p className={`text-xs ${theme.muted}`}>
-                              {branch.is_active
+                              {(branch as any).is_active
                                 ? language === "fa"
                                   ? "فعال"
                                   : language === "ar"
                                     ? "نشط"
                                     : "Active"
                                 : language === "fa"
-                                  ? " غیرفعال"
-                                  : language === "ar"
-                                    ? "غير نشط"
-                                    : "Inactive"}
+                                  ? "غیرفعال"
+                                  : "Inactive"}
                             </p>
                           </div>
                         </div>
@@ -386,10 +452,10 @@ export default function AboutPage() {
                           />
                           <span className="line-clamp-2">
                             {language === "en"
-                              ? branch.address_en
+                              ? (branch as any).address_en
                               : language === "ar"
-                                ? branch.address_ar
-                                : branch.address_fa || "به زودی اضافه می‌شود"}
+                                ? (branch as any).address_ar
+                                : (branch as any).address_fa || "به زودی"}
                           </span>
                         </div>
                         <div className="flex gap-2">
@@ -398,9 +464,7 @@ export default function AboutPage() {
                             className="shrink-0 text-slate-400"
                           />
                           <span dir="ltr">
-                            {(branch as any).phone_1 ||
-                              (branch as any).phone_number_2 ||
-                              "به زودی اضافه می‌شود"}
+                            {(branch as any).phone_1 || "به زودی"}
                           </span>
                         </div>
                         <div className="flex gap-2">
@@ -409,21 +473,16 @@ export default function AboutPage() {
                             className="shrink-0 text-slate-400"
                           />
                           <span>
-                            {branch.open !== undefined &&
-                            branch.close !== undefined
-                              ? `${language === "fa"
-                                  ? "هر روز"
-                                  : language === "ar"
-                                    ? "كل يوم" 
-                                    : "Every Day"} AM ${branch.open}:00 - PM ${branch.close}:00`
-                              : "ساعت بازگویی به زودی..."}
+                            {(branch as any).open !== undefined
+                              ? `${language === "fa" ? "هر روز" : "Every Day"} ${(branch as any).open}:00 - ${(branch as any).close}:00`
+                              : "ساعت کاری به زودی..."}
                           </span>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 pt-2">
                         <a
-                          href={`tel:${(branch as any).phone || ""}`}
+                          href={`tel:${(branch as any).phone_1 || ""}`}
                           className="h-10 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center justify-center gap-1.5 text-sm font-bold"
                         >
                           <PhoneCall size={16} /> تماس
@@ -452,26 +511,31 @@ export default function AboutPage() {
           )}
         </div>
 
-        {/* مدیریت */}
+        {/* کارت مدیریت - مثل قبلی */}
         <div className={`${theme.card} p-6 sm:p-8`}>
           <div className="flex flex-col sm:flex-row gap-6 items-start">
-            <div className="h-20 w-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-emerald-500/20 shrink-0">
-              W
+            <div className="h-20 w-20 rounded-full overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-2xl font-black shadow-lg">
+              {managerAvatar ? (
+                <Image
+                  src={managerAvatar}
+                  alt="مدیر"
+                  width={80}
+                  height={80}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                "W"
+              )}
             </div>
             <div className="flex-1 space-y-3">
               <div>
                 <h3 className="text-lg font-black">
-                  {language === "fa"
-                    ? "مدیریت رستوران وطندار"
-                    : "Watandar Management"}
+                  {managerInfo?.manager_name}
                 </h3>
                 <p className={`text-sm ${theme.muted} mt-1`}>
-                  {language === "fa"
-                    ? "برای پیشنهادات، انتقادات، همکاری و رزرو مراسم، مستقیم با مدیریت در ارتباط باشید."
-                    : "For suggestions, cooperation and reservations, contact management directly."}
+                  {managerInfo?.manager_description}
                 </p>
               </div>
-
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div
                   className={`${theme.softCard} p-3.5 flex items-center gap-2.5`}
@@ -480,7 +544,7 @@ export default function AboutPage() {
                   <div>
                     <p className="text-[11px] opacity-50 font-bold">مدیریت</p>
                     <p className="text-sm font-bold" dir="ltr">
-                      +93 700 123 456
+                      {managerInfo?.manager_number}
                     </p>
                   </div>
                 </div>
@@ -491,58 +555,56 @@ export default function AboutPage() {
                   <div>
                     <p className="text-[11px] opacity-50 font-bold">واتساپ</p>
                     <p className="text-sm font-bold" dir="ltr">
-                      +93 700 123 456
+                      {managerInfo?.manager_number}
                     </p>
-                  </div>
-                </div>
-                <div
-                  className={`${theme.softCard} p-3.5 flex items-center gap-2.5`}
-                >
-                  <MapPin size={18} className="text-red-500" />
-                  <div>
-                    <p className="text-[11px] opacity-50 font-bold">
-                      دفتر مرکزی
-                    </p>
-                    <p className="text-xs font-bold">کابل، شهر نو</p>
                   </div>
                 </div>
               </div>
-
               <div className="flex flex-wrap gap-2 pt-2">
                 <a
-                  href="tel:+93700123456"
+                  href={`tel:${managerInfo?.manager_number}`}
                   className="rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-5 h-10 flex items-center gap-2 text-sm font-bold"
                 >
-                  <PhoneCall size={16} /> تماس با مدیریت
+                  <PhoneCall size={16} />{language === "fa"
+                    ? "تماس"
+                    : language === "ar"
+                      ? "اتصال"
+                      : "Call"}
                 </a>
                 <a
-                  href="https://wa.me/93700123456"
+                  href={`https://wa.me/${managerInfo?.manager_number}`}
                   target="_blank"
                   className="rounded-full border border-black/10 dark:border-white/10 bg-white dark:bg-slate-900 px-5 h-10 flex items-center gap-2 text-sm font-bold"
                 >
-                  واتساپ
+                  {language === "fa"
+                    ? "واتساپ"
+                    : language === "ar"
+                      ? "واتساب"
+                      : "WhatsApp"}
                 </a>
               </div>
             </div>
           </div>
         </div>
 
-        {/* فوتر CTA */}
         <div className="rounded-[2rem] bg-gradient-to-l from-emerald-600 via-emerald-600 to-teal-600 p-8 text-white text-center shadow-xl shadow-emerald-600/20 dark:shadow-black/30">
-          <h3 className="text-2xl font-black">آماده سفارش هستید؟</h3>
+          <h3 className="text-2xl font-black">{language === "fa" ? "آماده سفارش هستید؟" : language === "ar" ? "هل أنت مستعد لطلب الطعام؟" : "Ready to Order?"}</h3>
           <p className="mt-2 text-white/80 text-sm">
-            به منو برگردید و طعم اصیل وطندار را بچشید
+            {language === "fa"
+              ? "منوی کامل ما را مشاهده کنید و غذای مورد علاقه خود را انتخاب کنید."
+              : language === "ar"
+                ? "اطلع على قائمتنا الكاملة واختر طعامك المفضل."
+                : "View our full menu and choose your favorite dish."}
           </p>
           <Link
             href="/menu"
             className="mt-5 inline-flex h-12 items-center justify-center rounded-full bg-white px-8 text-sm font-bold text-emerald-700 shadow-lg hover:bg-white/90 transition-colors"
           >
-            مشاهده منو
+            {language === "fa" ? "مشاهده منو" : language === "ar" ? "عرض القائمة" : "View Menu"}
           </Link>
         </div>
       </div>
 
-      {/* لایت‌باکس گالری */}
       {selectedImage && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"

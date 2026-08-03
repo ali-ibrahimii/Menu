@@ -188,7 +188,7 @@ export default function CartDrawer() {
         <Button
           size="icon"
           variant="ghost"
-          className="relative h-11 w-11 rounded-full bg-white/10 border border-white/10"
+          className="relative h-11 w-11"
         >
           <ShoppingCart size={20} />
           {getTotalItems() > 0 && (
