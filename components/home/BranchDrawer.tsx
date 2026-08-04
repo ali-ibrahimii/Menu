@@ -108,10 +108,6 @@ export default function BranchDrawer({
         <div className="flex h-full flex-col overflow-hidden">
           {/* هدر */}
           <DrawerHeader className="space-y-0 p-0">
-            <DrawerTitle className="sr-only">Branch Menu</DrawerTitle>
-            <DrawerDescription className="sr-only">
-              Navigation and branch info
-            </DrawerDescription>
 
             <div className="relative px-5 pt-8 pb-5">
               <DrawerClose className="absolute top-4 left-4 sm:top-5 sm:left-5">
@@ -129,7 +125,7 @@ export default function BranchDrawer({
                   <Image
                     src="/logo1.png"
                     alt="Watandar logo"
-                    width={96}
+                    width={86}
                     height={28}
                     className="object-contain dark:opacity-90"
                     priority
