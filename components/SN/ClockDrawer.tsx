@@ -183,13 +183,15 @@ export default function ClockDrawer() {
       </DrawerTrigger>
 
       <DrawerContent
+        className={`max-h-[92vh] rounded-top`}
         dir={language === "en" ? "ltr" : "rtl"}
-        className="h-auto max-h-[80vh] glass-drawer"
       >
         <div className="flex-1 w-full px-8 space-y-4 overflow-y-auto pb-6">
           {/* هدر با نام شعبه */}
           <div className="flex flex-col items-center space-y-2">
-            <h1 className={`font-bold text-xl text-center ${language === "en" ? "" : "font-[BTitr]"} `}>
+            <h1
+              className={`font-bold text-xl text-center ${language === "en" ? "" : "font-[BTitr]"} `}
+            >
               {translationsMap.openHours}
             </h1>
             <Badge variant={statusInfo.color} className="text-xs">
@@ -234,7 +236,9 @@ export default function ClockDrawer() {
                 </>
               ) : (
                 <>
-                  <div className={`text-3xl font-bold dark:text-gray-600 text-gray-800  ${language === "en" ? "font-[Balbek]" : "font-[BTitr]"}`}>
+                  <div
+                    className={`text-3xl font-bold dark:text-gray-600 text-gray-800  ${language === "en" ? "font-[Balbek]" : "font-[BTitr]"}`}
+                  >
                     {translationsMap.closed}
                   </div>
                   <p className="text-sm dark:text-gray-300 text-gray-800">

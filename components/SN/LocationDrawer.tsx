@@ -68,12 +68,11 @@ export default function LocationDrawer() {
         </button>
       </DrawerTrigger>
 
-      <DrawerContent className="h-[50vh] glass-drawer">
+      <DrawerContent className={`max-h-[92vh] rounded-top`}>
         {/* نقشه */}
         <div className="flex-1 relative w-full p-2">
           {mapLoading && (
             <div className="absolute inset-0 flex items-center justify-center z-10">
-
               <Loader />
             </div>
           )}
@@ -86,18 +85,18 @@ export default function LocationDrawer() {
             allowFullScreen
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            className="rounded-4xl"
+            className="rounded-2xl"
             title="موقعیت رستوران وطندار"
             onLoad={() => setMapLoading(false)}
           />
         </div>
 
         {/* اطلاعات موقعیت */}
-        <div className="my-6">
+        <div className="my-6 flex justify-center items-center">
           {/* دکمه مسیریابی هوشمند */}
           <Button
             onClick={handleNavigation}
-            className="w-full py-6 dark:bg-white text-base font-medium"
+            className="w-5/12 py-6 dark:bg-white text-base font-medium"
             size="lg"
           >
             {getButtonIcon()}

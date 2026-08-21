@@ -50,7 +50,7 @@ const SHOP_BRANCH_SLUGS = [
  */
 const theme = {
   drawer:
-    "border-black/10 bg-[#fff8ed]/95 text-slate-950 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/95 dark:text-white",
+    "border-black/10 bg-[#fff8ed]/95 text-slate-950 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-[#09090a] dark:text-white",
   imageCard:
     "border border-black/10 bg-slate-100 shadow-2xl shadow-black/15 dark:border-white/10 dark:bg-slate-900 dark:shadow-black/35",
   pageDecor:
@@ -192,15 +192,11 @@ export default function FoodDetails({
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent className={`h-[92vh] overflow-hidden p-0 ${theme.drawer}`}>
+      <DrawerContent className={`h-[92vh] rounded-top overflow-hidden p-0 ${theme.drawer}`}>
         <div
           dir={isEnglish ? "ltr" : "rtl"}
           className="relative h-full overflow-y-auto scrollbar-hide"
         >
-          {/* Background decoration */}
-          <div
-            className={`pointer-events-none absolute inset-0 -z-10 ${theme.pageDecor}`}
-          />
 
           <div className="grid min-h-full grid-cols-1 gap-0 lg:grid-cols-[1.05fr_0.95fr]">
             {/* Image Area */}
@@ -358,10 +354,6 @@ export default function FoodDetails({
                   <h2
                     className={`mb-2 flex items-center gap-2 text-sm font-black ${theme.strongText}`}
                   >
-                    <ImageIcon
-                      size={16}
-                      className="text-emerald-600 dark:text-emerald-300"
-                    />
                     {descriptionTitle}
                   </h2>
 

@@ -18,7 +18,7 @@ export default function LanguageSwitcher() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon">
-          <Globe className="opacity-60" size={18} />
+          <Globe className="opacity-70" size={18} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="">

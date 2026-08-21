@@ -143,7 +143,7 @@ export default function BranchDrawer({
                   <div className="my-4 flex items-center justify-center gap-3">
                     <span className="h-px w-16 bg-gradient-to-r from-transparent to-emerald-300/70" />
                     <span
-                      className={`inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1.5 text-xs font-bold text-emerald-700 backdrop-blur-md dark:border-emerald-300/20 dark:bg-emerald-400/10 dark:text-emerald-200`}
+                      className={`inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1.5 text-xs text-emerald-700 backdrop-blur-md dark:border-emerald-300/20 dark:bg-emerald-400/10 dark:text-emerald-200`}
                     >
                       <Navigation className="h-3.5 w-3.5" />
                       {branchName}

@@ -202,10 +202,11 @@ export const translations = {
     noActiveBranch: "شعبه فعالی وجود ندارد",
     test: "این یک متن تستی هست در قسمت در ما",
     pleaseTryAgain: "شعبه یافت نشد لطفا دوباره تلاش کنید",
-    description: "وصف",
+    description: "توضیحات",
     guideBranch: "برای دیدن منوی شعبه دیگر، شعبه را تغییر دهید",
     badgeBranches: "اصالت طعم افغانستانی",
     quickActions: "دسترسی سریع",
+    ingredients: "مواد تشکیل دهنده",
   },
 
   ar: {
@@ -410,10 +411,11 @@ export const translations = {
     noActiveBranch: "No Active Branch",
     test: "این یک متن تستی هست در قسمت در ما",
     pleaseTryAgain: "لطفا دوباره تلاش کنید",
-    description: "توضیحات",
+    description: "وصف",
     guideBranch: "لرؤية قائمة فرع آخر، يرجى تغيير الفرع",
     badgeBranches: "اصالت طعم افغانستانی",
     quickActions: "إجراءات سريعة",
+    ingredients: "مكونات",
   },
 
   en: {
@@ -622,6 +624,7 @@ export const translations = {
     guideBranch: "To view the menu of another branch, please change the branch",
     badgeBranches: "Authentic Afghan Taste",
     quickActions: "Quick Actions",
+    ingredients: "Ingredints",
   },
 };
 // Types برای امنیت
