@@ -340,7 +340,13 @@ export default function AboutPage() {
                       </div>
                       <div className="flex gap-2">
                         <Clock size={16} className="text-slate-400" />
-                        <span>{language === "fa" ? "هر روز 8:00 - 23:00" : language === "ar" ? "كل يوم 8:00 - 23:00" : "Every day 8:00 - 23:00"}</span>
+                        <span>
+                          {language === "fa"
+                            ? "هر روز 8:00 - 23:00"
+                            : language === "ar"
+                              ? "كل يوم 8:00 - 23:00"
+                              : "Every day 8:00 - 23:00"}
+                        </span>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2 pt-2">
@@ -348,14 +354,24 @@ export default function AboutPage() {
                         href={`tel:${(branch as any).phone_1 || ""}`}
                         className="h-10 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 flex items-center justify-center gap-1.5 text-sm font-bold"
                       >
-                        <Phone size={16} /> {language === "fa" ? "تماس" : language === "ar" ? "اتصال" : "Call"}
+                        <Phone size={16} />{" "}
+                        {language === "fa"
+                          ? "تماس"
+                          : language === "ar"
+                            ? "اتصال"
+                            : "Call"}
                       </a>
                       <a
                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((branch as any).address_fa || branch.name_fa)}`}
                         target="_blank"
                         className="h-10 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-slate-900 flex items-center justify-center gap-1.5 text-sm font-bold"
                       >
-                        <Navigation size={16} /> {language === "fa" ? "مسیر" : language === "ar" ? "الطريق" : "Directions"}
+                        <Navigation size={16} />{" "}
+                        {language === "fa"
+                          ? "مسیر"
+                          : language === "ar"
+                            ? "الطريق"
+                            : "Directions"}
                       </a>
                     </div>
                   </div>
@@ -375,10 +391,10 @@ export default function AboutPage() {
                   alt="مدیر"
                   className="h-full w-full object-cover"
                 />
-              ) : managerInfo?.manager_name ? (
-                managerInfo.manager_name.charAt(0)
+              ) : managerInfo?.manager_name_fa ? (
+                managerInfo.manager_name_fa.charAt(0)
               ) : (
-                "W"
+                "Vafa"
               )}
             </div>
             <div className="flex-1 space-y-3">
@@ -386,11 +402,18 @@ export default function AboutPage() {
                 <h3 className="text-lg font-black">
                   {loadingManager
                     ? "در حال بارگذاری..."
-                    : managerInfo?.manager_name || "مدیریت رستوران وطندار"}
+                    : language === "fa"
+                      ? managerInfo?.manager_name_fa || "مدیر"
+                      : language === "ar"
+                        ? managerInfo?.manager_name_ar || "المدير"
+                        : managerInfo?.manager_name_en || "Manager"}
                 </h3>
                 <p className={`text-sm ${theme.muted} mt-1`}>
-                  {managerInfo?.manager_description ||
-                    "برای پیشنهادات با مدیریت در ارتباط باشید"}
+                  {language === "fa"
+                    ? managerInfo?.manager_description_fa
+                    : language === "ar"
+                      ? managerInfo?.manager_description_ar
+                      : managerInfo?.manager_description_en}
                 </p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -440,14 +463,23 @@ export default function AboutPage() {
                   href={`tel:${managerInfo?.manager_number || ""}`}
                   className="rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-5 h-10 flex items-center gap-2 text-sm font-bold"
                 >
-                  <Phone size={16} /> {language === "fa" ? "تماس" : language === "ar" ? "اتصال" : "Call"}
+                  <Phone size={16} />{" "}
+                  {language === "fa"
+                    ? "تماس"
+                    : language === "ar"
+                      ? "اتصال"
+                      : "Call"}
                 </a>
                 <a
                   href={`https://wa.me/${managerInfo?.manager_number || ""}`}
                   target="_blank"
                   className="rounded-full border border-black/10 dark:border-white/10 bg-white dark:bg-slate-900 px-5 h-10 flex items-center gap-2 text-sm font-bold"
                 >
-                  {language === "fa" ? "واتساپ" : language === "ar" ? "واتساب" : "WhatsApp"}
+                  {language === "fa"
+                    ? "واتساپ"
+                    : language === "ar"
+                      ? "واتساب"
+                      : "WhatsApp"}
                 </a>
               </div>
             </div>
@@ -466,7 +498,11 @@ export default function AboutPage() {
             href="/menu"
             className="mt-5 inline-flex h-12 items-center justify-center rounded-full bg-white px-8 text-sm font-bold text-emerald-700"
           >
-            {language === "fa" ? "مشاهده منو" : language === "ar" ? "عرض القائمة" : "View Menu"}
+            {language === "fa"
+              ? "مشاهده منو"
+              : language === "ar"
+                ? "عرض القائمة"
+                : "View Menu"}
           </Link>
         </div>
       </div>
