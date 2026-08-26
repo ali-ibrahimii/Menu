@@ -51,8 +51,8 @@ interface BranchDrawerProps {
 
 const theme = {
   drawer:
-    "bg-[#fff8ed] text-slate-900 dark:bg-slate-950 dark:text-white border-r border-black/10 dark:border-white/10",
-  card: "rounded-2xl border border-black/10 bg-white/80 dark:border-white/10 dark:bg-slate-900/60 backdrop-blur",
+    "bg-white text-slate-900 dark:bg-black dark:text-white border-r border-black/10 dark:border-white/10",
+  card: "rounded-2xl border border-black/10 bg-accent dark:border-white/10 dark:bg-[#0a0908] backdrop-blur",
   muted: "text-slate-500 dark:text-slate-400",
   navItem:
     "group flex items-center justify-between rounded-xl px-4 py-3.5 text-[14px] font-medium transition-all hover:bg-black/[0.04] dark:hover:bg-white/[0.06] active:scale-[0.98]",
@@ -108,35 +108,33 @@ export default function BranchDrawer({
         <div className="flex h-full flex-col overflow-hidden">
           {/* هدر */}
           <DrawerHeader className="space-y-0 p-0">
-            <DrawerTitle className="sr-only">Branch Menu</DrawerTitle>
-            <DrawerDescription className="sr-only">
-              Navigation and branch info
-            </DrawerDescription>
 
             <div className="relative px-5 pt-8 pb-5">
               <DrawerClose className="absolute top-4 left-4 sm:top-5 sm:left-5">
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-9 w-9 rounded-xl bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15"
+                  className={`h-9 w-9 ${theme.card} rounded-lg hover:bg-black/10 dark:hover:bg-white/15`}
                 >
                   <X size={18} />
                 </Button>
               </DrawerClose>
 
               <div className="flex flex-col items-center gap-4">
-                <div className="rounded-[1.5rem] border border-black/10 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-slate-900">
+                <div className={`rounded-[1.5rem] border border-black/10 ${theme.card} bg-white p-3 shadow-sm dark:border-white/10`}>
                   <Image
                     src="/logo1.png"
                     alt="Watandar logo"
-                    width={96}
+                    width={86}
                     height={28}
                     className="object-contain dark:opacity-90"
                     priority
                   />
                 </div>
                 <div className="text-center">
-                  <h1 className={`text-2xl font-black ${language === "en" ? "font-[Balbek]" : "font-[BTitr]"} tracking-tight`}>
+                  <h1
+                    className={`text-2xl font-black ${language === "en" ? "font-[Balbek]" : "font-[BTitr]"} tracking-tight`}
+                  >
                     {t("restaurantName") || "وطندار"}
                   </h1>
                   <p className={`mt-2 text-xs ${theme.muted}`}>
@@ -145,7 +143,7 @@ export default function BranchDrawer({
                   <div className="my-4 flex items-center justify-center gap-3">
                     <span className="h-px w-16 bg-gradient-to-r from-transparent to-emerald-300/70" />
                     <span
-                      className={`inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-700 backdrop-blur-md dark:border-emerald-300/20 dark:bg-emerald-400/10 dark:text-emerald-200`}
+                      className={`inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1.5 text-xs text-emerald-700 backdrop-blur-md dark:border-emerald-300/20 dark:bg-emerald-400/10 dark:text-emerald-200`}
                     >
                       <Navigation className="h-3.5 w-3.5" />
                       {branchName}
@@ -164,7 +162,7 @@ export default function BranchDrawer({
               <p className="px-2 text-[11px] font-bold tracking-widest opacity-40">
                 {t("quickActions")}
               </p>
-              <div className="space-y-1">
+              <div dir={isRTL ? "rtl" : "ltr"} className="space-y-1">
                 {navLinks.map((link) => (
                   <Link
                     key={link.href}

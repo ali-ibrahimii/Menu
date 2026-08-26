@@ -23,11 +23,11 @@ export default function HomeContent() {
    * ساختار، فاصله‌ها، سایزها و layout تغییر نکرده‌اند.
    */
   const theme = {
-    page: "bg-[#fff8ed] text-slate-950 dark:bg-slate-950 dark:text-white transition-colors duration-500",
+    page: "bg-white text-slate-950 dark:bg-black dark:text-white transition-colors duration-500",
     panel:
       "border border-black/10 bg-white/75 shadow-xl shadow-emerald-950/5 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.055] dark:shadow-black/30",
     mutedText: "text-white/80 dark:text-white/80",
-    strongText: "text-slate-950 dark:text-white",
+    strongText: "text-slate-600 dark:text-white",
     iconBox:
       "border border-emerald-500/15 bg-emerald-500/10 text-emerald-700 dark:border-emerald-300/15 dark:bg-emerald-400/10 dark:text-emerald-300",
     accentButton:
@@ -42,7 +42,7 @@ export default function HomeContent() {
       >
         <div className="flex justify-center items-center flex-col">
           <Loader />
-          <p className={`mt-3 text-sm font-medium ${theme.mutedText}`}>
+          <p className={`mt-3 text-sm font-medium ${theme.strongText}`}>
             {t("loading")}
           </p>
         </div>

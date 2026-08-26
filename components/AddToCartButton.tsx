@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus, ShoppingCart } from "lucide-react";
 import { useCartStore, CartItem } from "@/stores/cartStore";
-import { Food } from "@/types";
+import type { Food } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/translations/translation";
 
@@ -33,8 +33,8 @@ export default function AddToCartButton({
     const cartItem: Omit<CartItem, "quantity"> = {
       id: food.id,
       name_fa: food.name_fa,
-      name_ar: food.name_ar,
-      name_en: food.name_en,
+      name_ar: food.name_ar!,
+      name_en: food.name_en!,
       price: food.price,
       image_url: food.image_url,
     };

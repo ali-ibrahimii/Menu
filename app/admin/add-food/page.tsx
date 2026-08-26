@@ -16,8 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
-// تایپ‌ها از پوشه مرکزی - طبق ساختار جدید
-import type { Branch, FoodFormState } from "@/types";
+// تایپ‌ها از پوشه مرکزی
+import type { Branch, FoodFormState, Category } from "@/types";
 
 const INITIAL_FORM_STATE: FoodFormState = {
   name_fa: "",
@@ -39,9 +39,8 @@ const INITIAL_FORM_STATE: FoodFormState = {
   tags: "",
 };
 
-// تم - فقط روشن/تاریک، بدون کد اضافه
 const theme = {
-  page: "min-h-screen w-full bg-[#fff8ed] text-slate-900 dark:bg-slate-950 dark:text-white transition-colors duration-500",
+  page: "min-h-screen w-full bg-white text-slate-900 dark:bg-black dark:text-white transition-colors duration-500",
   container: "mx-auto w-full max-w-5xl",
   card: "rounded-[1.5rem] border border-black/[0.08] bg-white/90 shadow-sm dark:border-white/10 dark:bg-slate-900/70",
   cardHeader: "border-b border-black/5 dark:border-white/10 pb-3",
@@ -65,10 +64,13 @@ export default function AddFoodPage() {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [category, setCategory] = useState("");
   const [branches, setBranches] = useState<Branch[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [form, setForm] = useState<FoodFormState>(INITIAL_FORM_STATE);
 
   useEffect(() => {
     fetchBranches();
+    fetchCategories();
   }, []);
 
   const fetchBranches = async () => {
@@ -77,12 +79,29 @@ export default function AddFoodPage() {
         .from("branches")
         .select("id, name_fa, slug, name_ar, name_en, is_active")
         .order("created_at");
-
       if (error) throw error;
       setBranches((data as Branch[]) || []);
       if (data?.length === 0) toast.warning("ابتدا باید شعبه‌ای ایجاد کنید");
     } catch {
       toast.error("خطا در دریافت شعب");
+    }
+  };
+
+  const fetchCategories = async () => {
+    setLoadingCategories(true);
+    try {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, name, name_ar, slug")
+        .order("name", { ascending: false });
+      if (error) throw error;
+      setCategories((data as Category[]) || []);
+      console.log("✅ دسته‌بندی‌ها از Supabase:", data);
+    } catch (err: any) {
+      console.error("خطا در دریافت دسته‌بندی‌ها:", err.message);
+      toast.error("خطا در دریافت دسته‌بندی‌ها");
+    } finally {
+      setLoadingCategories(false);
     }
   };
 
@@ -142,6 +161,11 @@ export default function AddFoodPage() {
 
     setLoading(true);
     try {
+      // پیدا کردن دسته انتخاب شده برای ذخیره slug و id
+      const selectedCat = categories.find(
+        (c) => c.id === category || c.slug === category,
+      );
+
       const payload = {
         name_fa: form.name_fa.trim(),
         name_ar: form.name_ar.trim() || form.name_fa.trim(),
@@ -152,7 +176,8 @@ export default function AddFoodPage() {
         price: Number(form.price),
         image_url: imageUrls[0],
         images: imageUrls,
-        category,
+        category: selectedCat?.slug || category, // مثل "Afghan foods"
+        category_id: selectedCat?.id || null, // id واقعی از جدول categories
         branch_id: form.branch_id,
         cooking_time: form.cooking_time ? Number(form.cooking_time) : null,
         serves: form.serves ? Number(form.serves) : null,
@@ -194,12 +219,11 @@ export default function AddFoodPage() {
             افزودن غذای جدید
           </h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            فقط ادمین - فارسی
+            دسته‌بندی‌ها از جدول categories سوپابیس میاد
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* تصاویر */}
           <div className={`${theme.card} p-4 sm:p-6 space-y-5`}>
             <h2
               className={`${theme.cardHeader} font-bold text-emerald-700 dark:text-emerald-300`}
@@ -326,7 +350,6 @@ export default function AddFoodPage() {
             </div>
           </div>
 
-          {/* قیمت و دسته */}
           <div className={`${theme.card} p-4 sm:p-6 space-y-5`}>
             <h2
               className={`${theme.cardHeader} font-bold text-blue-600 dark:text-blue-300`}
@@ -379,20 +402,36 @@ export default function AddFoodPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className={theme.label}>دسته‌بندی *</Label>
+                <Label className={theme.label}>
+                  دسته‌بندی *{" "}
+                  {loadingCategories && (
+                    <span className="text-xs opacity-50">
+                      (در حال بارگذاری از Supabase...)
+                    </span>
+                  )}
+                </Label>
                 <Select value={category} onValueChange={setCategory} required>
                   <SelectTrigger className={theme.selectTrigger}>
-                    <SelectValue placeholder="انتخاب دسته" />
+                    <SelectValue
+                      placeholder={
+                        loadingCategories
+                          ? "در حال بارگذاری..."
+                          : "انتخاب دسته‌بندی"
+                      }
+                    />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Afghan foods">غذای افغانی</SelectItem>
-                    <SelectItem value="Iranian foods">غذای ایرانی</SelectItem>
-                    <SelectItem value="Drinks">دمنوش</SelectItem>
-                    <SelectItem value="Dessert">دسر</SelectItem>
-                    <SelectItem value="Cold drinks">نوشیدنی سرد</SelectItem>
-                    <SelectItem value="Hot drinks">نوشیدنی گرم</SelectItem>
-                    <SelectItem value="Breakfast">صبحانه</SelectItem>
-                    <SelectItem value="Coffee-based drinks">قهوه</SelectItem>
+                  <SelectContent className="dark:bg-slate-900 dark:border-white/10">
+                    {categories.length === 0 && !loadingCategories ? (
+                      <SelectItem value="Afghan foods" disabled>
+                        دسته‌ای یافت نشد
+                      </SelectItem>
+                    ) : (
+                      categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -413,7 +452,7 @@ export default function AddFoodPage() {
                       }
                     />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="dark:bg-slate-900 dark:border-white/10">
                     {branches.map((b) => (
                       <SelectItem key={b.id} value={b.id}>
                         {b.name_fa}
@@ -426,7 +465,7 @@ export default function AddFoodPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label className={theme.label}>مواد تشکیل‌دهنده فارسی</Label>
+                <Label className={theme.label}>مواد فارسی</Label>
                 <Textarea
                   name="ingredients_fa"
                   value={form.ingredients_fa}
@@ -459,7 +498,6 @@ export default function AddFoodPage() {
             </div>
           </div>
 
-          {/* وضعیت */}
           <div className={`${theme.card} p-4 sm:p-6 space-y-4`}>
             <h2
               className={`${theme.cardHeader} font-bold text-purple-600 dark:text-purple-300`}

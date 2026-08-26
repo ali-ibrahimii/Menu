@@ -158,7 +158,10 @@ export default function PhoneDrawer() {
         </button>
       </DrawerTrigger>
 
-      <DrawerContent className="dark:text-white border glass-drawer max-h-[80vh]">
+      <DrawerContent
+        className={`max-h-[92vh] rounded-top`}
+        dir={language === "en" ? "ltr" : "rtl"}
+      >
         <div className="w-full px-8 pb-6">
           {/* هدر ساده */}
           <div className="flex items-center justify-center mb-4">

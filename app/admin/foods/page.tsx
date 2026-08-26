@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   XCircle,
   TrendingUp,
+  Store,
 } from "lucide-react";
 import {
   Table,
@@ -57,37 +58,19 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-type Food = {
-  id: string;
-  name_fa: string;
-  name_ar: string;
-  name_en: string;
-  price: number;
-  image_url: string;
-  category_id: string;
-  is_available: boolean;
-  description_fa: string;
-  description_ar: string;
-  description_en: string;
-  created_at: string;
-  updated_at: string;
-};
-
-type SortConfig = {
-  key: keyof Food;
-  direction: "asc" | "desc";
-};
+// ✅ تایپ‌ها از پوشه مرکزی
+import type { Food, Category, Branch } from "@/types";
+import type { SortConfig } from "@/types";
 
 const PLACEHOLDER_IMAGE =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='55' font-size='12' text-anchor='middle' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E";
 
-// تم اصلی پروژه - روشن / تاریک
 const theme = {
   page: "min-h-screen w-full bg-[#fff8ed] text-slate-900 dark:bg-slate-950 dark:text-white transition-colors duration-500",
   headerCard:
     "relative overflow-hidden rounded-[1.75rem] bg-gradient-to-l from-emerald-600 via-emerald-600 to-teal-600 p-6 sm:p-8 md:p-10 shadow-xl shadow-emerald-600/20 dark:from-emerald-600 dark:via-emerald-700 dark:to-teal-700 dark:shadow-black/30",
   statCard:
-    "rounded-[1.25rem] border border-black/[0.06] bg-white/90 backdrop-blur-sm shadow-sm transition-all hover:shadow-md dark:border-white/10 dark:bg-slate-900/70 dark:hover:bg-slate-900",
+    "rounded-[1.25rem] border border-black/[0.06] bg-white/90 backdrop-blur-sm shadow-sm dark:border-white/10 dark:bg-slate-900/70",
   filterCard:
     "rounded-[1.25rem] border border-black/[0.06] bg-white/90 backdrop-blur-sm shadow-sm dark:border-white/10 dark:bg-slate-900/70",
   tableCard:
@@ -101,62 +84,87 @@ export default function AdminFoodsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [branchFilter, setBranchFilter] = useState<string>("all");
   const [availabilityFilter, setAvailabilityFilter] = useState<string>("all");
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    key: "created_at",
+    key: "created_at" as keyof Food,
     direction: "desc",
   });
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     foodId: string | null;
-  }>({
-    open: false,
-    foodId: null,
-  });
+  }>({ open: false, foodId: null });
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [previewDialog, setPreviewDialog] = useState(false);
-  const [categories, setCategories] = useState<
-    { id: string; name_fa: string }[]
-  >([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
 
   useEffect(() => {
     fetchFoods();
     fetchCategories();
+    fetchBranches();
   }, []);
 
   useEffect(() => {
     let result = [...foods];
 
     if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase();
       result = result.filter(
-        (food) =>
-          food.name_fa?.toLowerCase().includes(query) ||
-          food.name_en?.toLowerCase().includes(query) ||
-          food.description_fa?.toLowerCase().includes(query) ||
-          food.price.toString().includes(query),
+        (f) =>
+          String(f.name_fa ?? "")
+            .toLowerCase()
+            .includes(q) ||
+          String(f.name_en ?? "")
+            .toLowerCase()
+            .includes(q) ||
+          String(f.name_ar ?? "")
+            .toLowerCase()
+            .includes(q) ||
+          String(f.description_fa ?? "")
+            .toLowerCase()
+            .includes(q) ||
+          String(f.price ?? "")
+            .toString()
+            .includes(q),
       );
     }
 
     if (categoryFilter !== "all") {
-      result = result.filter((food) => food.category_id === categoryFilter);
+      result = result.filter(
+        (f) =>
+          f.category_id === categoryFilter || f.category === categoryFilter,
+      );
+    }
+
+    if (branchFilter !== "all") {
+      result = result.filter((f) => f.branch_id === branchFilter);
     }
 
     if (availabilityFilter !== "all") {
-      const isAvailable = availabilityFilter === "available";
-      result = result.filter((food) => food.is_available === isAvailable);
+      const isAv = availabilityFilter === "available";
+      result = result.filter((f) => Boolean(f.is_available) === isAv);
     }
 
     result.sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
-      if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+      const av = (a as any)[sortConfig.key];
+      const bv = (b as any)[sortConfig.key];
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      if (av < bv) return sortConfig.direction === "asc" ? -1 : 1;
+      if (av > bv) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;
     });
 
     setFilteredFoods(result);
-  }, [foods, searchQuery, categoryFilter, availabilityFilter, sortConfig]);
+  }, [
+    foods,
+    searchQuery,
+    categoryFilter,
+    branchFilter,
+    availabilityFilter,
+    sortConfig,
+  ]);
 
   const fetchFoods = async () => {
     setLoading(true);
@@ -165,11 +173,9 @@ export default function AdminFoodsPage() {
         .from("foods")
         .select("*")
         .order("created_at", { ascending: false });
-
       if (error) throw error;
-      setFoods(data || []);
-    } catch (error) {
-      console.error("Error fetching foods:", error);
+      setFoods((data as Food[]) || []);
+    } catch {
       toast.error("خطا در دریافت لیست غذاها");
     } finally {
       setLoading(false);
@@ -180,13 +186,20 @@ export default function AdminFoodsPage() {
     try {
       const { data } = await supabase
         .from("categories")
-        .select("id, name_fa")
-        .order("name_fa");
+        .select("id, name, name_ar, slug, order_number")
+        .order("order_number", { ascending: true });
+      setCategories((data as Category[]) || []);
+    } catch {}
+  };
 
-      setCategories(data || []);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
+  const fetchBranches = async () => {
+    try {
+      const { data } = await supabase
+        .from("branches")
+        .select("id, name_fa, slug")
+        .order("name_fa");
+      setBranches((data as Branch[]) || []);
+    } catch {}
   };
 
   const handleDelete = async () => {
@@ -196,31 +209,27 @@ export default function AdminFoodsPage() {
         .from("foods")
         .delete()
         .eq("id", deleteDialog.foodId);
-
       if (error) throw error;
-      toast.success("غذا با موفقیت حذف شد");
+      toast.success("غذا حذف شد");
       fetchFoods();
-    } catch (error) {
-      console.error("Error deleting food:", error);
-      toast.error("خطا در حذف غذا");
+    } catch {
+      toast.error("خطا در حذف");
     } finally {
       setDeleteDialog({ open: false, foodId: null });
     }
   };
 
-  const toggleAvailability = async (foodId: string, currentStatus: boolean) => {
+  const toggleAvailability = async (foodId: string, current: boolean) => {
     try {
       const { error } = await supabase
         .from("foods")
-        .update({ is_available: !currentStatus })
+        .update({ is_available: !current })
         .eq("id", foodId);
-
       if (error) throw error;
-      toast.success(`غذا ${!currentStatus ? "فعال" : "غیرفعال"} شد`);
+      toast.success(`غذا ${!current ? "فعال" : "غیرفعال"} شد`);
       fetchFoods();
-    } catch (error) {
-      console.error("Error updating availability:", error);
-      toast.error("خطا در بروزرسانی وضعیت");
+    } catch {
+      toast.error("خطا در بروزرسانی");
     }
   };
 
@@ -232,12 +241,20 @@ export default function AdminFoodsPage() {
   };
 
   const getCategoryName = (categoryId: string) => {
-    const category = categories.find((c) => c.id === categoryId);
-    return category ? category.name_fa : "بدون دسته‌بندی";
+    const cat = categories.find(
+      (c) => c.id === categoryId || c.slug === categoryId,
+    );
+    return cat
+      ? (cat as any).name_fa || cat.name || cat.slug
+      : "بدون دسته‌بندی";
   };
 
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("fa-IR");
+  const getBranchName = (branchId: string) => {
+    const b = branches.find((x) => x.id === branchId);
+    return b ? b.name_fa : "همه شعب";
+  };
+
+  const formatDate = (d: string) => new Date(d).toLocaleDateString("fa-IR");
 
   const getSortIcon = (key: keyof Food) => {
     if (sortConfig.key !== key)
@@ -252,8 +269,22 @@ export default function AdminFoodsPage() {
   const resetFilters = () => {
     setSearchQuery("");
     setCategoryFilter("all");
+    setBranchFilter("all");
     setAvailabilityFilter("all");
   };
+
+  // آمار بر اساس فیلتر شعبه
+  const statsByBranch = useMemo(() => {
+    const inBranch =
+      branchFilter === "all"
+        ? foods
+        : foods.filter((f) => f.branch_id === branchFilter);
+    return {
+      total: inBranch.length,
+      active: inBranch.filter((f) => f.is_available).length,
+      inactive: inBranch.filter((f) => !f.is_available).length,
+    };
+  }, [foods, branchFilter]);
 
   if (loading && foods.length === 0) {
     return (
@@ -265,8 +296,7 @@ export default function AdminFoodsPage() {
             <div className="absolute inset-0 rounded-full border-4 border-emerald-200/50 dark:border-white/10" />
             <div className="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin" />
           </div>
-          <p className="font-semibold text-lg">در حال بارگذاری غذاها...</p>
-          <p className={`text-sm mt-2 ${theme.mutedText}`}>لطفا صبر کنید</p>
+          <p className="font-semibold text-lg">در حال بارگذاری...</p>
         </div>
       </div>
     );
@@ -279,35 +309,31 @@ export default function AdminFoodsPage() {
         <div className={theme.headerCard}>
           <div className="absolute -top-20 -left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
           <div className="absolute -bottom-16 -right-16 w-72 h-72 bg-white/10 rounded-full blur-3xl" />
-
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl border border-white/20 shadow-lg sm:p-4">
-                <UtensilsCrossed className="w-7 h-7 text-white sm:w-8 sm:h-8" />
+              <div className="p-3.5 bg-white/20 backdrop-blur-md rounded-2xl border border-white/20 shadow-lg">
+                <UtensilsCrossed className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white drop-shadow">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white">
                   مدیریت غذاها
                 </h1>
-                <p className="text-white/90 mt-1.5 text-sm sm:text-base">
-                  مشاهده و مدیریت تمام غذاهای منو
+                <p className="text-white/90 mt-1 text-sm">
+                  فیلتر بر اساس شعبه و دسته‌بندی
                 </p>
               </div>
             </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex gap-3">
               <Button
                 onClick={fetchFoods}
                 variant="secondary"
-                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white/20 text-white border border-white/30 hover:bg-white/30 backdrop-blur-md"
+                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 backdrop-blur-md"
               >
-                <RefreshCw size={18} />
-                بروزرسانی
+                <RefreshCw size={18} /> بروزرسانی
               </Button>
-              <Link href="/admin/add-food" className="w-full sm:w-auto">
-                <Button className="w-full flex items-center justify-center gap-2 bg-white text-emerald-700 hover:bg-white/95 font-bold shadow-lg">
-                  <Plus size={18} />
-                  افزودن غذا جدید
+              <Link href="/admin/add-food">
+                <Button className="bg-white text-emerald-700 hover:bg-white/95 font-bold shadow-lg">
+                  <Plus size={18} /> افزودن غذا
                 </Button>
               </Link>
             </div>
@@ -315,45 +341,45 @@ export default function AdminFoodsPage() {
         </div>
 
         {/* آمار */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             title="کل غذاها"
-            value={foods.length}
+            value={statsByBranch.total}
             icon={<UtensilsCrossed className="w-6 h-6 text-blue-500" />}
-            iconBg="bg-blue-500/10 dark:bg-blue-400/10"
+            iconBg="bg-blue-500/10"
           />
           <StatCard
-            title="غذاهای فعال"
-            value={foods.filter((f) => f.is_available).length}
+            title="فعال"
+            value={statsByBranch.active}
             icon={<CheckCircle2 className="w-6 h-6 text-emerald-500" />}
-            iconBg="bg-emerald-500/10 dark:bg-emerald-400/10"
+            iconBg="bg-emerald-500/10"
             valueColor="text-emerald-600 dark:text-emerald-300"
           />
           <StatCard
-            title="غذاهای غیرفعال"
-            value={foods.filter((f) => !f.is_available).length}
+            title="غیرفعال"
+            value={statsByBranch.inactive}
             icon={<XCircle className="w-6 h-6 text-red-400" />}
-            iconBg="bg-red-500/10 dark:bg-red-400/10"
-            valueColor="text-red-500 dark:text-red-300"
+            iconBg="bg-red-500/10"
+            valueColor="text-red-500"
           />
           <StatCard
-            title="نتایج جستجو"
+            title="نتایج فیلتر"
             value={filteredFoods.length}
             icon={<TrendingUp className="w-6 h-6 text-purple-500" />}
-            iconBg="bg-purple-500/10 dark:bg-purple-400/10"
-            valueColor="text-purple-600 dark:text-purple-300"
+            iconBg="bg-purple-500/10"
           />
         </div>
 
-        {/* فیلترها */}
+        {/* فیلترها - جدید با شعبه */}
         <Card className={theme.filterCard}>
           <CardContent className="p-4 sm:p-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-              <div className="md:col-span-5">
+              {/* جستجو */}
+              <div className="md:col-span-3">
                 <div className="relative">
                   <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500 h-5 w-5" />
                   <Input
-                    placeholder="جستجو در غذاها..."
+                    placeholder="جستجو نام، قیمت..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pr-12 bg-white dark:bg-slate-900 border-black/10 dark:border-white/10"
@@ -361,6 +387,7 @@ export default function AdminFoodsPage() {
                 </div>
               </div>
 
+              {/* فیلتر دسته‌بندی */}
               <div className="md:col-span-3">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -369,12 +396,9 @@ export default function AdminFoodsPage() {
                       className="w-full justify-between bg-white dark:bg-slate-900 border-black/10 dark:border-white/10"
                     >
                       <span className="flex items-center truncate">
-                        <Filter
-                          size={16}
-                          className="ml-2 shrink-0 text-emerald-500"
-                        />
+                        <Filter size={14} className="ml-2 text-emerald-500" />
                         {categoryFilter === "all"
-                          ? "همه دسته‌بندی‌ها"
+                          ? "همه دسته‌ها"
                           : getCategoryName(categoryFilter)}
                       </span>
                       <ChevronDown className="h-4 w-4 opacity-50" />
@@ -386,18 +410,54 @@ export default function AdminFoodsPage() {
                     <DropdownMenuItem onClick={() => setCategoryFilter("all")}>
                       همه دسته‌بندی‌ها
                     </DropdownMenuItem>
-                    {categories.map((category) => (
+                    {categories.map((cat) => (
                       <DropdownMenuItem
-                        key={category.id}
-                        onClick={() => setCategoryFilter(category.id)}
+                        key={cat.id}
+                        onClick={() => setCategoryFilter(cat.id)}
                       >
-                        {category.name_fa}
+                        {(cat as any).name_fa || cat.name}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
 
+              {/* فیلتر شعبه - جدید */}
+              <div className="md:col-span-3">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between bg-white dark:bg-slate-900 border-black/10 dark:border-white/10"
+                    >
+                      <span className="flex items-center truncate">
+                        <Store size={14} className="ml-2 text-blue-500" />
+                        {branchFilter === "all"
+                          ? "همه شعبه‌ها"
+                          : getBranchName(branchFilter)}
+                      </span>
+                      <ChevronDown className="h-4 w-4 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="start">
+                    <DropdownMenuLabel>شعبه</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setBranchFilter("all")}>
+                      همه شعبه‌ها
+                    </DropdownMenuItem>
+                    {branches.map((b) => (
+                      <DropdownMenuItem
+                        key={b.id}
+                        onClick={() => setBranchFilter(b.id)}
+                      >
+                        {b.name_fa}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* فیلتر وضعیت */}
               <div className="md:col-span-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -405,12 +465,12 @@ export default function AdminFoodsPage() {
                       variant="outline"
                       className="w-full justify-between bg-white dark:bg-slate-900 border-black/10 dark:border-white/10"
                     >
-                      <span className="truncate">
+                      <span className="truncate text-sm">
                         {availabilityFilter === "all"
                           ? "همه وضعیت‌ها"
                           : availabilityFilter === "available"
                             ? "فقط فعال"
-                            : "فقط غیرفعال"}
+                            : "غیرفعال"}
                       </span>
                       <ChevronDown className="h-4 w-4 opacity-50" />
                     </Button>
@@ -429,161 +489,124 @@ export default function AdminFoodsPage() {
                     <DropdownMenuItem
                       onClick={() => setAvailabilityFilter("unavailable")}
                     >
-                      فقط غیرفعال
+                      غیرفعال
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
 
-              <div className="md:col-span-2">
+              <div className="md:col-span-1">
                 <Button
                   variant="outline"
                   className="w-full border-black/10 dark:border-white/10"
                   onClick={resetFilters}
                 >
-                  حذف فیلترها
+                  حذف
                 </Button>
               </div>
             </div>
+
+            {(branchFilter !== "all" || categoryFilter !== "all") && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {branchFilter !== "all" && (
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-50 dark:bg-blue-950 border-blue-200 text-blue-700"
+                  >
+                    <Store size={12} className="ml-1" /> شعبه:{" "}
+                    {getBranchName(branchFilter)}{" "}
+                    <button
+                      onClick={() => setBranchFilter("all")}
+                      className="mr-2 text-blue-500"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {categoryFilter !== "all" && (
+                  <Badge
+                    variant="outline"
+                    className="bg-emerald-50 dark:bg-emerald-950 border-emerald-200 text-emerald-700"
+                  >
+                    دسته: {getCategoryName(categoryFilter)}{" "}
+                    <button
+                      onClick={() => setCategoryFilter("all")}
+                      className="mr-2"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* جدول - دسکتاپ + کارت - موبایل */}
+        {/* جدول */}
         <Card className={theme.tableCard}>
           <CardHeader className="border-b border-black/5 dark:border-white/10 p-4 sm:p-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle className="text-xl">لیست غذاها</CardTitle>
-                <CardDescription>
-                  نمایش {filteredFoods.length} از {foods.length}
-                </CardDescription>
-              </div>
-            </div>
+            <CardTitle>لیست غذاها ({filteredFoods.length})</CardTitle>
+            <CardDescription>
+              فیلتر:{" "}
+              {branchFilter !== "all"
+                ? `شعبه ${getBranchName(branchFilter)}`
+                : "همه شعبه‌ها"}{" "}
+              •{" "}
+              {categoryFilter !== "all"
+                ? `دسته ${getCategoryName(categoryFilter)}`
+                : "همه دسته‌ها"}
+            </CardDescription>
           </CardHeader>
-
           <CardContent className="p-0">
             {filteredFoods.length === 0 ? (
-              <div className="text-center py-16 px-4">
-                <div className="mx-auto w-20 h-20 rounded-full bg-slate-100 dark:bg-white/5 border border-black/5 dark:border-white/10 flex items-center justify-center mb-4">
-                  <UtensilsCrossed className="w-10 h-10 text-slate-400" />
-                </div>
-                <p className="text-lg font-semibold">هیچ غذایی یافت نشد</p>
-                <p className={`text-sm mt-1 ${theme.mutedText}`}>
-                  {searchQuery
-                    ? "عبارت جستجو رو عوض کن"
-                    : "اولین غذا را اضافه کنید"}
-                </p>
+              <div className="text-center py-16">
+                <UtensilsCrossed className="mx-auto w-10 h-10 opacity-20 mb-3" />
+                <p>غذایی با این فیلتر یافت نشد</p>
               </div>
             ) : (
               <>
-                {/* MOBILE CARDS */}
-                <div className="grid grid-cols-1 gap-3 p-4 sm:p-4 md:hidden">
+                {/* موبایل */}
+                <div className="grid grid-cols-1 gap-3 p-4 md:hidden">
                   {filteredFoods.map((food) => (
                     <div
                       key={food.id}
                       className="rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-slate-900 p-3 flex gap-3"
                     >
-                      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-black/10 dark:border-white/10">
-                        <img
-                          src={food.image_url || PLACEHOLDER_IMAGE}
-                          alt={food.name_fa}
-                          className="h-full w-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = PLACEHOLDER_IMAGE;
-                          }}
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
+                      <img
+                        src={food.image_url || PLACEHOLDER_IMAGE}
+                        alt={food.name_fa}
+                        className="h-20 w-20 rounded-xl object-cover"
+                      />
+                      <div className="flex-1 min-w-0">
                         <p className="font-bold truncate">{food.name_fa}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                          {food.name_en} • {getCategoryName(food.category_id)}
+                        <p className="text-xs opacity-60 truncate">
+                          {food.name_en} • {getBranchName(food.branch_id)}
                         </p>
-                        <div className="mt-2 flex items-center justify-between">
-                          <span className="text-sm font-bold text-emerald-600 dark:text-emerald-300">
-                            {food.price.toLocaleString()} افغانی
-                          </span>
-                          <button
-                            onClick={() =>
-                              toggleAvailability(food.id, food.is_available)
-                            }
-                            className={`rounded-full px-2.5 py-1 text-[10px] font-bold border ${
-                              food.is_available
-                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-300"
-                                : "bg-slate-100 text-slate-500 border-black/10 dark:bg-white/5 dark:text-slate-400"
-                            }`}
-                          >
-                            {food.is_available ? "فعال" : "غیرفعال"}
-                          </button>
-                        </div>
-                        <div className="mt-2 flex gap-1.5">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 flex-1"
-                            onClick={() => {
-                              setSelectedFood(food);
-                              setPreviewDialog(true);
-                            }}
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                          </Button>
-                          <Link
-                            href={`/admin/edit/${food.id}`}
-                            className="flex-1"
-                          >
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 w-full"
-                            >
-                              <Edit className="h-3.5 w-3.5" />
-                            </Button>
-                          </Link>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 text-red-500"
-                            onClick={() =>
-                              setDeleteDialog({ open: true, foodId: food.id })
-                            }
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
+                        <p className="text-sm font-bold text-emerald-600 mt-1">
+                          {food.price.toLocaleString()} ؋
+                        </p>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                {/* DESKTOP TABLE */}
+                {/* دسکتاپ */}
                 <div className="hidden md:block overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-slate-50/80 dark:bg-white/[0.03] border-b border-black/5 dark:border-white/10 hover:bg-slate-50/80">
-                        <TableHead className="w-20">تصویر</TableHead>
+                      <TableRow className="bg-slate-50/80 dark:bg-white/[0.03] border-b border-black/5 dark:border-white/10">
+                        <TableHead>تصویر</TableHead>
                         <TableHead>
                           <SortButton
                             label="نام"
-                            onClick={() => handleSort("name_fa")}
-                            icon={getSortIcon("name_fa")}
+                            onClick={() => handleSort("name_fa" as any)}
+                            icon={getSortIcon("name_fa" as any)}
                           />
                         </TableHead>
-                        <TableHead>
-                          <SortButton
-                            label="قیمت"
-                            onClick={() => handleSort("price")}
-                            icon={getSortIcon("price")}
-                          />
-                        </TableHead>
-                        <TableHead>دسته‌بندی</TableHead>
-                        <TableHead>
-                          <SortButton
-                            label="وضعیت"
-                            onClick={() => handleSort("is_available")}
-                            icon={getSortIcon("is_available")}
-                          />
-                        </TableHead>
-                        <TableHead>تاریخ</TableHead>
+                        <TableHead>شعبه</TableHead>
+                        <TableHead>دسته</TableHead>
+                        <TableHead>وضعیت</TableHead>
+                        <TableHead>قیمت</TableHead>
                         <TableHead className="text-center">عملیات</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -591,62 +614,48 @@ export default function AdminFoodsPage() {
                       {filteredFoods.map((food) => (
                         <TableRow
                           key={food.id}
-                          className="border-b border-black/5 dark:border-white/10 hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
+                          className="border-b border-black/5 dark:border-white/10"
                         >
                           <TableCell>
-                            <div className="w-14 h-14 rounded-xl overflow-hidden border border-black/10 dark:border-white/10">
-                              <img
-                                src={food.image_url || PLACEHOLDER_IMAGE}
-                                alt={food.name_fa}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.src = PLACEHOLDER_IMAGE;
-                                }}
-                              />
-                            </div>
+                            <img
+                              src={food.image_url || PLACEHOLDER_IMAGE}
+                              alt=""
+                              className="h-12 w-12 rounded-xl object-cover"
+                            />
                           </TableCell>
                           <TableCell>
                             <p className="font-bold">{food.name_fa}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                              {food.name_en}
-                            </p>
-                          </TableCell>
-                          <TableCell className="font-bold text-emerald-600 dark:text-emerald-300 whitespace-nowrap">
-                            {food.price.toLocaleString()}{" "}
-                            <span className="text-[10px] font-normal text-slate-500">
-                              افغانی
-                            </span>
+                            <p className="text-xs opacity-60">{food.name_en}</p>
                           </TableCell>
                           <TableCell>
                             <Badge
                               variant="outline"
-                              className="bg-slate-50 dark:bg-white/5 border-black/10 dark:border-white/10"
+                              className="bg-blue-50 dark:bg-blue-950/30"
                             >
+                              <Store size={10} className="ml-1" />
+                              {getBranchName(food.branch_id)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
                               {getCategoryName(food.category_id)}
                             </Badge>
                           </TableCell>
                           <TableCell>
                             <button
                               onClick={() =>
-                                toggleAvailability(food.id, food.is_available)
+                                toggleAvailability(food.id, !!food.is_available)
                               }
-                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${
-                                food.is_available
-                                  ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-300"
-                                  : "bg-slate-100 text-slate-600 border-black/10 dark:bg-white/5 dark:text-slate-400"
-                              }`}
+                              className={`px-3 py-1 rounded-full text-xs font-bold border ${food.is_available ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20" : "bg-slate-100 text-slate-600"}`}
                             >
-                              <span
-                                className={`w-2 h-2 rounded-full ${food.is_available ? "bg-emerald-500" : "bg-slate-400"}`}
-                              />
                               {food.is_available ? "فعال" : "غیرفعال"}
                             </button>
                           </TableCell>
-                          <TableCell className="text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                            {formatDate(food.created_at)}
+                          <TableCell className="font-bold text-emerald-600">
+                            {food.price.toLocaleString()} ؋
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center justify-center gap-1.5">
+                            <div className="flex justify-center gap-1">
                               <Button
                                 size="icon"
                                 variant="outline"
@@ -656,7 +665,7 @@ export default function AdminFoodsPage() {
                                   setPreviewDialog(true);
                                 }}
                               >
-                                <Eye className="h-4 w-4" />
+                                <Eye size={14} />
                               </Button>
                               <Link href={`/admin/edit/${food.id}`}>
                                 <Button
@@ -664,48 +673,22 @@ export default function AdminFoodsPage() {
                                   variant="outline"
                                   className="h-8 w-8"
                                 >
-                                  <Edit className="h-4 w-4" />
+                                  <Edit size={14} />
                                 </Button>
                               </Link>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8"
-                                  >
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>عملیات</DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      toggleAvailability(
-                                        food.id,
-                                        food.is_available,
-                                      )
-                                    }
-                                  >
-                                    {food.is_available
-                                      ? "غیرفعال کردن"
-                                      : "فعال کردن"}
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    className="text-red-500"
-                                    onClick={() =>
-                                      setDeleteDialog({
-                                        open: true,
-                                        foodId: food.id,
-                                      })
-                                    }
-                                  >
-                                    <Trash2 className="h-4 w-4 ml-2" />
-                                    حذف
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                className="h-8 w-8 text-red-500"
+                                onClick={() =>
+                                  setDeleteDialog({
+                                    open: true,
+                                    foodId: food.id,
+                                  })
+                                }
+                              >
+                                <Trash2 size={14} />
+                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -718,125 +701,50 @@ export default function AdminFoodsPage() {
           </CardContent>
         </Card>
 
-        {/* Delete Dialog */}
+        {/* دیالوگ حذف و پیش‌نمایش - همون قبلی */}
         <AlertDialog
           open={deleteDialog.open}
           onOpenChange={(open) => setDeleteDialog({ open, foodId: null })}
         >
-          <AlertDialogContent
-            dir="rtl"
-            className="bg-white dark:bg-slate-900 border-black/10 dark:border-white/10"
-          >
+          <AlertDialogContent dir="rtl" className="bg-white dark:bg-slate-900">
             <AlertDialogHeader>
-              <div className="mx-auto w-14 h-14 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-3">
-                <Trash2 className="w-7 h-7 text-red-500" />
-              </div>
               <AlertDialogTitle className="text-center">
-                آیا مطمئن هستید؟
+                حذف شود؟
               </AlertDialogTitle>
-              <AlertDialogDescription className="text-center">
-                این عمل غیرقابل بازگشت است.
-              </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-              <AlertDialogCancel className="w-full sm:w-auto">
-                لغو
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDelete}
-                className="w-full sm:w-auto bg-red-600 hover:bg-red-700"
-              >
-                بله، حذف شود
+            <AlertDialogFooter>
+              <AlertDialogCancel>لغو</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-red-600">
+                حذف
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Preview Dialog */}
         <AlertDialog open={previewDialog} onOpenChange={setPreviewDialog}>
           <AlertDialogContent
-            className="max-w-[95vw] sm:max-w-3xl bg-white dark:bg-slate-900 border-black/10 dark:border-white/10 p-4 sm:p-6"
             dir="rtl"
+            className="max-w-2xl bg-white dark:bg-slate-900"
           >
             <AlertDialogHeader>
-              <AlertDialogTitle>پیش‌نمایش غذا</AlertDialogTitle>
+              <AlertDialogTitle>{selectedFood?.name_fa}</AlertDialogTitle>
             </AlertDialogHeader>
-            {selectedFood && (
-              <div className="space-y-5">
-                <div className="flex flex-col sm:flex-row gap-6">
-                  <div className="sm:w-1/3">
-                    <img
-                      src={selectedFood.image_url || PLACEHOLDER_IMAGE}
-                      alt={selectedFood.name_fa}
-                      className="w-full h-64 sm:h-72 object-cover rounded-2xl border border-black/10 dark:border-white/10"
-                      onError={(e) => {
-                        e.currentTarget.src = PLACEHOLDER_IMAGE;
-                      }}
-                    />
-                  </div>
-                  <div className="sm:w-2/3 space-y-4">
-                    <div>
-                      <h3 className="text-xl font-bold">
-                        {selectedFood.name_fa}
-                      </h3>
-                      <p className="text-slate-500 dark:text-slate-400 text-sm">
-                        {selectedFood.name_en}
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="rounded-xl border border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] p-3">
-                        <p className="text-xs text-slate-500">قیمت</p>
-                        <p className="text-lg font-bold text-emerald-600 dark:text-emerald-300 mt-1">
-                          {selectedFood.price.toLocaleString()} افغانی
-                        </p>
-                      </div>
-                      <div className="rounded-xl border border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] p-3">
-                        <p className="text-xs text-slate-500">وضعیت</p>
-                        <Badge
-                          className={`mt-2 ${selectedFood.is_available ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20" : ""}`}
-                        >
-                          {selectedFood.is_available ? "فعال" : "غیرفعال"}
-                        </Badge>
-                      </div>
-                      <div className="rounded-xl border border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] p-3">
-                        <p className="text-xs text-slate-500">دسته‌بندی</p>
-                        <p className="font-semibold mt-1">
-                          {getCategoryName(selectedFood.category_id)}
-                        </p>
-                      </div>
-                      <div className="rounded-xl border border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] p-3">
-                        <p className="text-xs text-slate-500">تاریخ ایجاد</p>
-                        <p className="font-semibold mt-1">
-                          {formatDate(selectedFood.created_at)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="text-sm font-medium mb-2">توضیحات</p>
-                      <p className="text-sm leading-relaxed rounded-xl border border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] p-3">
-                        {selectedFood.description_fa || "بدون توضیحات"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            <AlertDialogFooter className="flex-col sm:flex-row gap-2 border-t border-black/5 dark:border-white/10 pt-4">
-              <AlertDialogCancel className="w-full sm:w-auto">
-                بستن
-              </AlertDialogCancel>
-              {selectedFood && (
-                <Link
-                  href={`/admin/edit/${selectedFood.id}`}
-                  className="w-full sm:w-auto"
-                >
-                  <AlertDialogAction className="w-full bg-emerald-600 hover:bg-emerald-700">
-                    ویرایش
-                  </AlertDialogAction>
-                </Link>
-              )}
+            <div className="space-y-3">
+              <img
+                src={selectedFood?.image_url || PLACEHOLDER_IMAGE}
+                alt=""
+                className="w-full h-60 object-cover rounded-xl"
+              />
+              <p className="text-sm">{selectedFood?.description_fa}</p>
+              <p className="font-bold text-emerald-600">
+                {selectedFood?.price.toLocaleString()} ؋ -{" "}
+                {selectedFood?.branch_id
+                  ? getBranchName(selectedFood.branch_id)
+                  : ""}
+              </p>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel>بستن</AlertDialogCancel>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -845,61 +753,32 @@ export default function AdminFoodsPage() {
   );
 }
 
-function StatCard({
-  title,
-  value,
-  icon,
-  iconBg,
-  valueColor = "",
-}: {
-  title: string;
-  value: number;
-  icon: React.ReactNode;
-  iconBg: string;
-  valueColor?: string;
-}) {
+function StatCard({ title, value, icon, iconBg, valueColor = "" }: any) {
   return (
-    <Card className={`${theme.statCard}`}>
-      <CardContent className="p-4 sm:p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              {title}
-            </p>
-            <p
-              className={`text-2xl sm:text-3xl font-black mt-1.5 ${valueColor}`}
-            >
-              {value}
-            </p>
-          </div>
-          <div
-            className={`p-3 rounded-2xl border border-black/5 dark:border-white/10 ${iconBg}`}
-          >
-            {icon}
-          </div>
+    <Card className="rounded-[1.25rem] border border-black/[0.06] bg-white/90 dark:border-white/10 dark:bg-slate-900/70">
+      <CardContent className="p-4 sm:p-5 flex items-center justify-between">
+        <div>
+          <p className="text-sm opacity-60">{title}</p>
+          <p className={`text-2xl font-black mt-1 ${valueColor}`}>{value}</p>
+        </div>
+        <div
+          className={`p-3 rounded-2xl border border-black/5 dark:border-white/10 ${iconBg}`}
+        >
+          {icon}
         </div>
       </CardContent>
     </Card>
   );
 }
 
-function SortButton({
-  label,
-  onClick,
-  icon,
-}: {
-  label: string;
-  onClick: () => void;
-  icon: React.ReactNode;
-}) {
+function SortButton({ label, onClick, icon }: any) {
   return (
     <Button
       variant="ghost"
-      className="p-0 h-auto font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 hover:bg-transparent flex items-center gap-1.5"
+      className="p-0 h-auto font-semibold flex items-center gap-1"
       onClick={onClick}
     >
-      {label}
-      {icon}
+      {label} {icon}
     </Button>
   );
 }

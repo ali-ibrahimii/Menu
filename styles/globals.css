@@ -327,9 +327,8 @@ html, body {
   
 }
 
-.glass-drawer {
-  @apply inline-flex items-center justify-center border-t border-white/50 dark:text-white rounded-t-[44px] text-black
-         transition-transform duration-150 ease-in-out overflow-visible;
+.rounded-top {
+  @apply rounded-t-[30px] overflow-visible;
 }
 
 .glass-rate-card {

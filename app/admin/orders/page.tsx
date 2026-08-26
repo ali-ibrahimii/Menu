@@ -1,771 +1,728 @@
-// app/admin/orders/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  RefreshCw,
-  CheckCircle,
-  XCircle,
+  Bell,
+  BellRing,
+  Bike,
+  Store,
+  CheckCircle2,
   Clock,
-  Receipt,
-  User,
-  Hash,
-  Notebook,
+  DollarSign,
+  Printer,
   Search,
   Calendar,
   Filter,
-  ChevronDown,
+  Volume2,
+  VolumeX,
+  X,
+  Trash2,
   Eye,
-  Printer,
-  Download,
-  MoreVertical,
+  ChefHat,
+  PackageCheck,
 } from "lucide-react";
-import { toast } from "sonner";
-import { format, parseISO, isToday, isYesterday, subDays } from "date-fns";
-import { faIR } from "date-fns/locale";
 
-interface OrderItem {
+type Order = {
   id: string;
-  name_fa: string;
-  name_ar: string;
-  name_en: string;
-  price: number;
-  quantity: number;
-  image_url: string;
-}
-
-interface Order {
-  id: string;
-  created_at: string;
+  device_id: string;
   customer_name: string;
-  table_number: string;
-  deviceId: string;
-  notes: string;
+  customer_phone: string | null;
+  order_type: "dine_in" | "delivery";
+  table_number: string | null;
+  delivery_address: string | null;
   total_price: number;
-  status: "pending" | "confirmed" | "completed" | "cancelled";
-  items: OrderItem[];
-}
+  delivery_fee: number;
+  final_price: number;
+  status: string;
+  payment_method: string;
+  is_printed: boolean;
+  created_at: string;
+  items: any[];
+};
 
-type DateFilter = "today" | "yesterday" | "week" | "month" | "all";
+type NotificationItem = {
+  id: string;
+  order: Order;
+  read: boolean;
+  time: Date;
+};
 
-export default function AdminOrdersPage() {
+const theme = {
+  page: "min-h-screen w-full bg-[#fff8ed] text-slate-900 dark:bg-slate-950 dark:text-white",
+  card: "rounded-2xl border border-black/5 bg-white/90 dark:border-white/10 dark:bg-slate-900/70 backdrop-blur shadow-sm",
+};
+
+// صدای نوتیفیکیشن - بیپ ساده با Web Audio
+const playNotificationSound = () => {
+  try {
+    const ctx = new (
+      window.AudioContext || (window as any).webkitAudioContext
+    )();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.value = 880;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.5);
+    // بیپ دوم
+    setTimeout(() => {
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.frequency.value = 1200;
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      gain2.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      osc2.start();
+      osc2.stop(ctx.currentTime + 0.3);
+    }, 200);
+  } catch {}
+};
+
+export default function AdminOrdersWithNotifications() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [updatingOrder, setUpdatingOrder] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [dateFilter, setDateFilter] = useState<DateFilter>("today");
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [showNotifPanel, setShowNotifPanel] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState<"all" | "dine_in" | "delivery">(
+    "all",
+  );
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "pending" | "confirmed" | "paid"
+  >("all");
+  const [filterDate, setFilterDate] = useState<
+    "all" | "today" | "yesterday" | "week"
+  >("all");
+  const [selected, setSelected] = useState<Order | null>(null);
 
-  // دریافت سفارشات از دیتابیس
-  const fetchOrders = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .order("created_at", { ascending: false });
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
-      if (error) throw error;
-      setOrders(data || []);
-      applyFilters(data || [], searchQuery, statusFilter, dateFilter);
-      toast.success("سفارشات با موفقیت بارگذاری شدند");
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      toast.error("خطا در دریافت سفارشات");
-    } finally {
-      setLoading(false);
+  // درخواست اجازه نوتیفیکیشن مرورگر
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
     }
+    const savedSound = localStorage.getItem("notif_sound");
+    if (savedSound !== null) setSoundEnabled(savedSound === "true");
+  }, []);
+
+  const fetchOrders = async () => {
+    const { data } = await supabase
+      .from("orders")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    setOrders((data as any) || []);
   };
 
   useEffect(() => {
     fetchOrders();
-  }, []);
 
-  // فیلتر کردن سفارشات بر اساس تاریخ
-  const filterByDate = (orders: Order[], filterType: DateFilter): Order[] => {
-    const now = new Date();
-    
-    switch (filterType) {
-      case "today":
-        return orders.filter(order => isToday(parseISO(order.created_at)));
-      case "yesterday":
-        return orders.filter(order => isYesterday(parseISO(order.created_at)));
-      case "week":
-        const weekAgo = subDays(now, 7);
-        return orders.filter(order => 
-          parseISO(order.created_at) >= weekAgo
-        );
-      case "month":
-        const monthAgo = subDays(now, 30);
-        return orders.filter(order => 
-          parseISO(order.created_at) >= monthAgo
-        );
-      default:
-        return orders;
-    }
-  };
+    // Realtime - وقتی سفارش جدید ثبت شد
+    const channel = supabase
+      .channel("orders-notifications")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "orders" },
+        (payload) => {
+          const newOrder = payload.new as Order;
+          console.log("🔔 سفارش جدید:", newOrder);
 
-  // اعمال فیلترها
-  const applyFilters = (
-    ordersList: Order[],
-    search: string,
-    status: string,
-    date: DateFilter
-  ) => {
-    let filtered = ordersList;
+          // اضافه به لیست سفارشات
+          setOrders((prev) => [newOrder, ...prev]);
 
-    // فیلتر بر اساس تاریخ
-    filtered = filterByDate(filtered, date);
+          // اضافه به نوتیفیکیشن‌ها
+          const notif: NotificationItem = {
+            id: `notif_${Date.now()}`,
+            order: newOrder,
+            read: false,
+            time: new Date(),
+          };
+          setNotifications((prev) => [notif, ...prev]);
 
-    // فیلتر بر اساس وضعیت
-    if (status !== "all") {
-      filtered = filtered.filter(order => order.status === status);
-    }
+          // صدا
+          if (soundEnabled) playNotificationSound();
 
-    // جستجو
+          // ویبره موبایل
+          if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
+
+          // توست بزرگ
+          toast.message(`🔔 سفارش جدید - ${newOrder.customer_name}`, {
+            description: `${newOrder.order_type === "delivery" ? "بیرون‌بر" : `میز ${newOrder.table_number || "-"}`} • ${Number(newOrder.final_price || 0).toLocaleString()} ؋`,
+            duration: 8000,
+            action: {
+              label: "مشاهده",
+              onClick: () => setSelected(newOrder),
+            },
+          });
+
+          // نوتیفیکیشن مرورگر
+          if (
+            "Notification" in window &&
+            Notification.permission === "granted"
+          ) {
+            new Notification(`سفارش جدید - ${newOrder.customer_name}`, {
+              body: `${newOrder.order_type === "delivery" ? "بیرون‌بر" : `میز ${newOrder.table_number}`} - ${Number(newOrder.final_price).toLocaleString()} تومان`,
+              icon: "/logo1.png",
+              tag: newOrder.id,
+            });
+          }
+
+          // تایتل چشمک‌زن
+          let originalTitle = document.title;
+          let blink = 0;
+          const interval = setInterval(() => {
+            document.title =
+              blink % 2 === 0
+                ? `🔔 سفارش جدید! - ${newOrder.customer_name}`
+                : originalTitle;
+            blink++;
+            if (blink > 10) {
+              clearInterval(interval);
+              document.title = originalTitle;
+            }
+          }, 800);
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [soundEnabled]);
+
+  // فیلتر و دسته‌بندی
+  const filteredOrders = useMemo(() => {
+    let res = [...orders];
     if (search) {
-      filtered = filtered.filter(order =>
-        order.customer_name.toLowerCase().includes(search.toLowerCase()) ||
-        order.id.toLowerCase().includes(search.toLowerCase()) ||
-        order.table_number?.toLowerCase().includes(search.toLowerCase()) ||
-        order.notes?.toLowerCase().includes(search.toLowerCase())
+      const q = search.toLowerCase();
+      res = res.filter(
+        (o) =>
+          o.customer_name?.toLowerCase().includes(q) ||
+          o.customer_phone?.includes(q) ||
+          o.table_number?.includes(q) ||
+          o.id.toLowerCase().includes(q),
       );
     }
+    if (filterType !== "all")
+      res = res.filter((o) => o.order_type === filterType);
+    if (filterStatus !== "all")
+      res = res.filter((o) => o.status === filterStatus);
+    if (filterDate !== "all") {
+      const now = new Date();
+      res = res.filter((o) => {
+        const d = new Date(o.created_at);
+        if (filterDate === "today")
+          return d.toDateString() === now.toDateString();
+        if (filterDate === "yesterday") {
+          const y = new Date();
+          y.setDate(y.getDate() - 1);
+          return d.toDateString() === y.toDateString();
+        }
+        if (filterDate === "week") {
+          const weekAgo = new Date();
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          return d >= weekAgo;
+        }
+        return true;
+      });
+    }
+    return res;
+  }, [orders, search, filterType, filterStatus, filterDate]);
 
-    setFilteredOrders(filtered);
-  };
+  // گروه‌بندی بر اساس تاریخ
+  const groupedByDate = useMemo(() => {
+    const groups: Record<string, Order[]> = {
+      امروز: [],
+      دیروز: [],
+      "این هفته": [],
+      قدیمی‌تر: [],
+    };
+    const now = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
 
-  useEffect(() => {
-    applyFilters(orders, searchQuery, statusFilter, dateFilter);
-  }, [searchQuery, statusFilter, dateFilter, orders]);
+    filteredOrders.forEach((o) => {
+      const d = new Date(o.created_at);
+      if (d.toDateString() === now.toDateString()) groups["امروز"].push(o);
+      else if (d.toDateString() === yesterday.toDateString())
+        groups["دیروز"].push(o);
+      else if (d >= weekAgo) groups["این هفته"].push(o);
+      else groups["قدیمی‌تر"].push(o);
+    });
 
-  // آپدیت وضعیت سفارش
-  const updateOrderStatus = async (
-    orderId: string,
-    newStatus: Order["status"]
-  ) => {
-    setUpdatingOrder(orderId);
-    try {
-      const { error } = await supabase
-        .from("orders")
-        .update({ status: newStatus })
-        .eq("id", orderId);
+    // حذف گروه خالی
+    return Object.entries(groups).filter(([_, list]) => list.length > 0);
+  }, [filteredOrders]);
 
-      if (error) throw error;
+  const markAllRead = () =>
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const clearNotifications = () => setNotifications([]);
 
-      // آپدیت local state
-      setOrders((prev) =>
-        prev.map((order) =>
-          order.id === orderId ? { ...order, status: newStatus } : order
-        )
-      );
-
-      toast.success(`سفارش با موفقیت ${getStatusLabel(newStatus)} شد`);
-    } catch (error) {
-      console.error("Error updating order:", error);
-      toast.error("خطا در آپدیت سفارش");
-    } finally {
-      setUpdatingOrder(null);
+  const handleApprove = async (order: Order, next: string) => {
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: next })
+      .eq("id", order.id);
+    if (!error) {
+      toast.success(`وضعیت: ${next}`);
+      fetchOrders();
+      if (next === "paid") {
+        // اینجا چاپ
+        setSelected(order);
+        setTimeout(() => {
+          const el = document.getElementById("receipt-hidden");
+          if (el) {
+            const w = window.open("", "_blank", "width=380,height=600");
+            if (w) {
+              w.document.write(
+                `<html><head><style>@page{size:80mm auto;margin:0}body{margin:0;padding:10px;font-family:Tahoma}</style></head><body onload="window.print();window.close()">${el.innerHTML}</body></html>`,
+              );
+              w.document.close();
+            }
+          }
+        }, 300);
+      }
     }
   };
-
-  // نمایش وضعیت سفارش
-  const getStatusBadge = (status: Order["status"]) => {
-    const statusConfig = {
-      pending: {
-        color: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
-        icon: Clock,
-        label: "در انتظار",
-      },
-      confirmed: {
-        color: "bg-blue-100 text-blue-800 hover:bg-blue-100",
-        icon: CheckCircle,
-        label: "تأیید شده",
-      },
-      completed: {
-        color: "bg-green-100 text-green-800 hover:bg-green-100",
-        icon: CheckCircle,
-        label: "تکمیل شده",
-      },
-      cancelled: {
-        color: "bg-red-100 text-red-800 hover:bg-red-100",
-        icon: XCircle,
-        label: "لغو شده",
-      },
-    };
-
-    const config = statusConfig[status];
-    const IconComponent = config.icon;
-
-    return (
-      <Badge className={`${config.color} gap-1`}>
-        <IconComponent size={12} />
-        {config.label}
-      </Badge>
-    );
-  };
-
-  const getStatusLabel = (status: Order["status"]) => {
-    const labels = {
-      pending: "در انتظار",
-      confirmed: "تأیید شده",
-      completed: "تکمیل شده",
-      cancelled: "لغو شده",
-    };
-    return labels[status];
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      const date = parseISO(dateString);
-      return format(date, "yyyy/MM/dd - HH:mm", { locale: faIR });
-    } catch {
-      return dateString;
-    }
-  };
-
-  // آمار و اطلاعات
-  const stats = {
-    total: filteredOrders.length,
-    pending: filteredOrders.filter(o => o.status === "pending").length,
-    confirmed: filteredOrders.filter(o => o.status === "confirmed").length,
-    completed: filteredOrders.filter(o => o.status === "completed").length,
-    totalRevenue: filteredOrders
-      .filter(o => o.status === "completed")
-      .reduce((sum, order) => sum + order.total_price, 0),
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-center">
-          <RefreshCw className="animate-spin mx-auto mb-4" size={32} />
-          <p className="text-gray-600">در حال بارگذاری سفارشات...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* هدر */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Receipt size={28} />
-            مدیریت سفارشات
-          </h1>
-          <p className="text-gray-600 mt-2">
-            مشاهده و مدیریت تمام سفارشات دریافتی
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={fetchOrders}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <RefreshCw size={16} />
-            بروزرسانی
-          </Button>
-          <Button className="flex items-center gap-2">
-            <Download size={16} />
-            خروجی گزارش
-          </Button>
-        </div>
-      </div>
+    <div dir="rtl" className={`${theme.page} p-3 sm:p-6`}>
+      <div className="mx-auto max-w-7xl space-y-4">
+        {/* هدر با زنگ نوتیفیکیشن */}
+        <div className="flex flex-col sm:flex-row justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-black flex items-center gap-2">
+              سفارشات{" "}
+              <span className="text-sm font-normal opacity-60">
+                ({filteredOrders.length})
+              </span>
+            </h1>
+            <p className="text-sm opacity-60">
+              صندوق‌دار: نوتیفیکیشن لحظه‌ای فعاله
+            </p>
+          </div>
 
-      {/* آمار */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">کل سفارشات</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
-              </div>
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Receipt className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full"
+              onClick={() => setSoundEnabled(!soundEnabled)}
+            >
+              {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+            </Button>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">در انتظار</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
-              </div>
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Clock className="w-6 h-6 text-yellow-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">تأیید شده</p>
-                <p className="text-2xl font-bold text-blue-600">{stats.confirmed}</p>
-              </div>
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">تکمیل شده</p>
-                <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
-              </div>
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">درآمد کل</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {stats.totalRevenue.toLocaleString()} تومان
-                </p>
-              </div>
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Receipt className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* فیلترها و جستجو */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-            {/* جستجو */}
-            <div className="md:col-span-4">
-              <div className="relative">
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <Input
-                  placeholder="جستجو در سفارشات (نام مشتری، شماره سفارش، ...)"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pr-10"
-                />
-              </div>
-            </div>
-
-            {/* فیلتر وضعیت */}
-            <div className="md:col-span-3">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <Filter size={16} className="ml-2" />
-                  <SelectValue placeholder="فیلتر بر اساس وضعیت" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">همه وضعیت‌ها</SelectItem>
-                  <SelectItem value="pending">در انتظار</SelectItem>
-                  <SelectItem value="confirmed">تأیید شده</SelectItem>
-                  <SelectItem value="completed">تکمیل شده</SelectItem>
-                  <SelectItem value="cancelled">لغو شده</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* فیلتر تاریخ */}
-            <div className="md:col-span-3">
-              <Select 
-                value={dateFilter} 
-                onValueChange={(value: DateFilter) => setDateFilter(value)}
-              >
-                <SelectTrigger>
-                  <Calendar size={16} className="ml-2" />
-                  <SelectValue placeholder="فیلتر بر اساس تاریخ" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="today">امروز</SelectItem>
-                  <SelectItem value="yesterday">دیروز</SelectItem>
-                  <SelectItem value="week">هفته جاری</SelectItem>
-                  <SelectItem value="month">ماه جاری</SelectItem>
-                  <SelectItem value="all">همه زمان‌ها</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* ریست فیلترها */}
-            <div className="md:col-span-2">
+            <div className="relative">
               <Button
                 variant="outline"
-                className="w-full"
-                onClick={() => {
-                  setSearchQuery("");
-                  setStatusFilter("all");
-                  setDateFilter("today");
-                }}
+                className="rounded-full gap-2"
+                onClick={() => setShowNotifPanel(!showNotifPanel)}
               >
-                حذف فیلترها
+                <BellRing
+                  size={18}
+                  className={
+                    unreadCount > 0 ? "animate-bounce text-amber-500" : ""
+                  }
+                />
+                نوتیفیکیشن
+                {unreadCount > 0 && (
+                  <Badge className="bg-red-500 text-white rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs animate-pulse">
+                    {unreadCount}
+                  </Badge>
+                )}
               </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* جدول سفارشات */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>لیست سفارشات</CardTitle>
-              <CardDescription>
-                نمایش {filteredOrders.length} سفارش از {orders.length} سفارش
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {filteredOrders.length === 0 ? (
-            <div className="text-center py-12">
-              <Receipt size={48} className="mx-auto mb-4 opacity-50" />
-              <p className="text-lg text-gray-500">هیچ سفارشی یافت نشد</p>
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-right">شماره سفارش</TableHead>
-                    <TableHead className="text-right">مشتری</TableHead>
-                    <TableHead className="text-right">تاریخ</TableHead>
-                    <TableHead className="text-right">میز</TableHead>
-                    <TableHead className="text-right">مبلغ</TableHead>
-                    <TableHead className="text-right">وضعیت</TableHead>
-                    <TableHead className="text-right">عملیات</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody dir="ltr" className="text-right">
-                  {filteredOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">
-                        #{order.id.slice(-8).toUpperCase()}
-                      </TableCell>
-                      <TableCell>{order.customer_name}</TableCell>
-                      <TableCell>{formatDate(order.created_at)}</TableCell>
-                      <TableCell>
-                        {order.table_number ? (
-                          <Badge variant="outline">{order.table_number}</Badge>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="font-semibold">
-                        {order.total_price.toLocaleString()} تومان
-                      </TableCell>
-                      <TableCell>{getStatusBadge(order.status)}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2 border" dir="rtl">
-                          <Dialog
-                            open={isDetailsOpen && selectedOrder?.id === order.id}
-                            onOpenChange={(open) => {
-                              setIsDetailsOpen(open);
-                              if (open) setSelectedOrder(order);
-                              else setSelectedOrder(null);
+              {showNotifPanel && (
+                <Card className="absolute left-20 sm:right-0 top-12 z-80 w-30 sm:w-96 rounded-2xl shadow-2xl border-black/10 dark:border-white/10 max-h-[70vh] flex flex-col">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-base">
+                      اعلان‌ها ({notifications.length})
+                    </CardTitle>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={markAllRead}
+                      >
+                        خوانده شد
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => setShowNotifPanel(false)}
+                      >
+                        <X size={14} />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-1 overflow-y-auto space-y-2 p-2">
+                    {notifications.length === 0 ? (
+                      <p className="text-center text-sm opacity-50 py-8">
+                        اعلانی نیست
+                      </p>
+                    ) : (
+                      notifications.map((n) => (
+                        <div
+                          key={n.id}
+                          className={`p-3 rounded-xl border flex gap-3 ${!n.read ? "bg-amber-50 dark:bg-amber-950/20 border-amber-500/20" : "bg-white dark:bg-slate-900 border-black/5 dark:border-white/10"}`}
+                        >
+                          <div
+                            className={`h-9 w-9 rounded-full flex items-center justify-center text-white shrink-0 ${n.order.order_type === "delivery" ? "bg-orange-500" : "bg-emerald-500"}`}
+                          >
+                            {n.order.order_type === "delivery" ? (
+                              <Bike size={16} />
+                            ) : (
+                              <Store size={16} />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm truncate">
+                              {n.order.customer_name} •{" "}
+                              {n.order.order_type === "delivery"
+                                ? "بیرون‌بر"
+                                : `میز ${n.order.table_number}`}
+                            </p>
+                            <p className="text-xs opacity-70 truncate">
+                              {Number(n.order.final_price).toLocaleString()} ؋ -{" "}
+                              {new Date(n.time).toLocaleTimeString("fa-IR")}
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            className="h-7 rounded-full text-xs"
+                            onClick={() => {
+                              setSelected(n.order);
+                              setShowNotifPanel(false);
+                              setNotifications((prev) =>
+                                prev.map((x) =>
+                                  x.id === n.id ? { ...x, read: true } : x,
+                                ),
+                              );
                             }}
                           >
-                            <DialogTrigger asChild>
+                            دیدن
+                          </Button>
+                        </div>
+                      ))
+                    )}
+                  </CardContent>
+                  {notifications.length > 0 && (
+                    <div className="p-2 border-t">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-xs text-red-500 gap-1"
+                        onClick={clearNotifications}
+                      >
+                        <Trash2 size={12} /> پاک کردن همه
+                      </Button>
+                    </div>
+                  )}
+                </Card>
+              )}
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full gap-1"
+              onClick={fetchOrders}
+            >
+              <Clock size={14} /> بروزرسانی
+            </Button>
+          </div>
+        </div>
+
+        {/* فیلترها - دسته‌بندی بر اساس تاریخ و نوع */}
+        <Card className={`${theme.card} p-3 sm:p-4`}>
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search
+                  size={14}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 opacity-40"
+                />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="جستجو نام، تلفن، میز..."
+                  className="pr-9 rounded-full h-9 text-sm"
+                />
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-full h-9 gap-1"
+              >
+                <Filter size={14} /> فیلتر
+              </Button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-1.5">
+                <Calendar size={12} className="opacity-50" />
+                <span className="text-xs font-bold opacity-60">تاریخ:</span>
+                {[
+                  { k: "all", l: "همه" },
+                  { k: "today", l: "امروز" },
+                  { k: "yesterday", l: "دیروز" },
+                  { k: "week", l: "هفته" },
+                ].map((f) => (
+                  <button
+                    key={f.k}
+                    onClick={() => setFilterDate(f.k as any)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${filterDate === f.k ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "bg-black/5 dark:bg-white/5"}`}
+                  >
+                    {f.l}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-1.5">
+                <Bike size={12} className="opacity-50" />
+                <span className="text-xs font-bold opacity-60">نوع:</span>
+                {[
+                  { k: "all", l: "همه" },
+                  { k: "dine_in", l: "داخل 🍽️" },
+                  { k: "delivery", l: "بیرون‌بر 🛵" },
+                ].map((f) => (
+                  <button
+                    key={f.k}
+                    onClick={() => setFilterType(f.k as any)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold ${filterType === f.k ? "bg-emerald-600 text-white" : "bg-black/5 dark:bg-white/5"}`}
+                  >
+                    {f.l}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-1.5 ms-2">
+                <span className="text-xs font-bold opacity-60">وضعیت:</span>
+                {[
+                  { k: "all", l: "همه" },
+                  { k: "pending", l: "در انتظار" },
+                  { k: "confirmed", l: "تایید" },
+                  { k: "paid", l: "پرداخت" },
+                ].map((f) => (
+                  <button
+                    key={f.k}
+                    onClick={() => setFilterStatus(f.k as any)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold ${filterStatus === f.k ? "bg-blue-600 text-white" : "bg-black/5 dark:bg-white/5"}`}
+                  >
+                    {f.l}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* لیست گروه‌بندی شده بر اساس تاریخ */}
+        <div className="space-y-6">
+          {groupedByDate.map(([dateLabel, ordersInDate]) => (
+            <div key={dateLabel} className="space-y-3">
+              <h3 className="font-black text-sm flex items-center gap-2 sticky top-0 bg-[#fff8ed]/80 dark:bg-slate-950/80 backdrop-blur py-2 z-10">
+                <Calendar size={14} /> {dateLabel}{" "}
+                <Badge variant="secondary" className="rounded-full text-xs">
+                  {ordersInDate.length}
+                </Badge>
+              </h3>
+
+              {/* داخل هر تاریخ، تفکیک بر اساس نوع سفارش */}
+              {[
+                { type: "dine_in", label: "داخل رستوران 🍽️", icon: Store },
+                { type: "delivery", label: "بیرون‌بر 🛵", icon: Bike },
+              ].map((group) => {
+                const list = ordersInDate.filter(
+                  (o) => o.order_type === group.type,
+                );
+                if (list.length === 0) return null;
+                return (
+                  <div
+                    key={group.type}
+                    className="ms-2 border-r-2 border-black/5 dark:border-white/10 pr-3 space-y-2"
+                  >
+                    <p className="text-xs font-bold opacity-60 flex items-center gap-1">
+                      <group.icon size={12} /> {group.label} ({list.length})
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {list.map((order) => (
+                        <Card
+                          key={order.id}
+                          className={`rounded-2xl border transition-all hover:shadow-md ${order.status === "pending" ? "border-amber-500/30 bg-amber-50/30 dark:bg-amber-950/10" : theme.card}`}
+                        >
+                          <CardContent className="p-3 flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div
+                                className={`h-10 w-10 rounded-full flex items-center justify-center text-white shrink-0 ${order.order_type === "delivery" ? "bg-orange-500" : "bg-emerald-500"}`}
+                              >
+                                {order.order_type === "delivery" ? (
+                                  <Bike size={16} />
+                                ) : (
+                                  <Store size={16} />
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-bold text-sm truncate">
+                                  {order.customer_name}{" "}
+                                  <span className="text-xs opacity-50">
+                                    •{" "}
+                                    {order.order_type === "delivery"
+                                      ? order.customer_phone
+                                      : `میز ${order.table_number}`}
+                                  </span>
+                                </p>
+                                <p className="text-xs opacity-60 truncate">
+                                  {order.final_price?.toLocaleString()} ؋ •{" "}
+                                  {new Date(
+                                    order.created_at,
+                                  ).toLocaleTimeString("fa-IR")}{" "}
+                                  • {order.status}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex gap-1 shrink-0">
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => setSelectedOrder(order)}
+                                className="h-7 w-7 p-0 rounded-full cursor-pointer"
+                                onClick={() => setSelected(order)}
                               >
-                                <Eye size={14} />
+                                <Eye size={12} />
                               </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                              <DialogHeader>
-                                <DialogTitle>
-                                  {/* جزئیات سفارش #{order.id.slice(-8).toUpperCase()} */}
-                                </DialogTitle>
-                                <DialogDescription>
-                                  {/* {formatDate(order.created_at)} */}
-                                </DialogDescription>
-                              </DialogHeader>
-                              {/* محتوای دیالوگ مشابه کارت قبلی */}
-                            </DialogContent>
-                          </Dialog>
-
-                          {order.status === "pending" && (
-                            <Button
-                              size="sm"
-                              onClick={() => updateOrderStatus(order.id, "confirmed")}
-                              disabled={updatingOrder === order.id}
-                              className="bg-blue-600 hover:bg-blue-700"
-                            >
-                              {updatingOrder === order.id ? "..." : "تأیید"}
-                            </Button>
-                          )}
-
-                          {order.status === "confirmed" && (
-                            <Button
-                              size="sm"
-                              onClick={() => updateOrderStatus(order.id, "completed")}
-                              disabled={updatingOrder === order.id}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              {updatingOrder === order.id ? "..." : "تکمیل"}
-                            </Button>
-                          )}
-
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => {
-                              // پرینت فاکتور
-                              window.print();
-                            }}
-                          >
-                            <Printer size={14} />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-
-          {/* پاگینیشن */}
-          {filteredOrders.length > 0 && (
-            <div className="flex items-center justify-between border-t pt-4 mt-4">
-              <div className="text-sm text-gray-500">
-                نمایش 1 تا {filteredOrders.length} از {filteredOrders.length} نتیجه
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" disabled>
-                  قبلی
-                </Button>
-                <Button variant="outline" size="sm" className="bg-blue-50">
-                  1
-                </Button>
-                <Button variant="outline" size="sm">
-                  2
-                </Button>
-                <Button variant="outline" size="sm">
-                  بعدی
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* جزئیات سفارش در حالت دیالوگ */}
-      {selectedOrder && (
-        <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                جزئیات سفارش #{selectedOrder.id.slice(-8).toUpperCase()}
-              </DialogTitle>
-              <DialogDescription>
-                {formatDate(selectedOrder.created_at)}
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              {/* اطلاعات مشتری */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <User size={16} className="text-gray-500" />
-                    <span className="font-medium">مشتری:</span>
-                    <span>{selectedOrder.customer_name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Hash size={16} className="text-gray-500" />
-                    <span className="font-medium">میز:</span>
-                    <span>{selectedOrder.table_number || "-"}</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div>
-                    <span className="font-medium">وضعیت:</span>
-                    <div className="mt-1">{getStatusBadge(selectedOrder.status)}</div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div>
-                    <span className="font-medium">جمع کل:</span>
-                    <div className="text-2xl font-bold text-green-600 mt-1">
-                      {selectedOrder.total_price.toLocaleString()} تومان
+                              {order.status === "pending" && (
+                                <Button
+                                  size="sm"
+                                  className="h-7 rounded-full bg-blue-600 text-white text-xs px-2"
+                                  onClick={() =>
+                                    handleApprove(order, "confirmed")
+                                  }
+                                >
+                                  تایید
+                                </Button>
+                              )}
+                              {order.status !== "paid" &&
+                                order.status !== "cancelled" && (
+                                  <Button
+                                    size="sm"
+                                    className="h-7 rounded-full bg-emerald-600 text-white text-xs px-2"
+                                    onClick={() => handleApprove(order, "paid")}
+                                  >
+                                    پرداخت
+                                  </Button>
+                                )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
                   </div>
-                </div>
-              </div>
+                );
+              })}
+            </div>
+          ))}
 
-              {/* یادداشت */}
-              {selectedOrder.notes && (
-                <div className="flex items-start gap-2 p-4 bg-blue-50 rounded-lg">
-                  <Notebook size={18} className="text-blue-500 mt-1 flex-shrink-0" />
-                  <div>
-                    <span className="font-medium text-blue-700">یادداشت:</span>
-                    <p className="text-blue-600 mt-1">{selectedOrder.notes}</p>
-                  </div>
-                </div>
-              )}
+          {groupedByDate.length === 0 && (
+            <Card className="rounded-2xl border-dashed border-2 py-16 text-center bg-white/50 dark:bg-slate-900/50">
+              <p className="opacity-50">سفارشی با این فیلتر نیست</p>
+            </Card>
+          )}
+        </div>
 
-              {/* آیتم‌های سفارش */}
-              <div>
-                <h4 className="font-semibold mb-3 text-lg border-b pb-2">
-                  آیتم‌های سفارش
-                </h4>
-                <div className="space-y-3">
-                  {selectedOrder.items.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
-                    >
-                      <div className="flex items-center gap-4 flex-1">
-                        <img
-                          src={item.image_url}
-                          alt={item.name_fa}
-                          className="w-20 h-20 rounded-lg object-cover border"
-                        />
-                        <div className="flex-1">
-                          <p className="font-semibold text-lg">{item.name_fa}</p>
-                          <p className="text-gray-500">
-                            قیمت واحد: {item.price.toLocaleString()} تومان
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium text-lg">
-                          تعداد: {item.quantity}
-                        </p>
-                        <p className="text-green-600 font-bold text-lg mt-2">
-                          {(item.price * item.quantity).toLocaleString()} تومان
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* دکمه‌های مدیریت */}
-              <div className="flex gap-2 pt-4 border-t">
-                {selectedOrder.status === "pending" && (
-                  <>
-                    <Button
-                      onClick={() => {
-                        updateOrderStatus(selectedOrder.id, "confirmed");
-                        setIsDetailsOpen(false);
-                      }}
-                      disabled={updatingOrder === selectedOrder.id}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700"
-                    >
-                      {updatingOrder === selectedOrder.id ? "..." : "تأیید سفارش"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        updateOrderStatus(selectedOrder.id, "cancelled");
-                        setIsDetailsOpen(false);
-                      }}
-                      disabled={updatingOrder === selectedOrder.id}
-                      className="text-red-600 border-red-200 hover:bg-red-50"
-                    >
-                      لغو سفارش
-                    </Button>
-                  </>
-                )}
-
-                {selectedOrder.status === "confirmed" && (
-                  <>
-                    <Button
-                      onClick={() => {
-                        updateOrderStatus(selectedOrder.id, "completed");
-                        setIsDetailsOpen(false);
-                      }}
-                      disabled={updatingOrder === selectedOrder.id}
-                      className="flex-1 bg-green-600 hover:bg-green-700"
-                    >
-                      {updatingOrder === selectedOrder.id ? "..." : "تکمیل سفارش"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        updateOrderStatus(selectedOrder.id, "cancelled");
-                        setIsDetailsOpen(false);
-                      }}
-                      disabled={updatingOrder === selectedOrder.id}
-                      className="text-red-600 border-red-200 hover:bg-red-50"
-                    >
-                      لغو سفارش
-                    </Button>
-                  </>
-                )}
-
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  onClick={() => window.print()}
+        {/* رسید مخفی برای چاپ */}
+        <div style={{ position: "absolute", left: "-999px", top: "-999px" }}>
+          <div id="receipt-hidden">
+            {selected && (
+              <div
+                style={{
+                  width: "300px",
+                  fontFamily: "monospace",
+                  fontSize: "12px",
+                  padding: "8px",
+                  direction: "rtl",
+                  background: "white",
+                  color: "black",
+                }}
+              >
+                <div
+                  style={{
+                    textAlign: "center",
+                    borderBottom: "2px dashed black",
+                    paddingBottom: "8px",
+                    marginBottom: "8px",
+                  }}
                 >
-                  <Printer size={16} />
-                  پرینت فاکتور
-                </Button>
+                  <div style={{ fontWeight: "900", fontSize: "16px" }}>
+                    وطندار
+                  </div>
+                  <div>سفارش: {selected.id.slice(0, 8)}</div>
+                  <div>{new Date().toLocaleString("fa-IR")}</div>
+                </div>
+                <div>مشتری: {selected.customer_name}</div>
+                <div>
+                  نوع:{" "}
+                  {selected.order_type === "delivery"
+                    ? "بیرون‌بر"
+                    : `میز ${selected.table_number}`}
+                </div>
+                {selected.delivery_address && (
+                  <div>آدرس: {selected.delivery_address}</div>
+                )}
+                <div
+                  style={{
+                    borderTop: "1px dashed black",
+                    borderBottom: "1px dashed black",
+                    margin: "8px 0",
+                    padding: "6px 0",
+                  }}
+                >
+                  {(selected.items || []).map((it: any, i: number) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span>
+                        {it.name_fa} x{it.quantity}
+                      </span>
+                      <span>{(it.price * it.quantity).toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontWeight: "bold",
+                  }}
+                >
+                  <span>جمع</span>
+                  <span>{Number(selected.final_price).toLocaleString()} ؋</span>
+                </div>
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

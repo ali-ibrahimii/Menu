@@ -30,15 +30,15 @@ export interface RatingStats {
 }
 
 const theme = {
-  card: "rounded-[1.25rem] border border-black/[0.06] bg-white/90 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-slate-900/70 transition-colors",
+  card: "rounded-[1.25rem] border border-black/[0.06] bg-white/90 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-card transition-colors",
   input:
-    "bg-white dark:bg-slate-900 border-black/10 dark:border-white/10 dark:text-white dark:placeholder:text-slate-400 focus-visible:ring-emerald-500/30 rounded-xl h-11",
+    "bg-white dark:bg-card border-black/10 dark:border-white/10 dark:text-white dark:placeholder:text-slate-400 focus-visible:ring-emerald-500/30 rounded-xl h-11",
   textarea:
-    "bg-white dark:bg-slate-900 border-black/10 dark:border-white/10 dark:text-white dark:placeholder:text-slate-400 focus-visible:ring-emerald-500/30 rounded-xl",
+    "bg-white dark:bg-card border-black/10 dark:border-white/10 dark:text-white dark:placeholder:text-slate-400 focus-visible:ring-emerald-500/30 rounded-xl",
   primaryBtn:
     "w-full rounded-xl h-12 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold shadow-lg shadow-emerald-500/20 hover:from-emerald-600 hover:to-teal-700 dark:from-emerald-500 dark:to-teal-500 active:scale-[0.98] transition-all",
   secondaryBtn:
-    "rounded-xl h-12 border-black/10 dark:border-white/10 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-white/5",
+    "bg-gradient-to-r rounded-xl from-emerald-500 via-emerald-500 to-teal-500 text-white shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/35 dark:from-emerald-400 dark:via-emerald-500 dark:to-teal-500 dark:text-slate-950 dark:hover:shadow-emerald-400/35 disabled:cursor-not-allowed disabled:from-slate-400 disabled:to-slate-500 disabled:text-white/70 disabled:shadow-none dark:disabled:from-slate-500 dark:disabled:to-slate-600 dark:disabled:text-white/60",
 };
 
 export default function RatingSystem({
@@ -377,8 +377,10 @@ export default function RatingSystem({
                       </span>
                     </div>
                   </div>
-                  <span className="shrink-0 text-[11px] text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-white/5 px-2.5 py-1 rounded-full border border-black/5 dark:border-white/10">
-                    {new Date(review.created_at).toLocaleDateString("fa-IR")}
+                  <span className="shrink-0 text-[11px] text-slate-500 dark:text-slate-300 bg-slate-50 dark:bg-white/5 px-2.5 py-1 rounded-full border border-black/5 dark:border-white/10">
+                    {new Date(review.created_at).toLocaleDateString(
+                      "fa-IR-u-nu-latn",
+                    )}
                   </span>
                 </div>
 

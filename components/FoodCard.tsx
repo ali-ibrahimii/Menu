@@ -7,6 +7,19 @@ import { Badge } from "@/components/ui/badge";
 import AddToCartButton from "@/components/AddToCartButton";
 import { Food } from "@/types";
 
+
+const theme = {
+  page: "bg-accent/50 text-slate-950 dark:bg-[#0a0908] dark:text-white transition-colors duration-500",
+  panel:
+    "border border-black/10 bg-white/75 shadow-xl shadow-emerald-950/5 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.055] dark:shadow-black/30",
+  mutedText: "text-slate-600 dark:text-white/60",
+  strongText: "text-slate-950 dark:text-white",
+  iconBox:
+    "border border-emerald-500/15 bg-emerald-500/10 text-emerald-700 dark:border-emerald-300/15 dark:bg-emerald-400/10 dark:text-emerald-300",
+  accentButton:
+    "bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-500 text-white shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/35 dark:from-emerald-400 dark:via-emerald-500 dark:to-teal-500 dark:text-slate-950",
+};
+
 interface FoodCardProps {
   food: Food;
   language: string;
@@ -63,7 +76,7 @@ const FoodCard = memo(function FoodCard({
       whileHover={{ scale: 1.015 }}
       whileTap={{ scale: 0.98 }}
       dir={language === "en" ? "ltr" : "rtl"}
-      className="relative flex items-center w-full h-34 bg-[#fffdf8]/90 dark:bg-slate-950/90 text-slate-50 dark:text-white rounded-2xl border border-black/10 dark:border-white/10 overflow-hidden cursor-pointer shadow-md shadow-black/5 dark:shadow-black/30 transition-all backdrop-blur-xl"
+      className={`relative flex items-center w-full h-34 ${theme.page} rounded-2xl border border-black/10 dark:border-white/10 overflow-hidden cursor-pointer shadow-md shadow-black/5 dark:shadow-black/30 transition-all backdrop-blur-xl`}
       onClick={onClickCard}
       style={{ transform: "translateZ(0)" }}
     >
@@ -99,7 +112,7 @@ const FoodCard = memo(function FoodCard({
       <div className="flex flex-col mx-3 w-8/12 overflow-hidden py-2">
         <div className="mb-4">
           <h2
-            className={`text-md font-bold truncate text-slate-950 dark:text-white ${
+            className={`text-md font-bold truncate ${theme.strongText} ${
               language === "en" ? "font-[Montserrat]" : ""
             }`}
           >
@@ -107,7 +120,7 @@ const FoodCard = memo(function FoodCard({
           </h2>
 
           {hasIngredients && (
-            <p className="text-[12px] line-clamp-2 leading-4.5 text-slate-600 dark:text-white/70">
+            <p className="text-[12px] line-clamp-2 leading-4.5 ${theme.mutedText} mt-1">
               {ingredients}
             </p>
           )}

@@ -19,7 +19,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CartDrawer from "@/components/CartDrawer";
 
 const theme = {
-  page: "bg-[#fff8ed] text-slate-950 dark:bg-slate-950 dark:text-white transition-colors duration-500",
+  page: "bg-white text-slate-950 dark:bg-black dark:text-white transition-colors duration-500",
   mutedText: "text-slate-600 dark:text-white/80",
 };
 
