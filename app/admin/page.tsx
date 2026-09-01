@@ -89,13 +89,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchAll();
   }, []);
-  
-useEffect(() => {
-  const id = localStorage.getItem("watandar_device_id") || "unknown";
-  supabase
-    .from("site_visits")
-    .insert({ device_id: id, page: window.location.pathname });
-}, []);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -326,7 +319,7 @@ useEffect(() => {
           <div className="flex flex-col sm:flex-row justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-black">
-                داشبورد کامل 🚀
+                داشبورد
               </h1>
               <p className={`text-sm mt-1 ${theme.muted}`}>
                 جستجو بین غذاها، مشتریان، شماره‌ها
@@ -555,7 +548,9 @@ useEffect(() => {
                 <p className="text-xs font-bold opacity-60 flex items-center gap-1">
                   <Users size={12} /> بازدید سایت{" "}
                   {visits.length === 0 && (
-                    <span className="text-amber-600">(نیاز به SQL)</span>
+                    <span className="text-amber-600">{
+                      "جدول site_visits خالی است یا RLS ندارد"
+                    }</span>
                   )}
                 </p>
                 <p className="text-2xl font-black mt-1">
@@ -613,7 +608,7 @@ useEffect(() => {
                         stats.totalRevenue / stats.totalOrders,
                       ).toLocaleString()
                     : 0}{" "}
-                  ؋
+                  تومان
                 </p>
               </div>
               <div className="h-12 w-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-600">
@@ -625,28 +620,22 @@ useEffect(() => {
 
         {/* اگر بازدید 0 بود، راهنما */}
         {visits.length === 0 && (
-          <Card
-            className={`${theme.card} border-amber-500/30 bg-amber-50 dark:bg-amber-950/20`}
-          >
-            <CardContent className="p-4 text-sm leading-6">
-              <p className="font-bold flex items-center gap-2">
-                <Eye size={16} /> آمار بازدید نمایش داده نمیشه چون جدول
-                site_visits خالیه یا RLS نداره:
+          <Card className="bg-amber-50/30 border-amber-500/20">
+            <CardContent className="p-4 sm:p-5">
+              <p className="text-sm opacity-80">
+                ⚠️ جدول <code>site_visits</code> وجود ندارد یا RLS بسته است. برای
+                نمایش آمار بازدیدها، SQL زیر را در بخش SQL Editor اجرا کنید:
               </p>
-              <pre
-                className="mt-2 text-[11px] bg-black/5 dark:bg-white/5 p-3 rounded-xl overflow-x-auto"
-                dir="ltr"
-              >
-                {`CREATE TABLE IF NOT EXISTS site_visits (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), device_id TEXT, page TEXT, created_at TIMESTAMPTZ DEFAULT NOW());
-ALTER TABLE site_visits ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow all" ON site_visits FOR ALL USING (true) WITH CHECK (true);
-
--- و توی app/layout.tsx اضافه کن:
-useEffect(() => {
-  const id = localStorage.getItem('watandar_device_id') || 'unknown';
-  supabase.from('site_visits').insert({ device_id: id, page: window.location.pathname });
-}, []);
-`}
+              <pre className="bg-black/5 dark:bg-white/10 p-3 rounded-lg mt-2 text-xs overflow-x-auto">
+                <code>
+                  CREATE TABLE site_visits (
+                  <br />
+                  &nbsp;&nbsp;id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                  <br />
+                  &nbsp;&nbsp;created_at timestamp with time zone DEFAULT now()
+                  <br />
+                  );
+                </code>
               </pre>
             </CardContent>
           </Card>
