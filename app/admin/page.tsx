@@ -119,16 +119,14 @@ export default function AdminDashboard() {
           .from("site_visits")
           .select("*")
           .order("created_at", { ascending: false })
-          .limit(100)
-          .then((r) => r)
-          .catch(() => ({ data: [] })),
-        supabase
-          .from("qr_scans")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(100)
-          .then((r) => r)
-          .catch(() => ({ data: [] })),
+          .limit(100),
+        Promise.resolve(
+          supabase
+            .from("qr_scans")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .limit(100),
+        ).catch(() => ({ data: [] })),
       ]);
       setOrders((ordersRes.data as any) || []);
       setFoods((foodsRes.data as any) || []);
