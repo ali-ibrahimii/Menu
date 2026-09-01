@@ -319,9 +319,21 @@ export default function AboutPage() {
                         <MapPin size={20} />
                       </div>
                       <div>
-                        <p className="font-bold">{name}</p>
+                        <p className="font-bold">{language === "fa"
+                          ? (branch as any).name_fa
+                          : language === "ar"
+                            ? (branch as any).name_ar
+                            : (branch as any).name_en}</p>
                         <p className={`text-xs ${theme.muted}`}>
-                          {(branch as any).is_active ? "فعال" : "غیرفعال"}
+                          {(branch as any).is_active ? (language === "fa"
+                            ? "فعال"
+                            : language === "ar"
+                              ? "نشط"
+                              : "Active") : (language === "fa"
+                                ? "غیرفعال"
+                                : language === "ar"
+                                  ? "غير نشط"
+                                  : "Inactive")}
                         </p>
                       </div>
                     </div>
@@ -405,7 +417,11 @@ export default function AboutPage() {
               <div>
                 <h3 className="text-lg font-black">
                   {loadingManager
-                    ? "در حال بارگذاری..."
+                    ? language === "fa"
+                      ? "در حال بارگذاری..."
+                      : language === "ar"
+                        ? "جار التحميل..."
+                        : "Loading..."
                     : language === "fa"
                       ? managerInfo?.manager_name_fa || "مدیر"
                       : language === "ar"
