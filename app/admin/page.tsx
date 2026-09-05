@@ -89,13 +89,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchAll();
   }, []);
-  
-useEffect(() => {
-  const id = localStorage.getItem("watandar_device_id") || "unknown";
-  supabase
-    .from("site_visits")
-    .insert({ device_id: id, page: window.location.pathname });
-}, []);
 
   const fetchAll = async () => {
     setLoading(true);
