@@ -7,7 +7,8 @@ export default function VisitTracker() {
   useEffect(() => {
     // تولید ID منحصر به فرد برای دستگاه اگر وجود نداشته باشد
     const generateDeviceId = (): string => {
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      const chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
       let result = "";
       for (let i = 0; i < 16; i++) {
         result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -16,7 +17,6 @@ export default function VisitTracker() {
     };
 
     const id = localStorage.getItem("watandar_device_id") || generateDeviceId();
-    
     // ذخیره ID در localStorage برای استفاده‌های بعدی
     if (!localStorage.getItem("watandar_device_id")) {
       localStorage.setItem("watandar_device_id", id);
@@ -25,10 +25,10 @@ export default function VisitTracker() {
     // ثبت بازدید در پایگاه داده
     supabase
       .from("site_visits")
-      .insert({ 
-        device_id: id, 
+      .insert({
+        device_id: id,
         page: window.location.pathname,
-        user_agent: navigator.userAgent
+        user_agent: navigator.userAgent,
       })
       .then(({ error }) => {
         if (error) {

@@ -223,7 +223,7 @@ export default function RootLayout({
                     <Toaster position="top-center" />
                     {children}
                     <Analytics /> {/* آنالیز بازدیدها */}
-                    <VisitTracker />
+                    <VisitTracker /> {/* ردیابی بازدیدها */}
                   </AdminAuthProvider>
                 </BranchProvider>
               </LanguageProvider>
