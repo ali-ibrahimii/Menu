@@ -17,7 +17,6 @@ export default function VisitTracker() {
     };
 
     const id = localStorage.getItem("watandar_device_id") || generateDeviceId();
-
     // ذخیره ID در localStorage برای استفاده‌های بعدی
     if (!localStorage.getItem("watandar_device_id")) {
       localStorage.setItem("watandar_device_id", id);
