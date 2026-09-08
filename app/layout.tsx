@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/contexts/ThemeProvider";
 import { Analytics } from "@vercel/analytics/react";
 import AOSProvider from "@/contexts/AOSProvider";
 import Providers from "@/contexts/providers";
+import VisitTracker from "@/components/VisitTracker";
 
 export const metadata: Metadata = {
   // متادیتای اصلی
@@ -222,6 +223,7 @@ export default function RootLayout({
                     <Toaster position="top-center" />
                     {children}
                     <Analytics /> {/* آنالیز بازدیدها */}
+                    <VisitTracker /> {/* ردیابی بازدیدها */}
                   </AdminAuthProvider>
                 </BranchProvider>
               </LanguageProvider>

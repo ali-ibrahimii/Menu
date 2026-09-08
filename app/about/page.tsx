@@ -160,26 +160,26 @@ export default function AboutPage() {
     {
       icon: Award,
       value: "10+",
-      label: language === "fa" ? "سال تجربه" : "Years",
-      sub: "از ۲۰۱۴",
+      label: language === "fa" ? "سال تجربه" : language === "ar" ? "سنوات" : "Years",
+      sub: language === "fa" ? "از ۲۰۱۴" : language === "ar" ? "من ٢٠١٤" : "Since 2014",
     },
     {
       icon: Building2,
       value: "2",
-      label: language === "fa" ? "شعبه فعال" : "Branches",
-      sub: "در مشهد",
+      label: language === "fa" ? "شعبه فعال" : language === "ar" ? "الفروع" : "Branches",
+      sub: language === "fa" ? "در مشهد" : language === "ar" ? "في مشهد" : "In Mashhad",
     },
     {
       icon: UtensilsCrossed,
       value: "80+",
-      label: language === "fa" ? "غذای اصیل" : "Dishes",
-      sub: "افغانی و ایرانی",
+      label: language === "fa" ? "غذای اصیل" : language === "ar" ? "الأطباق" : "Dishes",
+      sub: language === "fa" ? "افغانستانی و ایرانی" : language === "ar" ? "أفغاني و إيراني" : "Afghan and Iranian",
     },
     {
       icon: Users,
       value: "300K+",
-      label: language === "fa" ? "مشتری راضی" : "Happy",
-      sub: "خانواده وطندار",
+      label: language === "fa" ? "مشتری راضی" : language === "ar" ? "العملاء الرضا" : "Happy",
+      sub: language === "fa" ? "خانواده وطندار" : language === "ar" ? "عائلة وطندار" : "Family and Friends",
     },
   ];
 
@@ -319,9 +319,21 @@ export default function AboutPage() {
                         <MapPin size={20} />
                       </div>
                       <div>
-                        <p className="font-bold">{name}</p>
+                        <p className="font-bold">{language === "fa"
+                          ? (branch as any).name_fa
+                          : language === "ar"
+                            ? (branch as any).name_ar
+                            : (branch as any).name_en}</p>
                         <p className={`text-xs ${theme.muted}`}>
-                          {(branch as any).is_active ? "فعال" : "غیرفعال"}
+                          {(branch as any).is_active ? (language === "fa"
+                            ? "فعال"
+                            : language === "ar"
+                              ? "نشط"
+                              : "Active") : (language === "fa"
+                                ? "غیرفعال"
+                                : language === "ar"
+                                  ? "غير نشط"
+                                  : "Inactive")}
                         </p>
                       </div>
                     </div>
@@ -329,7 +341,11 @@ export default function AboutPage() {
                       <div className="flex gap-2">
                         <MapPin size={16} className="text-slate-400" />
                         <span className="line-clamp-2">
-                          {(branch as any).address_fa || "به زودی"}
+                          {language === "fa"
+                            ? (branch as any).address_fa
+                            : language === "ar"
+                              ? (branch as any).address_ar
+                              : (branch as any).address_en}
                         </span>
                       </div>
                       <div className="flex gap-2">
@@ -401,7 +417,11 @@ export default function AboutPage() {
               <div>
                 <h3 className="text-lg font-black">
                   {loadingManager
-                    ? "در حال بارگذاری..."
+                    ? language === "fa"
+                      ? "در حال بارگذاری..."
+                      : language === "ar"
+                        ? "جار التحميل..."
+                        : "Loading..."
                     : language === "fa"
                       ? managerInfo?.manager_name_fa || "مدیر"
                       : language === "ar"
@@ -439,22 +459,14 @@ export default function AboutPage() {
                 >
                   <MapPin size={18} className="text-red-500" />
                   <div>
-                    {language === "fa" ? (
                       <p className="text-[11px] opacity-50 font-bold">
-                        آدرس رستوران
+                        {language === "fa"
+                          ? "آدرس دفتر"
+                          : language === "ar"
+                            ? "عنوان المكتب"
+                            : "Office Address"}
                       </p>
-                    ) : language === "ar" ? (
-                      <p className="text-[11px] opacity-50 font-bold">
-                        عنوان المطعم
-                      </p>
-                    ) : (
-                      <p className="text-[11px] opacity-50 font-bold">
-                        Restaurant Address
-                      </p>
-                    )}
-                    <p className="text-xs font-bold truncate">
                       {managerInfo?.manager_description || "متن تست"}
-                    </p>
                   </div>
                 </div>
               </div>

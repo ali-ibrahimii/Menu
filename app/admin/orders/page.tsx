@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,24 +8,18 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
-  Bell,
   BellRing,
   Bike,
   Store,
-  CheckCircle2,
   Clock,
-  DollarSign,
-  Printer,
   Search,
   Calendar,
-  Filter,
   Volume2,
   VolumeX,
   X,
   Trash2,
   Eye,
-  ChefHat,
-  PackageCheck,
+  Package,
 } from "lucide-react";
 
 type Order = {
@@ -33,7 +27,7 @@ type Order = {
   device_id: string;
   customer_name: string;
   customer_phone: string | null;
-  order_type: "dine_in" | "delivery";
+  order_type: "dine_in" | "delivery" | "inter_city";
   table_number: string | null;
   delivery_address: string | null;
   total_price: number;
@@ -58,8 +52,7 @@ const theme = {
   card: "rounded-2xl border border-black/5 bg-white/90 dark:border-white/10 dark:bg-slate-900/70 backdrop-blur shadow-sm",
 };
 
-// صدای نوتیفیکیشن - بیپ ساده با Web Audio
-const playNotificationSound = () => {
+const playSound = () => {
   try {
     const ctx = new (
       window.AudioContext || (window as any).webkitAudioContext
@@ -71,9 +64,8 @@ const playNotificationSound = () => {
     gain.connect(ctx.destination);
     gain.gain.setValueAtTime(0.3, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-    osc.start(ctx.currentTime);
+    osc.start();
     osc.stop(ctx.currentTime + 0.5);
-    // بیپ دوم
     setTimeout(() => {
       const osc2 = ctx.createOscillator();
       const gain2 = ctx.createGain();
@@ -94,7 +86,7 @@ export default function AdminOrdersWithNotifications() {
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [search, setSearch] = useState("");
-  const [filterType, setFilterType] = useState<"all" | "dine_in" | "delivery">(
+  const [filterType, setFilterType] = useState<"all" | "dine_in" | "delivery" | "inter_city">(
     "all",
   );
   const [filterStatus, setFilterStatus] = useState<
@@ -107,14 +99,17 @@ export default function AdminOrdersWithNotifications() {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  // درخواست اجازه نوتیفیکیشن مرورگر
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
-    const savedSound = localStorage.getItem("notif_sound");
-    if (savedSound !== null) setSoundEnabled(savedSound === "true");
+    const saved = localStorage.getItem("notif_sound");
+    if (saved !== null) setSoundEnabled(saved === "true");
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("notif_sound", String(soundEnabled));
+  }, [soundEnabled]);
 
   const fetchOrders = async () => {
     const { data } = await supabase
@@ -127,8 +122,6 @@ export default function AdminOrdersWithNotifications() {
 
   useEffect(() => {
     fetchOrders();
-
-    // Realtime - وقتی سفارش جدید ثبت شد
     const channel = supabase
       .channel("orders-notifications")
       .on(
@@ -136,12 +129,8 @@ export default function AdminOrdersWithNotifications() {
         { event: "INSERT", schema: "public", table: "orders" },
         (payload) => {
           const newOrder = payload.new as Order;
-          console.log("🔔 سفارش جدید:", newOrder);
-
-          // اضافه به لیست سفارشات
           setOrders((prev) => [newOrder, ...prev]);
 
-          // اضافه به نوتیفیکیشن‌ها
           const notif: NotificationItem = {
             id: `notif_${Date.now()}`,
             order: newOrder,
@@ -150,23 +139,15 @@ export default function AdminOrdersWithNotifications() {
           };
           setNotifications((prev) => [notif, ...prev]);
 
-          // صدا
-          if (soundEnabled) playNotificationSound();
-
-          // ویبره موبایل
+          if (soundEnabled) playSound();
           if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
 
-          // توست بزرگ
-          toast.message(`🔔 سفارش جدید - ${newOrder.customer_name}`, {
+          toast(`🔔 سفارش جدید - ${newOrder.customer_name}`, {
             description: `${newOrder.order_type === "delivery" ? "بیرون‌بر" : `میز ${newOrder.table_number || "-"}`} • ${Number(newOrder.final_price || 0).toLocaleString()} ؋`,
             duration: 8000,
-            action: {
-              label: "مشاهده",
-              onClick: () => setSelected(newOrder),
-            },
+            action: { label: "مشاهده", onClick: () => setSelected(newOrder) },
           });
 
-          // نوتیفیکیشن مرورگر
           if (
             "Notification" in window &&
             Notification.permission === "granted"
@@ -178,8 +159,7 @@ export default function AdminOrdersWithNotifications() {
             });
           }
 
-          // تایتل چشمک‌زن
-          let originalTitle = document.title;
+          const originalTitle = document.title;
           let blink = 0;
           const interval = setInterval(() => {
             document.title =
@@ -195,13 +175,11 @@ export default function AdminOrdersWithNotifications() {
         },
       )
       .subscribe();
-
     return () => {
       supabase.removeChannel(channel);
     };
   }, [soundEnabled]);
 
-  // فیلتر و دسته‌بندی
   const filteredOrders = useMemo(() => {
     let res = [...orders];
     if (search) {
@@ -240,7 +218,6 @@ export default function AdminOrdersWithNotifications() {
     return res;
   }, [orders, search, filterType, filterStatus, filterDate]);
 
-  // گروه‌بندی بر اساس تاریخ
   const groupedByDate = useMemo(() => {
     const groups: Record<string, Order[]> = {
       امروز: [],
@@ -253,7 +230,6 @@ export default function AdminOrdersWithNotifications() {
     yesterday.setDate(yesterday.getDate() - 1);
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
-
     filteredOrders.forEach((o) => {
       const d = new Date(o.created_at);
       if (d.toDateString() === now.toDateString()) groups["امروز"].push(o);
@@ -262,8 +238,6 @@ export default function AdminOrdersWithNotifications() {
       else if (d >= weekAgo) groups["این هفته"].push(o);
       else groups["قدیمی‌تر"].push(o);
     });
-
-    // حذف گروه خالی
     return Object.entries(groups).filter(([_, list]) => list.length > 0);
   }, [filteredOrders]);
 
@@ -280,17 +254,52 @@ export default function AdminOrdersWithNotifications() {
       toast.success(`وضعیت: ${next}`);
       fetchOrders();
       if (next === "paid") {
-        // اینجا چاپ
         setSelected(order);
         setTimeout(() => {
-          const el = document.getElementById("receipt-hidden");
-          if (el) {
-            const w = window.open("", "_blank", "width=380,height=600");
-            if (w) {
-              w.document.write(
-                `<html><head><style>@page{size:80mm auto;margin:0}body{margin:0;padding:10px;font-family:Tahoma}</style></head><body onload="window.print();window.close()">${el.innerHTML}</body></html>`,
-              );
-              w.document.close();
+          // فاکتور مشتری
+          const customerEl = document.getElementById("receipt-customer");
+          if (customerEl) {
+            const w1 = window.open("", "_blank", "width=400,height=600");
+            if (w1) {
+              w1.document.write(`
+                <html>
+                  <head>
+                    <title>فاکتور مشتری ${order.id.slice(0, 8)}</title>
+                    <style>
+                      @page { size: 80mm auto; margin: 0; }
+                      body { margin: 0; padding: 0; background: white; display: flex; justify-content: center; font-family: Tahoma, monospace; }
+                      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    </style>
+                  </head>
+                  <body onload="window.print(); window.onafterprint = () => window.close();">
+                    ${customerEl.innerHTML}
+                  </body>
+                </html>
+              `);
+              w1.document.close();
+            }
+          }
+          // فاکتور آشپزخانه
+          const kitchenEl = document.getElementById("receipt-kitchen");
+          if (kitchenEl) {
+            const w2 = window.open("", "_blank", "width=400,height=600");
+            if (w2) {
+              w2.document.write(`
+                <html>
+                  <head>
+                    <title>فاکتور آشپزخانه ${order.id.slice(0, 8)}</title>
+                    <style>
+                      @page { size: 80mm auto; margin: 0; }
+                      body { margin: 0; padding: 0; background: white; display: flex; justify-content: center; font-family: Tahoma, monospace; }
+                      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    </style>
+                  </head>
+                  <body onload="window.print(); window.onafterprint = () => window.close();">
+                    ${kitchenEl.innerHTML}
+                  </body>
+                </html>
+              `);
+              w2.document.close();
             }
           }
         }, 300);
@@ -301,7 +310,6 @@ export default function AdminOrdersWithNotifications() {
   return (
     <div dir="rtl" className={`${theme.page} p-3 sm:p-6`}>
       <div className="mx-auto max-w-7xl space-y-4">
-        {/* هدر با زنگ نوتیفیکیشن */}
         <div className="flex flex-col sm:flex-row justify-between gap-3">
           <div>
             <h1 className="text-2xl font-black flex items-center gap-2">
@@ -314,7 +322,6 @@ export default function AdminOrdersWithNotifications() {
               صندوق‌دار: نوتیفیکیشن لحظه‌ای فعاله
             </p>
           </div>
-
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -346,8 +353,8 @@ export default function AdminOrdersWithNotifications() {
               </Button>
 
               {showNotifPanel && (
-                <Card className="absolute left-20 sm:right-0 top-12 z-80 w-30 sm:w-96 rounded-2xl shadow-2xl border-black/10 dark:border-white/10 max-h-[70vh] flex flex-col">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <Card className="absolute left-0 sm:left-auto sm:right-0 top-12 z-50 w-[90vw] max-w-[380px] sm:w-[380px] rounded-2xl shadow-2xl border-black/10 dark:border-white/10 max-h-[70vh] flex flex-col">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                     <CardTitle className="text-base">
                       اعلان‌ها ({notifications.length})
                     </CardTitle>
@@ -399,7 +406,9 @@ export default function AdminOrdersWithNotifications() {
                             </p>
                             <p className="text-xs opacity-70 truncate">
                               {Number(n.order.final_price).toLocaleString()} ؋ -{" "}
-                              {new Date(n.time).toLocaleTimeString("fa-IR")}
+                              {new Date(n.time).toLocaleTimeString(
+                                "fa-IR-u-nu-latn",
+                              )}
                             </p>
                           </div>
                           <Button
@@ -422,7 +431,7 @@ export default function AdminOrdersWithNotifications() {
                     )}
                   </CardContent>
                   {notifications.length > 0 && (
-                    <div className="p-2 border-t">
+                    <div className="p-2 border-t border-black/5 dark:border-white/10">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -448,7 +457,6 @@ export default function AdminOrdersWithNotifications() {
           </div>
         </div>
 
-        {/* فیلترها - دسته‌بندی بر اساس تاریخ و نوع */}
         <Card className={`${theme.card} p-3 sm:p-4`}>
           <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
@@ -461,18 +469,10 @@ export default function AdminOrdersWithNotifications() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="جستجو نام، تلفن، میز..."
-                  className="pr-9 rounded-full h-9 text-sm"
+                  className="pr-9 rounded-full h-9 text-sm bg-white dark:bg-slate-900"
                 />
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="rounded-full h-9 gap-1"
-              >
-                <Filter size={14} /> فیلتر
-              </Button>
             </div>
-
             <div className="flex flex-wrap gap-2">
               <div className="flex items-center gap-1.5">
                 <Calendar size={12} className="opacity-50" />
@@ -493,7 +493,6 @@ export default function AdminOrdersWithNotifications() {
                 ))}
               </div>
             </div>
-
             <div className="flex flex-wrap gap-2">
               <div className="flex items-center gap-1.5">
                 <Bike size={12} className="opacity-50" />
@@ -502,6 +501,7 @@ export default function AdminOrdersWithNotifications() {
                   { k: "all", l: "همه" },
                   { k: "dine_in", l: "داخل 🍽️" },
                   { k: "delivery", l: "بیرون‌بر 🛵" },
+                  { k: "inter_city", l: "شهر دیگر 📦" },
                 ].map((f) => (
                   <button
                     key={f.k}
@@ -512,7 +512,6 @@ export default function AdminOrdersWithNotifications() {
                   </button>
                 ))}
               </div>
-
               <div className="flex items-center gap-1.5 ms-2">
                 <span className="text-xs font-bold opacity-60">وضعیت:</span>
                 {[
@@ -534,7 +533,6 @@ export default function AdminOrdersWithNotifications() {
           </div>
         </Card>
 
-        {/* لیست گروه‌بندی شده بر اساس تاریخ */}
         <div className="space-y-6">
           {groupedByDate.map(([dateLabel, ordersInDate]) => (
             <div key={dateLabel} className="space-y-3">
@@ -544,11 +542,10 @@ export default function AdminOrdersWithNotifications() {
                   {ordersInDate.length}
                 </Badge>
               </h3>
-
-              {/* داخل هر تاریخ، تفکیک بر اساس نوع سفارش */}
               {[
                 { type: "dine_in", label: "داخل رستوران 🍽️", icon: Store },
                 { type: "delivery", label: "بیرون‌بر 🛵", icon: Bike },
+                { type: "inter_city", label: "ارسال شهر دیگر 📦", icon: Package },
               ].map((group) => {
                 const list = ordersInDate.filter(
                   (o) => o.order_type === group.type,
@@ -593,7 +590,7 @@ export default function AdminOrdersWithNotifications() {
                                   {order.final_price?.toLocaleString()} ؋ •{" "}
                                   {new Date(
                                     order.created_at,
-                                  ).toLocaleTimeString("fa-IR")}{" "}
+                                  ).toLocaleTimeString("fa-IR-u-nu-latn")}{" "}
                                   • {order.status}
                                 </p>
                               </div>
@@ -602,7 +599,7 @@ export default function AdminOrdersWithNotifications() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-7 w-7 p-0 rounded-full cursor-pointer"
+                                className="h-7 w-7 p-0 rounded-full"
                                 onClick={() => setSelected(order)}
                               >
                                 <Eye size={12} />
@@ -638,7 +635,6 @@ export default function AdminOrdersWithNotifications() {
               })}
             </div>
           ))}
-
           {groupedByDate.length === 0 && (
             <Card className="rounded-2xl border-dashed border-2 py-16 text-center bg-white/50 dark:bg-slate-900/50">
               <p className="opacity-50">سفارشی با این فیلتر نیست</p>
@@ -646,14 +642,14 @@ export default function AdminOrdersWithNotifications() {
           )}
         </div>
 
-        {/* رسید مخفی برای چاپ */}
-        <div style={{ position: "absolute", left: "-999px", top: "-999px" }}>
-          <div id="receipt-hidden">
+        <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
+          {/* فاکتور مشتری (با قیمت، آدرس، شماره تماس) */}
+          <div id="receipt-customer">
             {selected && (
               <div
                 style={{
                   width: "300px",
-                  fontFamily: "monospace",
+                  fontFamily: "monospace, Tahoma",
                   fontSize: "12px",
                   padding: "8px",
                   direction: "rtl",
@@ -670,53 +666,161 @@ export default function AdminOrdersWithNotifications() {
                   }}
                 >
                   <div style={{ fontWeight: "900", fontSize: "16px" }}>
-                    وطندار
+                    رستوران وطندار
                   </div>
-                  <div>سفارش: {selected.id.slice(0, 8)}</div>
-                  <div>{new Date().toLocaleString("fa-IR")}</div>
+                  <div style={{ fontSize: "10px" }}>VATANDAR RESTAURANT</div>
+                  <div style={{ fontSize: "10px", marginTop: "4px" }}>
+                    {new Date().toLocaleString("fa-IR")}
+                  </div>
+                  <div style={{ fontSize: "10px" }}>شماره: {selected.id.slice(0, 8)}</div>
                 </div>
-                <div>مشتری: {selected.customer_name}</div>
-                <div>
-                  نوع:{" "}
-                  {selected.order_type === "delivery"
-                    ? "بیرون‌بر"
-                    : `میز ${selected.table_number}`}
+                <div style={{ fontSize: "11px", marginBottom: "8px", lineHeight: "1.6" }}>
+                  <div>مشتری: {selected.customer_name}</div>
+                  {selected.customer_phone && <div>تماس: {selected.customer_phone}</div>}
+                  <div>
+                    نوع:{" "}
+                    {selected.order_type === "delivery"
+                      ? "بیرون‌بر 🛵"
+                      : selected.order_type === "inter_city"
+                        ? `ارسال به شهر دیگر 📦`
+                        : `داخل - میز ${selected.table_number || "-"}`}
+                  </div>
+                  {selected.delivery_address && <div>آدرس: {selected.delivery_address}</div>}
+                  {(selected.items || []).some((it: any) => it.is_store_item) && (
+                    <div style={{ color: "#2563eb", fontWeight: "bold", marginTop: "4px" }}>⚡ شامل محصولات فروشگاهی</div>
+                  )}
+                  <div>
+                    پرداخت: {selected.payment_method === "online" ? "آنلاین 💳" : "نقدی 💵"} • {selected.status}
+                  </div>
                 </div>
-                {selected.delivery_address && (
-                  <div>آدرس: {selected.delivery_address}</div>
-                )}
                 <div
                   style={{
                     borderTop: "1px dashed black",
                     borderBottom: "1px dashed black",
-                    margin: "8px 0",
                     padding: "6px 0",
+                    margin: "8px 0",
                   }}
                 >
-                  {(selected.items || []).map((it: any, i: number) => (
+                  {(selected.items || []).map((item: any, i: number) => (
                     <div
                       key={i}
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
+                        fontSize: "11px",
+                        padding: "2px 0",
                       }}
                     >
-                      <span>
-                        {it.name_fa} x{it.quantity}
+                      <span style={{ flex: 1 }}>
+                        {item.is_store_item ? "🛒 " : "🍽️ "}{item.name_fa} x{item.quantity}
                       </span>
-                      <span>{(it.price * it.quantity).toLocaleString()}</span>
+                      <span style={{ fontWeight: "bold" }}>
+                        {(item.price * item.quantity).toLocaleString()}
+                      </span>
                     </div>
                   ))}
                 </div>
+                <div style={{ fontSize: "11px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span>جمع جزء</span>
+                    <span>{Number(selected.total_price || 0).toLocaleString()}</span>
+                  </div>
+                  {Number(selected.delivery_fee) > 0 && (
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span>ارسال</span>
+                      <span>{Number(selected.delivery_fee).toLocaleString()}</span>
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontWeight: "900",
+                      fontSize: "13px",
+                      borderTop: "1px solid black",
+                      marginTop: "4px",
+                      paddingTop: "4px",
+                    }}
+                  >
+                    <span>قابل پرداخت</span>
+                    <span>
+                      {Number(
+                        selected.final_price || selected.total_price || 0,
+                      ).toLocaleString()}{" "}
+                      ؋
+                    </span>
+                  </div>
+                </div>
+                {selected.notes && (
+                  <div
+                    style={{
+                      marginTop: "8px",
+                      fontSize: "11px",
+                      borderTop: "1px dashed black",
+                      paddingTop: "6px",
+                    }}
+                  >
+                    <div style={{ fontWeight: "bold" }}>یادداشت:</div>
+                    <div>{selected.notes}</div>
+                  </div>
+                )}
                 <div
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontWeight: "bold",
+                    textAlign: "center",
+                    marginTop: "12px",
+                    borderTop: "2px dashed black",
+                    paddingTop: "8px",
+                    fontSize: "10px",
                   }}
                 >
-                  <span>جمع</span>
-                  <span>{Number(selected.final_price).toLocaleString()} ؋</span>
+                  <div>با تشکر از شما</div>
+                  <div style={{ marginTop: "4px" }}>***</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* فاکتور آشپزخانه (بدون قیمت کلی، فقط آیتم‌ها و تعداد برای تایید) */}
+          <div id="receipt-kitchen">
+            {selected && (
+              <div
+                style={{
+                  width: "300px",
+                  fontFamily: "monospace, Tahoma",
+                  fontSize: "13px",
+                  padding: "10px",
+                  direction: "rtl",
+                  background: "#fff",
+                  color: "#000",
+                  border: "2px solid #000",
+                }}
+              >
+                <div style={{ textAlign: "center", fontWeight: "900", fontSize: "18px", borderBottom: "2px dashed #000", paddingBottom: "8px", marginBottom: "8px" }}>
+                  آشپزخانه — رستوران وطندار
+                </div>
+                <div style={{ fontSize: "11px", marginBottom: "6px" }}>
+                  <div>سفارش: <b>{selected.id.slice(0, 8).toUpperCase()}</b></div>
+                  <div>مشتری: <b>{selected.customer_name}</b></div>
+                  <div>نوع: <b>{selected.order_type === "delivery" ? "بیرون‌بر 🛵" : selected.order_type === "inter_city" ? "ارسال شهر دیگر 📦" : `داخل - میز ${selected.table_number || "-"}`}</b></div>
+                  {selected.customer_phone && <div>تلفن: <b>{selected.customer_phone}</b></div>}
+                  {selected.delivery_address && <div>آدرس: <b>{selected.delivery_address}</b></div>}
+                  {selected.notes && <div>یادداشت: <b>{selected.notes}</b></div>}
+                  <div>زمان: <b>{new Date(selected.created_at).toLocaleString("fa-IR")}</b></div>
+                </div>
+                <div style={{ borderTop: "2px dashed #000", borderBottom: "2px dashed #000", padding: "6px 0", margin: "6px 0" }}>
+                  <div style={{ fontWeight: "900", marginBottom: "4px", fontSize: "14px" }}>اقلام سفارش:</div>
+                  {(selected.items || []).map((it: any, i: number) => (
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0", borderBottom: "1px dashed #ccc", fontSize: "12px" }}>
+                      <span>{it.is_store_item ? "📦 " : "🍽️ "}{it.name_fa} × {it.quantity}</span>
+                      {it.notes && <span style={{ color: "red", fontSize: "10px" }}>({it.notes})</span>}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ textAlign: "center", fontWeight: "bold", fontSize: "12px", borderTop: "2px dashed #000", paddingTop: "6px" }}>
+                  صندوق‌دار: لطفاً قبل از ارسال بررسی شود — وضعیت: {selected.status}
+                </div>
+                <div style={{ textAlign: "center", marginTop: "6px", fontSize: "10px", opacity: 0.7 }}>
+                  تأیید شده توسط صندوق‌دار
                 </div>
               </div>
             )}

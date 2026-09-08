@@ -1,165 +1,202 @@
-// app/admin/login/page.tsx
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Lock, User, LogIn, AlertCircle, Users } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Lock,
+  User,
+  AlertCircle,
+  ShieldCheck,
+  Sparkles,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import Image from "next/image";
+
+const theme = {
+  page: "min-h-screen w-full bg-[#fff8ed] text-slate-900 dark:bg-slate-950 dark:text-white transition-colors duration-500",
+  card: "rounded-[2rem] border border-black/[0.08] bg-white/90 shadow-2xl shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30",
+  input:
+    "h-[52px] w-full rounded-2xl border border-black/10 bg-white pr-11 pl-11 text-[14px] font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-emerald-500/30 focus-visible:border-emerald-500/30 dark:border-white/10 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500 transition-all",
+  label: "text-[13px] font-bold text-slate-700 dark:text-slate-200",
+  button:
+    "h-[52px] w-full rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-500 text-white font-black text-[15px] shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/30 hover:from-emerald-600 hover:to-teal-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed",
+};
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // اطلاعات ثابت ادمین
   const ADMIN_CREDENTIALS = {
-    username: 'admin',
-    password: '5515896'
+    username: "admin",
+    password: "5515896",
   };
 
-  // چک کن اگر قبلاً لاگین کرده
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const isLoggedIn = localStorage.getItem('isAdminLoggedIn');
-        if (isLoggedIn === 'true') {
-          router.push('/admin');
-        }
-      } catch (err) {
-        console.log('LocalStorage not available yet');
-      }
-    };
-    console.log("this is", router)
-
-    checkAuth();
+    try {
+      const isLoggedIn = localStorage.getItem("isAdminLoggedIn");
+      if (isLoggedIn === "true") router.push("/admin");
+    } catch {}
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
-
     try {
-      // اعتبارسنجی ساده
-      if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-        // ذخیره در localStorage
-        localStorage.setItem('isAdminLoggedIn', 'true');
-        localStorage.setItem('adminUsername', username);
-        
-        // تنظیم کوکی برای middleware
-        document.cookie = 'admin_auth=true; path=/; max-age=86400'; // 24 ساعت
-        
-        // ریدایرکت به صفحه ادمین
-        const from = searchParams.get('from') || '/admin';
+      if (
+        username === ADMIN_CREDENTIALS.username &&
+        password === ADMIN_CREDENTIALS.password
+      ) {
+        localStorage.setItem("isAdminLoggedIn", "true");
+        localStorage.setItem("adminUsername", username);
+        document.cookie = "admin_auth=true; path=/; max-age=86400";
+        const from = searchParams.get("from") || "/admin";
         router.push(from);
       } else {
-        setError('نام کاربری یا رمز عبور اشتباه است');
+        setError("نام کاربری یا رمز عبور اشتباه است");
       }
-    } catch (err) {
-      setError('خطا در ورود به سیستم');
-      console.error(err);
+    } catch {
+      setError("خطا در ورود به سیستم");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div
+      className={`${theme.page} flex items-center justify-center p-4 sm:p-6`}
+      dir="rtl"
+    >
+      {/* بک‌گراند دکور */}
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(20,184,166,0.12),transparent_40%)] dark:bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.15),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(20,184,166,0.10),transparent_40%)]" />
+        <div className="absolute -top-32 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-emerald-300/20 blur-[80px] dark:bg-emerald-500/10" />
+        <div className="absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full bg-amber-300/20 blur-[80px] dark:bg-teal-500/10" />
+      </div>
 
-        {/* کارت فرم */}
-        <div className="bg-white rounded-4xl shadow-xl p-8">
+      <div className="w-full max-w-[420px]">
         {/* هدر */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center bg-blue-600 rounded-full p-5 mb-6">
-            <Users size={40} className="text-white" />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-[1.75rem] bg-white shadow-xl shadow-black/10 border border-black/5 dark:bg-slate-900 dark:border-white/10 dark:shadow-black/30">
+            <Image
+              src="/logo1.png"
+              alt="logo"
+              width={48}
+              height={48}
+              className="object-contain"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            پنل مدیریت  منو رستوران
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 border border-emerald-500/15 dark:border-emerald-400/15 px-3 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 mb-3">
+            <ShieldCheck size={12} />
+            پنل امن مدیریت
+          </div>
+          <h1 className="text-[26px] font-black tracking-tight leading-8">
+            پنل مدیریت منو رستوران
           </h1>
-          <p className="text-gray-600">
-            لطفاً برای ادامه وارد شوید
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            خوش آمدید - لطفا وارد شوید
           </p>
         </div>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* پیغام خطا */}
+
+        {/* کارت */}
+        <div className={`${theme.card} p-6 sm:p-8`}>
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3 animate-fadeIn">
-                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <span className="text-red-700 text-sm">{error}</span>
+              <div className="flex items-start gap-2.5 rounded-2xl border border-red-500/20 bg-red-500/10 dark:bg-red-500/10 p-3.5 text-red-700 dark:text-red-300">
+                <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                <span className="text-[13px] font-medium leading-5">
+                  {error}
+                </span>
               </div>
             )}
 
-            {/* فیلد نام کاربری */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                نام کاربری
-              </label>
+              <label className={theme.label}>نام کاربری</label>
               <div className="relative">
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <User className="w-5 h-5 text-gray-400" />
-                </div>
+                <User
+                  size={18}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                />
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="نام کاربری خود را وارد کنید"
-                  className="w-full pr-10 pl-4 py-4 border border-gray-300 rounded-xl focus:ring-1 focus:ring-blue-600 text-accent-foreground focus:border-blue-600 outline-none transition text-right"
+                  placeholder="admin"
+                  className={theme.input}
                   required
-                  dir="rtl"
+                  dir="ltr"
+                  autoComplete="username"
                 />
               </div>
             </div>
 
-            {/* فیلد رمز عبور */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                رمز عبور
-              </label>
+              <label className={theme.label}>رمز عبور</label>
               <div className="relative">
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <Lock className="w-5 h-5 text-gray-400" />
-                </div>
+                <Lock
+                  size={18}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                />
                 <input
-                  type="password"
+                  type={showPass ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="رمز عبور خود را وارد کنید"
-                  className="w-full pr-10 pl-4 py-4 border border-gray-300 rounded-xl focus:ring-1 focus:ring-blue-600 text-accent-foreground focus:border-blue-600 outline-none transition text-right"
+                  placeholder="••••••••"
+                  className={theme.input}
                   required
-                  dir="rtl"
+                  dir="ltr"
+                  autoComplete="current-password"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                پیش‌فرض: admin / 5515896
+              </p>
             </div>
 
-            {/* دکمه ورود */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-4 px-4 bg-blue-600 hover:bg-blue-400  text-white font-medium rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
-            >
+            <button type="submit" disabled={loading} className={theme.button}>
               {loading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>در حال ورود...</span>
-                </>
+                <span className="flex items-center justify-center gap-2">
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  در حال ورود...
+                </span>
               ) : (
-                <>
-                  <span>ورود</span>
-                </>
+                <span className="flex items-center justify-center gap-2">
+                  <Sparkles size={16} />
+                  ورود به پنل
+                </span>
               )}
             </button>
           </form>
 
-          {/* فوتر */}
-          <div className="mt-8 text-center">
-            <p className="text-xs text-gray-500">
-              دسترسی به این صفحه فقط برای مدیران سیستم مجاز می‌باشد
-            </p>
+          <div className="mt-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
+            <span className="text-[11px] text-slate-400">
+              امن و رمزگذاری شده
+            </span>
+            <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
           </div>
+
+          <p className="mt-4 text-center text-[11px] leading-5 text-slate-500 dark:text-slate-400">
+            دسترسی فقط برای مدیران مجاز است. تمام ورودها ثبت می‌شود.
+          </p>
         </div>
+
+        <p className="mt-6 text-center text-[11px] text-slate-400">
+          © {new Date().getFullYear()} Vatandar Restaurant
+        </p>
       </div>
     </div>
   );

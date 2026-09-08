@@ -22,6 +22,7 @@ export type Food = {
   cooking_time: number | null;
   serves: number | null;
   sort_order?: number;
+  is_store_item?: boolean; // محصول فروشگاهی (مغازه خشک بار)
   created_at: string;
   updated_at: string;
 };

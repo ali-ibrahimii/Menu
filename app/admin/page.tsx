@@ -1,7 +1,6 @@
-// app/admin/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 import {
@@ -10,13 +9,23 @@ import {
   DollarSign,
   Clock,
   TrendingUp,
-  TrendingDown,
   ArrowUpRight,
   Plus,
   RefreshCw,
-  CheckCircle2,
-  XCircle,
   Eye,
+  Bike,
+  Store,
+  CreditCard,
+  Banknote,
+  QrCode,
+  Users,
+  BarChart3,
+  Calendar,
+  Search,
+  X,
+  MapPin,
+  Phone,
+  Hash,
 } from "lucide-react";
 import {
   Card,
@@ -27,6 +36,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import ThemeToggle from "@/components/ThemeToggle";
 import {
   AreaChart,
@@ -36,485 +46,753 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
   Legend,
-
 } from "recharts";
+import type { Food } from "@/types";
 
-/* ---------- انواع داده ---------- */
 type Order = {
   id: string;
   created_at: string;
   customer_name: string;
-  table_number: string;
+  customer_phone: string | null;
+  table_number: string | null;
+  delivery_address: string | null;
   total_price: number;
-  status: "pending" | "confirmed" | "completed" | "cancelled";
-  items: { name_fa: string; quantity: number; price: number }[];
+  final_price?: number;
+  status: string;
+  order_type?: "dine_in" | "delivery";
+  payment_method?: "cash" | "online";
+  branch_id?: string;
+  items: any[];
 };
 
-type Food = {
-  id: string;
-  name_fa: string;
-  price: number;
-  image_url: string;
-  is_available: boolean;
-  category_id: string;
-};
+const PIE_COLORS = ["#10b981", "#f59e0b", "#3b82f6", "#a855f7", "#ef4444"];
 
-/* ---------- رنگ نمودار ---------- */
-const PIE_COLORS = ["#f97316", "#22c55e", "#3b82f6", "#a855f7", "#ef4444"];
+const theme = {
+  page: "min-h-screen w-full bg-[#fff8ed] text-slate-900 dark:bg-slate-950 dark:text-white transition-colors duration-500",
+  card: "rounded-[1.5rem] border border-black/[0.06] bg-white/90 shadow-sm backdrop-blur dark:border-white/10 dark:bg-slate-900/70",
+  muted: "text-slate-500 dark:text-slate-400",
+};
 
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [foods, setFoods] = useState<Food[]>([]);
+  const [visits, setVisits] = useState<any[]>([]);
+  const [qrScans, setQrScans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [range, setRange] = useState<"today" | "week" | "month">("week");
 
   useEffect(() => {
-    fetchData();
+    fetchAll();
   }, []);
 
-  const fetchData = async () => {
+  const fetchAll = async () => {
     setLoading(true);
+    // هر جدول رو جداگانه بگیریم تا اگر یکی نبود بقیه خراب نشه
     try {
-      const [ordersRes, foodsRes] = await Promise.all([
-        supabase.from("orders").select("*").order("created_at", { ascending: false }),
-        supabase.from("foods").select("*"),
-      ]);
-      setOrders(ordersRes.data || []);
-      setFoods(foodsRes.data || []);
+      const { data: ordersData } = await supabase
+        .from("orders")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(150);
+      setOrders((ordersData as any) || []);
     } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
+      console.error("orders error", e);
     }
+
+    try {
+      const { data: foodsData } = await supabase
+        .from("foods")
+        .select("*")
+        .order("created_at", { ascending: false });
+      setFoods((foodsData as any) || []);
+    } catch (e) {
+      console.error("foods error", e);
+    }
+
+    try {
+      const { data: visitsData, error: visitsError } = await supabase
+        .from("site_visits")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (visitsError) throw visitsError;
+      setVisits(visitsData || []);
+      console.log("✅ بازدیدها:", visitsData?.length);
+    } catch (e: any) {
+      console.warn("⚠️ site_visits وجود ندارد یا RLS بسته است:", e.message);
+      setVisits([]); // خالی بمونه تا کاربر SQL رو بزنه
+    }
+
+    try {
+      const { data: qrData, error: qrError } = await supabase
+        .from("qr_scans")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (qrError) throw qrError;
+      setQrScans(qrData || []);
+    } catch {
+      setQrScans([]);
+    }
+
+    setLoading(false);
   };
 
-  /* ---------- محاسبات آماری ---------- */
-  const totalRevenue = orders
-    .filter((o) => o.status === "completed")
-    .reduce((sum, o) => sum + (o.total_price || 0), 0);
+  // موتور جستجو - بین غذاها و اسم مشتری و شماره موبایل و...
+  const searchResults = useMemo(() => {
+    if (!search.trim()) return null;
+    const q = search.toLowerCase();
 
-  const pendingCount = orders.filter((o) => o.status === "pending").length;
-  const completedCount = orders.filter((o) => o.status === "completed").length;
-  const todayStr = new Date().toDateString();
-  const todayOrders = orders.filter(
-    (o) => new Date(o.created_at).toDateString() === todayStr
-  ).length;
+    const matchedFoods = foods.filter(
+      (f) =>
+        String(f.name_fa || "")
+          .toLowerCase()
+          .includes(q) ||
+        String((f as any).name_en || "")
+          .toLowerCase()
+          .includes(q) ||
+        String((f as any).name_ar || "")
+          .toLowerCase()
+          .includes(q) ||
+        String(f.price || "")
+          .toString()
+          .includes(q) ||
+        String((f as any).category || "")
+          .toLowerCase()
+          .includes(q),
+    );
 
-  /* ---------- داده نمودار فروش ۷ روز اخیر ---------- */
-  const last7Days = Array.from({ length: 7 }).map((_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
-    const dayStr = d.toDateString();
-    const dayRevenue = orders
-      .filter(
-        (o) =>
-          o.status === "completed" &&
-          new Date(o.created_at).toDateString() === dayStr
-      )
-      .reduce((sum, o) => sum + (o.total_price || 0), 0);
-    const dayCount = orders.filter(
-      (o) => new Date(o.created_at).toDateString() === dayStr
+    const matchedOrders = orders.filter(
+      (o) =>
+        String(o.customer_name || "")
+          .toLowerCase()
+          .includes(q) ||
+        String(o.customer_phone || "")
+          .toLowerCase()
+          .includes(q) ||
+        String(o.table_number || "")
+          .toLowerCase()
+          .includes(q) ||
+        String(o.id || "")
+          .toLowerCase()
+          .includes(q) ||
+        String(o.delivery_address || "")
+          .toLowerCase()
+          .includes(q) ||
+        (o.items || []).some((it: any) =>
+          String(it.name_fa || "")
+            .toLowerCase()
+            .includes(q),
+        ),
+    );
+
+    return { foods: matchedFoods, orders: matchedOrders };
+  }, [search, foods, orders]);
+
+  const stats = useMemo(() => {
+    const todayStr = new Date().toDateString();
+    const todayOrders = orders.filter(
+      (o) => new Date(o.created_at).toDateString() === todayStr,
+    );
+    const totalRevenue = orders
+      .filter((o) => ["completed", "delivered", "paid"].includes(o.status))
+      .reduce(
+        (s, o) => s + Number((o as any).final_price || o.total_price || 0),
+        0,
+      );
+    const todayRevenue = todayOrders
+      .filter((o) => ["completed", "delivered", "paid"].includes(o.status))
+      .reduce(
+        (s, o) => s + Number((o as any).final_price || o.total_price || 0),
+        0,
+      );
+    const pending = orders.filter((o) => o.status === "pending").length;
+
+    // بازدید - فیکس: اگر جدول خالی بود 0 نشون نده، پیام بده
+    const todayVisits = visits.filter(
+      (v) => new Date(v.created_at).toDateString() === todayStr,
     ).length;
+    const totalVisits = visits.length;
+    const totalQrScans = qrScans.length;
+
     return {
-      name: d.toLocaleDateString("fa-IR", { weekday: "short" }),
-      درآمد: dayRevenue,
-      سفارش: dayCount,
+      totalRevenue,
+      todayRevenue,
+      pending,
+      completed: orders.filter((o) =>
+        ["completed", "delivered", "paid"].includes(o.status),
+      ).length,
+      todayOrders: todayOrders.length,
+      totalOrders: orders.length,
+      delivery: orders.filter((o) => o.order_type === "delivery").length,
+      dineIn: orders.filter((o) => o.order_type === "dine_in" || !o.order_type)
+        .length,
+      totalVisits,
+      todayVisits,
+      totalQrScans,
+      profit: totalRevenue * 0.4,
     };
-  });
+  }, [orders, visits, qrScans]);
 
-  /* ---------- داده نمودار وضعیت سفارشات ---------- */
-  const statusData = [
-    { name: "تکمیل شده", value: orders.filter((o) => o.status === "completed").length },
-    { name: "در انتظار", value: orders.filter((o) => o.status === "pending").length },
-    { name: "تایید شده", value: orders.filter((o) => o.status === "confirmed").length },
-    { name: "لغو شده", value: orders.filter((o) => o.status === "cancelled").length },
-  ].filter((d) => d.value > 0);
+  const last7Days = useMemo(() => {
+    return Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      const dayStr = d.toDateString();
+      const dayRevenue = orders
+        .filter(
+          (o) =>
+            ["completed", "delivered", "paid"].includes(o.status) &&
+            new Date(o.created_at).toDateString() === dayStr,
+        )
+        .reduce(
+          (s, o) => s + Number((o as any).final_price || o.total_price || 0),
+          0,
+        );
+      const dayOrders = orders.filter(
+        (o) => new Date(o.created_at).toDateString() === dayStr,
+      ).length;
+      const dayVisits = visits.filter(
+        (v) => new Date(v.created_at).toDateString() === dayStr,
+      ).length;
+      const dayQr = qrScans.filter(
+        (q) => new Date(q.created_at).toDateString() === dayStr,
+      ).length;
+      return {
+        name: d.toLocaleDateString("fa-IR", { weekday: "short" }),
+        درآمد: dayRevenue,
+        سفارش: dayOrders,
+        بازدید: dayVisits,
+        اسکن: dayQr,
+      };
+    });
+  }, [orders, visits, qrScans]);
 
-  /* ---------- محبوب‌ترین غذاها ---------- */
-  const foodSales: Record<string, { name: string; qty: number }> = {};
+  const statusData = useMemo(() => {
+    const groups: Record<string, number> = {};
+    orders.forEach((o) => (groups[o.status] = (groups[o.status] || 0) + 1));
+    return Object.entries(groups).map(([name, value]) => ({
+      name:
+        name === "completed"
+          ? "تکمیل"
+          : name === "pending"
+            ? "در انتظار"
+            : name,
+      value,
+    }));
+  }, [orders]);
+
+  const foodSales: any = {};
   orders.forEach((o) => {
-    o.items?.forEach((item) => {
-      if (!foodSales[item.name_fa])
-        foodSales[item.name_fa] = { name: item.name_fa, qty: 0 };
-      foodSales[item.name_fa].qty += item.quantity;
+    o.items?.forEach((item: any) => {
+      const key = item.name_fa || "نامشخص";
+      if (!foodSales[key]) foodSales[key] = { name: key, qty: 0, revenue: 0 };
+      foodSales[key].qty += Number(item.quantity || 1);
+      foodSales[key].revenue +=
+        Number(item.price || 0) * Number(item.quantity || 1);
     });
   });
   const topFoods = Object.values(foodSales)
-    .sort((a, b) => b.qty - a.qty)
-    .slice(0, 5);
-
+    .sort((a: any, b: any) => b.qty - a.qty)
+    .slice(0, 5) as any[];
   const recentOrders = orders.slice(0, 5);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950">
-        <div className="text-center">
-          <div className="relative mx-auto mb-4 w-16 h-16">
-            <div className="absolute inset-0 rounded-full border-4 border-orange-200 dark:border-orange-900" />
-            <div className="absolute inset-0 rounded-full border-4 border-orange-500 border-t-transparent animate-spin" />
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 font-medium">
-            در حال بارگذاری داشبورد...
-          </p>
-        </div>
+      <div
+        className={`flex items-center justify-center min-h-screen ${theme.page}`}
+      >
+        <div className="h-12 w-12 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin" />
       </div>
     );
   }
 
   return (
-    <div
-      dir="rtl"
-      className="w-full min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors"
-    >
-      <div className="container mx-auto p-4 md:p-6 space-y-6">
-        {/* ---------- هدر ---------- */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100">
-              داشبورد مدیریت 👋
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">
-              خلاصه عملکرد رستوران شما در یک نگاه
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button
-              onClick={fetchData}
-              variant="outline"
-              className="gap-2 dark:border-slate-700 dark:text-slate-200"
-            >
-              <RefreshCw size={16} />
-              بروزرسانی
-            </Button>
-            <Link href="/admin/add-food">
-              <Button className="gap-2 bg-orange-500 hover:bg-orange-600 text-white">
-                <Plus size={16} />
-                غذای جدید
+    <div dir="rtl" className={theme.page}>
+      <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8 space-y-6">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black">
+                داشبورد
+              </h1>
+              <p className={`text-sm mt-1 ${theme.muted}`}>
+                جستجو بین غذاها، مشتریان، شماره‌ها
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full gap-2"
+                onClick={fetchAll}
+              >
+                <RefreshCw size={14} /> بروزرسانی
               </Button>
-            </Link>
-          </div>
-        </div>
-
-        {/* ---------- کارت‌های آماری ---------- */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            title="درآمد کل"
-            value={`${totalRevenue.toLocaleString()} ؋`}
-            icon={<DollarSign className="w-5 h-5" />}
-            color="green"
-            trend="+12.5%"
-            trendUp
-          />
-          <StatCard
-            title="سفارشات امروز"
-            value={todayOrders.toString()}
-            icon={<ShoppingCart className="w-5 h-5" />}
-            color="blue"
-            trend="+8.2%"
-            trendUp
-          />
-          <StatCard
-            title="در انتظار تایید"
-            value={pendingCount.toString()}
-            icon={<Clock className="w-5 h-5" />}
-            color="orange"
-            trend={pendingCount > 5 ? "زیاد" : "عادی"}
-            trendUp={false}
-          />
-          <StatCard
-            title="کل غذاها"
-            value={foods.length.toString()}
-            icon={<UtensilsCrossed className="w-5 h-5" />}
-            color="purple"
-            trend={`${foods.filter((f) => f.is_available).length} فعال`}
-            trendUp
-          />
-        </div>
-
-        {/* ---------- نمودارها ---------- */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* نمودار فروش */}
-          <Card className="lg:col-span-2 border-0 shadow-sm dark:bg-slate-900 dark:border-slate-800">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="text-slate-800 dark:text-slate-100">
-                    نمودار فروش
-                  </CardTitle>
-                  <CardDescription className="dark:text-gray-400">
-                    درآمد و تعداد سفارشات ۷ روز اخیر
-                  </CardDescription>
-                </div>
-                <Badge
-                  variant="outline"
-                  className="text-green-600 border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950"
+              <Link href="/admin/add-food">
+                <Button
+                  size="sm"
+                  className="rounded-full bg-emerald-600 text-white gap-2"
                 >
-                  <TrendingUp className="w-3 h-3 ml-1" />
-                  رو به رشد
-                </Badge>
+                  <Plus size={14} /> غذا
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* موتور جستجو - جدید */}
+          <div className="relative">
+            <Search
+              size={18}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500"
+            />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="جستجو: نام غذا، قیمت، اسم مشتری، شماره موبایل، شماره میز، آدرس..."
+              className="pr-12 h-14 rounded-2xl bg-white dark:bg-slate-900 border-black/10 dark:border-white/10 text-sm shadow-sm"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          {/* نتایج جستجو */}
+          {searchResults && (
+            <Card
+              className={`${theme.card} border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/20`}
+            >
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  نتایج جستجو برای "{search}"{" "}
+                  <Badge className="rounded-full">
+                    {searchResults.foods.length + searchResults.orders.length}{" "}
+                    مورد
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {searchResults.foods.length > 0 && (
+                  <div>
+                    <p className="text-xs font-bold opacity-60 mb-2 flex items-center gap-1">
+                      <UtensilsCrossed size={12} /> غذاها (
+                      {searchResults.foods.length})
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {searchResults.foods.slice(0, 6).map((f: any) => (
+                        <div
+                          key={f.id}
+                          className="flex items-center gap-2 p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-black/5 dark:border-white/10"
+                        >
+                          <img
+                            src={f.image_url || "/bg.jpg"}
+                            alt=""
+                            className="h-10 w-10 rounded-lg object-cover"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm truncate">
+                              {f.name_fa}
+                            </p>
+                            <p className="text-xs opacity-60">
+                              {f.price?.toLocaleString()} تومان • {f.category}
+                            </p>
+                          </div>
+                          <Link href={`/admin/edit/${f.id}`}>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 rounded-full text-xs"
+                            >
+                              ویرایش
+                            </Button>
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {searchResults.orders.length > 0 && (
+                  <div>
+                    <p className="text-xs font-bold opacity-60 mb-2 flex items-center gap-1">
+                      <ShoppingCart size={12} /> سفارشات - مشتریان (
+                      {searchResults.orders.length})
+                    </p>
+                    <div className="space-y-2">
+                      {searchResults.orders.slice(0, 6).map((o: any) => (
+                        <div
+                          key={o.id}
+                          className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-black/5 dark:border-white/10"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-xs ${o.order_type === "delivery" ? "bg-orange-500" : "bg-emerald-500"}`}
+                            >
+                              {o.order_type === "delivery" ? "🛵" : "🍽️"}
+                            </div>
+                            <div>
+                              <p className="font-bold text-sm">
+                                {o.customer_name}{" "}
+                                {o.customer_phone && (
+                                  <span
+                                    className="text-xs opacity-60"
+                                    dir="ltr"
+                                  >
+                                    {o.customer_phone}
+                                  </span>
+                                )}
+                              </p>
+                              <p className="text-xs opacity-60">
+                                {o.order_type === "delivery"
+                                  ? o.delivery_address?.slice(0, 30)
+                                  : `میز ${o.table_number || "-"}`}{" "}
+                                •{" "}
+                                {new Date(o.created_at).toLocaleDateString(
+                                  "fa-IR-u-nu-latn",
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-left">
+                            <p className="font-bold text-sm">
+                              {Number(
+                                o.final_price || o.total_price,
+                              ).toLocaleString()}{" "}
+                              ؋
+                            </p>
+                            <Badge variant="outline" className="text-[10px]">
+                              {o.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {searchResults.foods.length === 0 &&
+                  searchResults.orders.length === 0 && (
+                    <p className="text-center text-sm opacity-50 py-4">
+                      نتیجه‌ای برای "{search}" یافت نشد
+                    </p>
+                  )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* آمار */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className={`${theme.card} border-l-4 border-l-emerald-500`}>
+            <CardContent className="p-4 sm:p-5">
+              <p className="text-xs opacity-60 font-bold">درآمد کل</p>
+              <p className="text-lg sm:text-xl font-black mt-1">
+                {stats.totalRevenue.toLocaleString()} ؋
+              </p>
+              <p className="text-xs text-emerald-600 mt-1">
+                سود: {stats.profit.toLocaleString()} ؋
+              </p>
+            </CardContent>
+          </Card>
+          <Card className={`${theme.card} border-l-4 border-l-blue-500`}>
+            <CardContent className="p-4 sm:p-5">
+              <p className="text-xs opacity-60 font-bold">امروز</p>
+              <p className="text-lg sm:text-xl font-black mt-1">
+                {stats.todayRevenue.toLocaleString()} ؋
+              </p>
+              <p className="text-xs opacity-60 mt-1">
+                {stats.todayOrders} سفارش
+              </p>
+            </CardContent>
+          </Card>
+          <Card className={theme.card}>
+            <CardContent className="p-4 sm:p-5">
+              <p className="text-xs opacity-60 font-bold">سفارشات</p>
+              <p className="text-lg sm:text-xl font-black mt-1">
+                {stats.totalOrders}
+              </p>
+              <p className="text-xs mt-1">
+                <span className="text-amber-600">
+                  {stats.pending} در انتظار
+                </span>
+              </p>
+            </CardContent>
+          </Card>
+          <Card className={theme.card}>
+            <CardContent className="p-4 sm:p-5">
+              <p className="text-xs opacity-60 font-bold">کل غذاها</p>
+              <p className="text-lg sm:text-xl font-black mt-1">
+                {foods.length}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Card
+            className={`${theme.card} ${visits.length === 0 ? "border-amber-500/30 bg-amber-50/20" : "bg-blue-500/5 border-blue-500/20"}`}
+          >
+            <CardContent className="p-4 sm:p-5 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold opacity-60 flex items-center gap-1">
+                  <Users size={12} /> بازدید سایت{" "}
+                  {visits.length === 0 && (
+                    <span className="text-amber-600">{
+                      "جدول site_visits خالی است یا RLS ندارد"
+                    }</span>
+                  )}
+                </p>
+                <p className="text-2xl font-black mt-1">
+                  {stats.totalVisits.toLocaleString()}
+                </p>
+                <p className="text-xs mt-1">
+                  امروز: {stats.todayVisits} • دیروز:{" "}
+                  {
+                    visits.filter((v) => {
+                      const y = new Date();
+                      y.setDate(y.getDate() - 1);
+                      return (
+                        new Date(v.created_at).toDateString() ===
+                        y.toDateString()
+                      );
+                    }).length
+                  }
+                </p>
               </div>
+              <div className="h-12 w-12 rounded-2xl bg-blue-500/20 flex items-center justify-center text-blue-600">
+                <Users size={20} />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className={theme.card}>
+            <CardContent className="p-4 sm:p-5 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold opacity-60">اسکن QR</p>
+                <p className="text-2xl font-black mt-1">
+                  {stats.totalQrScans.toLocaleString()}
+                </p>
+                <p className="text-xs mt-1">
+                  تبدیل:{" "}
+                  {stats.totalOrders > 0
+                    ? (
+                        (stats.totalOrders / Math.max(stats.totalQrScans, 1)) *
+                        100
+                      ).toFixed(1)
+                    : 0}
+                  %
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-2xl bg-purple-500/20 flex items-center justify-center text-purple-600">
+                <QrCode size={20} />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className={theme.card}>
+            <CardContent className="p-4 sm:p-5 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold opacity-60">میانگین سبد</p>
+                <p className="text-2xl font-black mt-1">
+                  {stats.totalOrders > 0
+                    ? Math.round(
+                        stats.totalRevenue / stats.totalOrders,
+                      ).toLocaleString()
+                    : 0}{" "}
+                  تومان
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-600">
+                <DollarSign size={20} />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* اگر بازدید 0 بود، راهنما */}
+        {visits.length === 0 && (
+          <Card className="bg-amber-50/30 border-amber-500/20">
+            <CardContent className="p-4 sm:p-5">
+              <p className="text-sm opacity-80">
+                ⚠️ جدول <code>site_visits</code> وجود ندارد یا RLS بسته است. برای
+                نمایش آمار بازدیدها، SQL زیر را در بخش SQL Editor اجرا کنید:
+              </p>
+              <pre className="bg-black/5 dark:bg-white/10 p-3 rounded-lg mt-2 text-xs overflow-x-auto">
+                <code>
+                  CREATE TABLE site_visits (
+                  <br />
+                  &nbsp;&nbsp;id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+                  <br />
+                  &nbsp;&nbsp;created_at timestamp with time zone DEFAULT now()
+                  <br />
+                  );
+                </code>
+              </pre>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className={`lg:col-span-2 ${theme.card}`}>
+            <CardHeader>
+              <CardTitle>فروش ۷ روز اخیر</CardTitle>
+              <CardDescription>درآمد، سفارش، بازدید</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={last7Days}>
-                  <defs>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    className="stroke-slate-200 dark:stroke-slate-800"
+                    className="stroke-black/10 dark:stroke-white/10"
                   />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} className="fill-slate-500" />
-                  <YAxis tick={{ fontSize: 12 }} className="fill-slate-500" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip
-                    contentStyle={{
-                      borderRadius: "12px",
-                      border: "none",
-                      boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                      direction: "rtl",
-                    }}
+                    contentStyle={{ borderRadius: 16, direction: "rtl" }}
                   />
                   <Area
                     type="monotone"
                     dataKey="درآمد"
-                    stroke="#f97316"
-                    strokeWidth={2}
-                    fill="url(#colorRevenue)"
+                    stroke="#10b981"
+                    fill="#10b981"
+                    fillOpacity={0.2}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="سفارش"
+                    stroke="#3b82f6"
+                    fill="transparent"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="بازدید"
+                    stroke="#8b5cf6"
+                    fill="transparent"
+                    strokeDasharray="4 4"
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
-
-          {/* نمودار وضعیت سفارشات */}
-          <Card className="border-0 shadow-sm dark:bg-slate-900 dark:border-slate-800">
+          <Card className={theme.card}>
             <CardHeader>
-              <CardTitle className="text-slate-800 dark:text-slate-100">
-                وضعیت سفارشات
-              </CardTitle>
-              <CardDescription className="dark:text-gray-400">
-                توزیع کلی سفارشات
-              </CardDescription>
+              <CardTitle className="text-base">وضعیت سفارشات</CardTitle>
             </CardHeader>
             <CardContent>
-              {statusData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={statusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={90}
-                      paddingAngle={4}
-                      dataKey="value"
-                    >
-                      {statusData.map((_, i) => (
-                        <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "12px",
-                        border: "none",
-                        direction: "rtl",
-                      }}
-                    />
-                    <Legend
-                      verticalAlign="bottom"
-                      iconType="circle"
-                      wrapperStyle={{ fontSize: "12px" }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="flex items-center justify-center h-[300px] text-gray-400">
-                  داده‌ای موجود نیست
-                </div>
-              )}
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={statusData}
+                    dataKey="value"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={4}
+                  >
+                    {statusData.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         </div>
 
-        {/* ---------- سفارشات اخیر + محبوب‌ترین غذاها ---------- */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* سفارشات اخیر */}
-          <Card className="lg:col-span-2 border-0 shadow-sm dark:bg-slate-900 dark:border-slate-800">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-slate-800 dark:text-slate-100">
-                  سفارشات اخیر
-                </CardTitle>
-                <Link href="/admin/orders">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-orange-600 gap-1"
-                  >
-                    مشاهده همه
-                    <ArrowUpRight className="w-4 h-4" />
-                  </Button>
-                </Link>
+          <Card className={`lg:col-span-2 ${theme.card}`}>
+            <CardHeader className="flex flex-row justify-between items-center">
+              <div>
+                <CardTitle>سفارشات اخیر</CardTitle>
+                <CardDescription>۵ سفارش آخر</CardDescription>
               </div>
+              <Link href="/admin/orders">
+                <Button variant="ghost" size="sm" className="gap-1">
+                  همه <ArrowUpRight size={14} />
+                </Button>
+              </Link>
             </CardHeader>
-            <CardContent>
-              {recentOrders.length === 0 ? (
-                <div className="text-center py-10 text-gray-400">
-                  هنوز سفارشی ثبت نشده است
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {recentOrders.map((order) => (
+            <CardContent className="space-y-2">
+              {recentOrders.map((o) => (
+                <div
+                  key={o.id}
+                  className="flex items-center justify-between p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03]"
+                >
+                  <div className="flex items-center gap-3">
                     <div
-                      key={order.id}
-                      className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                      className={`h-10 w-10 rounded-full flex items-center justify-center text-white ${o.order_type === "delivery" ? "bg-orange-500" : "bg-emerald-500"}`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-950 flex items-center justify-center text-orange-600 font-bold">
-                          {order.customer_name?.charAt(0) || "م"}
-                        </div>
-                        <div>
-                          <p className="font-medium text-slate-800 dark:text-slate-200">
-                            {order.customer_name || "مهمان"}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            میز {order.table_number || "-"} •{" "}
-                            {new Date(order.created_at).toLocaleDateString("fa-IR")}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-left">
-                        <p className="font-bold text-slate-800 dark:text-slate-200">
-                          {order.total_price?.toLocaleString()} ؋
-                        </p>
-                        <StatusBadge status={order.status} />
-                      </div>
+                      {o.order_type === "delivery" ? (
+                        <Bike size={16} />
+                      ) : (
+                        <Store size={16} />
+                      )}
                     </div>
-                  ))}
+                    <div>
+                      <p className="font-bold text-sm">
+                        {o.customer_name || "مهمان"}
+                      </p>
+                      <p className="text-xs opacity-60 flex items-center gap-1">
+                        <Phone size={10} />
+                        {o.customer_phone || "-"} • <Hash size={10} />
+                        {o.table_number || "-"} •{" "}
+                        {new Date(o.created_at).toLocaleDateString(
+                          "fa-IR-u-nu-latn",
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-left">
+                    <p className="font-black">
+                      {Number(
+                        (o as any).final_price || o.total_price,
+                      ).toLocaleString()}{" "}
+                      ؋
+                    </p>
+                    <Badge variant="outline" className="text-[10px] mt-1">
+                      {o.status}
+                    </Badge>
+                  </div>
                 </div>
-              )}
+              ))}
             </CardContent>
           </Card>
-
-          {/* محبوب‌ترین غذاها */}
-          <Card className="border-0 shadow-sm dark:bg-slate-900 dark:border-slate-800">
+          <Card className={theme.card}>
             <CardHeader>
-              <CardTitle className="text-slate-800 dark:text-slate-100">
-                پرفروش‌ترین‌ها
-              </CardTitle>
-              <CardDescription className="dark:text-gray-400">
-                محبوب‌ترین غذاها
-              </CardDescription>
+              <CardTitle>پرفروش‌ترین‌ها</CardTitle>
             </CardHeader>
-            <CardContent>
-              {topFoods.length === 0 ? (
-                <div className="text-center py-10 text-gray-400">
-                  داده‌ای موجود نیست
+            <CardContent className="space-y-2">
+              {topFoods.slice(0, 5).map((f: any, i: number) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 p-2 rounded-xl bg-black/5 dark:bg-white/5"
+                >
+                  <div className="h-8 w-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-xs">
+                    {i + 1}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-sm truncate">{f.name}</p>
+                    <p className="text-xs opacity-60">{f.qty} فروش</p>
+                  </div>
+                  <Badge className="bg-emerald-500 text-white">{f.qty}</Badge>
                 </div>
-              ) : (
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={topFoods} layout="vertical">
-                    <XAxis type="number" hide />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      width={80}
-                      tick={{ fontSize: 11 }}
-                      className="fill-slate-500"
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "12px",
-                        border: "none",
-                        direction: "rtl",
-                      }}
-                      cursor={{ fill: "rgba(249,115,22,0.05)" }}
-                    />
-                    <Bar dataKey="qty" fill="#f97316" radius={[0, 8, 8, 0]} barSize={20} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
+              ))}
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  );
-}
-
-/* ---------- کامپوننت‌های کمکی ---------- */
-
-function StatCard({
-  title,
-  value,
-  icon,
-  color,
-  trend,
-  trendUp,
-}: {
-  title: string;
-  value: string;
-  icon: React.ReactNode;
-  color: "green" | "blue" | "orange" | "purple";
-  trend: string;
-  trendUp: boolean;
-}) {
-  const colorMap = {
-    green: "bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400",
-    blue: "bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400",
-    orange: "bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-400",
-    purple: "bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-400",
-  };
-
-  return (
-    <Card className="border-0 shadow-sm dark:bg-slate-900 dark:border-slate-800 hover:shadow-md transition-shadow">
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between">
-          <div className={`p-2.5 rounded-xl ${colorMap[color]}`}>{icon}</div>
-          <div
-            className={`flex items-center gap-1 text-xs font-medium ${
-              trendUp ? "text-green-600" : "text-orange-500"
-            }`}
-          >
-            {trendUp ? (
-              <TrendingUp className="w-3 h-3" />
-            ) : (
-              <TrendingDown className="w-3 h-3" />
-            )}
-            {trend}
-          </div>
-        </div>
-        <div className="mt-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
-          <p className="text-2xl font-bold mt-1 text-slate-800 dark:text-slate-100">
-            {value}
-          </p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function StatusBadge({ status }: { status: Order["status"] }) {
-  const config = {
-    pending: { label: "در انتظار", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400" },
-    confirmed: { label: "تایید شده", className: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400" },
-    completed: { label: "تکمیل شده", className: "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400" },
-    cancelled: { label: "لغو شده", className: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400" },
-  };
-  const c = config[status] || config.pending;
-  return (
-    <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium mt-1 ${c.className}`}>
-      {c.label}
-    </span>
   );
 }
