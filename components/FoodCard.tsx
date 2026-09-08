@@ -125,6 +125,11 @@ const FoodCard = memo(function FoodCard({
             </p>
           )}
 
+          {food.is_store_item && (
+            <Badge className="absolute top-2 right-2 z-10 bg-blue-500 text-white text-[9px] px-1.5 py-0.5 rounded-md shadow-md" variant="secondary">
+              فروشگاهی 📦
+            </Badge>
+          )}
           <span className="text-[13px] font-bold text-emerald-600 dark:text-emerald-300 mt-1 inline-block">
             {priceText}
           </span>

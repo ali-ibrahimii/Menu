@@ -10,6 +10,7 @@ export interface CartItem {
   image_url: string;
   quantity: number;
   notes?: string;
+  is_store_item?: boolean;
 }
 
 interface CartStore {

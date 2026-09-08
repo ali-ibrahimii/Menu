@@ -19,6 +19,7 @@ import {
   X,
   Trash2,
   Eye,
+  Package,
 } from "lucide-react";
 
 type Order = {
@@ -26,7 +27,7 @@ type Order = {
   device_id: string;
   customer_name: string;
   customer_phone: string | null;
-  order_type: "dine_in" | "delivery";
+  order_type: "dine_in" | "delivery" | "inter_city";
   table_number: string | null;
   delivery_address: string | null;
   total_price: number;
@@ -85,7 +86,7 @@ export default function AdminOrdersWithNotifications() {
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [search, setSearch] = useState("");
-  const [filterType, setFilterType] = useState<"all" | "dine_in" | "delivery">(
+  const [filterType, setFilterType] = useState<"all" | "dine_in" | "delivery" | "inter_city">(
     "all",
   );
   const [filterStatus, setFilterStatus] = useState<
@@ -255,14 +256,50 @@ export default function AdminOrdersWithNotifications() {
       if (next === "paid") {
         setSelected(order);
         setTimeout(() => {
-          const el = document.getElementById("receipt-hidden");
-          if (el) {
-            const w = window.open("", "_blank", "width=380,height=600");
-            if (w) {
-              w.document.write(
-                `<html><head><style>@page{size:80mm auto;margin:0}body{margin:0;padding:10px;font-family:Tahoma;background:white;color:black}</style></head><body onload="window.print();window.close()">${el.innerHTML}</body></html>`,
-              );
-              w.document.close();
+          // فاکتور مشتری
+          const customerEl = document.getElementById("receipt-customer");
+          if (customerEl) {
+            const w1 = window.open("", "_blank", "width=400,height=600");
+            if (w1) {
+              w1.document.write(`
+                <html>
+                  <head>
+                    <title>فاکتور مشتری ${order.id.slice(0, 8)}</title>
+                    <style>
+                      @page { size: 80mm auto; margin: 0; }
+                      body { margin: 0; padding: 0; background: white; display: flex; justify-content: center; font-family: Tahoma, monospace; }
+                      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    </style>
+                  </head>
+                  <body onload="window.print(); window.onafterprint = () => window.close();">
+                    ${customerEl.innerHTML}
+                  </body>
+                </html>
+              `);
+              w1.document.close();
+            }
+          }
+          // فاکتور آشپزخانه
+          const kitchenEl = document.getElementById("receipt-kitchen");
+          if (kitchenEl) {
+            const w2 = window.open("", "_blank", "width=400,height=600");
+            if (w2) {
+              w2.document.write(`
+                <html>
+                  <head>
+                    <title>فاکتور آشپزخانه ${order.id.slice(0, 8)}</title>
+                    <style>
+                      @page { size: 80mm auto; margin: 0; }
+                      body { margin: 0; padding: 0; background: white; display: flex; justify-content: center; font-family: Tahoma, monospace; }
+                      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    </style>
+                  </head>
+                  <body onload="window.print(); window.onafterprint = () => window.close();">
+                    ${kitchenEl.innerHTML}
+                  </body>
+                </html>
+              `);
+              w2.document.close();
             }
           }
         }, 300);
@@ -464,6 +501,7 @@ export default function AdminOrdersWithNotifications() {
                   { k: "all", l: "همه" },
                   { k: "dine_in", l: "داخل 🍽️" },
                   { k: "delivery", l: "بیرون‌بر 🛵" },
+                  { k: "inter_city", l: "شهر دیگر 📦" },
                 ].map((f) => (
                   <button
                     key={f.k}
@@ -507,6 +545,7 @@ export default function AdminOrdersWithNotifications() {
               {[
                 { type: "dine_in", label: "داخل رستوران 🍽️", icon: Store },
                 { type: "delivery", label: "بیرون‌بر 🛵", icon: Bike },
+                { type: "inter_city", label: "ارسال شهر دیگر 📦", icon: Package },
               ].map((group) => {
                 const list = ordersInDate.filter(
                   (o) => o.order_type === group.type,
@@ -604,12 +643,13 @@ export default function AdminOrdersWithNotifications() {
         </div>
 
         <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
-          <div id="receipt-hidden">
+          {/* فاکتور مشتری (با قیمت، آدرس، شماره تماس) */}
+          <div id="receipt-customer">
             {selected && (
               <div
                 style={{
                   width: "300px",
-                  fontFamily: "monospace",
+                  fontFamily: "monospace, Tahoma",
                   fontSize: "12px",
                   padding: "8px",
                   direction: "rtl",
@@ -626,53 +666,161 @@ export default function AdminOrdersWithNotifications() {
                   }}
                 >
                   <div style={{ fontWeight: "900", fontSize: "16px" }}>
-                    وطندار
+                    رستوران وطندار
                   </div>
-                  <div>سفارش: {selected.id.slice(0, 8)}</div>
-                  <div>{new Date().toLocaleString("fa-IR-u-nu-latn")}</div>
+                  <div style={{ fontSize: "10px" }}>VATANDAR RESTAURANT</div>
+                  <div style={{ fontSize: "10px", marginTop: "4px" }}>
+                    {new Date().toLocaleString("fa-IR")}
+                  </div>
+                  <div style={{ fontSize: "10px" }}>شماره: {selected.id.slice(0, 8)}</div>
                 </div>
-                <div>مشتری: {selected.customer_name}</div>
-                <div>
-                  نوع:{" "}
-                  {selected.order_type === "delivery"
-                    ? "بیرون‌بر"
-                    : `میز ${selected.table_number}`}
+                <div style={{ fontSize: "11px", marginBottom: "8px", lineHeight: "1.6" }}>
+                  <div>مشتری: {selected.customer_name}</div>
+                  {selected.customer_phone && <div>تماس: {selected.customer_phone}</div>}
+                  <div>
+                    نوع:{" "}
+                    {selected.order_type === "delivery"
+                      ? "بیرون‌بر 🛵"
+                      : selected.order_type === "inter_city"
+                        ? `ارسال به شهر دیگر 📦`
+                        : `داخل - میز ${selected.table_number || "-"}`}
+                  </div>
+                  {selected.delivery_address && <div>آدرس: {selected.delivery_address}</div>}
+                  {(selected.items || []).some((it: any) => it.is_store_item) && (
+                    <div style={{ color: "#2563eb", fontWeight: "bold", marginTop: "4px" }}>⚡ شامل محصولات فروشگاهی</div>
+                  )}
+                  <div>
+                    پرداخت: {selected.payment_method === "online" ? "آنلاین 💳" : "نقدی 💵"} • {selected.status}
+                  </div>
                 </div>
-                {selected.delivery_address && (
-                  <div>آدرس: {selected.delivery_address}</div>
-                )}
                 <div
                   style={{
                     borderTop: "1px dashed black",
                     borderBottom: "1px dashed black",
-                    margin: "8px 0",
                     padding: "6px 0",
+                    margin: "8px 0",
                   }}
                 >
-                  {(selected.items || []).map((it: any, i: number) => (
+                  {(selected.items || []).map((item: any, i: number) => (
                     <div
                       key={i}
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
+                        fontSize: "11px",
+                        padding: "2px 0",
                       }}
                     >
-                      <span>
-                        {it.name_fa} x{it.quantity}
+                      <span style={{ flex: 1 }}>
+                        {item.is_store_item ? "🛒 " : "🍽️ "}{item.name_fa} x{item.quantity}
                       </span>
-                      <span>{(it.price * it.quantity).toLocaleString()}</span>
+                      <span style={{ fontWeight: "bold" }}>
+                        {(item.price * item.quantity).toLocaleString()}
+                      </span>
                     </div>
                   ))}
                 </div>
+                <div style={{ fontSize: "11px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span>جمع جزء</span>
+                    <span>{Number(selected.total_price || 0).toLocaleString()}</span>
+                  </div>
+                  {Number(selected.delivery_fee) > 0 && (
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span>ارسال</span>
+                      <span>{Number(selected.delivery_fee).toLocaleString()}</span>
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontWeight: "900",
+                      fontSize: "13px",
+                      borderTop: "1px solid black",
+                      marginTop: "4px",
+                      paddingTop: "4px",
+                    }}
+                  >
+                    <span>قابل پرداخت</span>
+                    <span>
+                      {Number(
+                        selected.final_price || selected.total_price || 0,
+                      ).toLocaleString()}{" "}
+                      ؋
+                    </span>
+                  </div>
+                </div>
+                {selected.notes && (
+                  <div
+                    style={{
+                      marginTop: "8px",
+                      fontSize: "11px",
+                      borderTop: "1px dashed black",
+                      paddingTop: "6px",
+                    }}
+                  >
+                    <div style={{ fontWeight: "bold" }}>یادداشت:</div>
+                    <div>{selected.notes}</div>
+                  </div>
+                )}
                 <div
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontWeight: "bold",
+                    textAlign: "center",
+                    marginTop: "12px",
+                    borderTop: "2px dashed black",
+                    paddingTop: "8px",
+                    fontSize: "10px",
                   }}
                 >
-                  <span>جمع</span>
-                  <span>{Number(selected.final_price).toLocaleString()} ؋</span>
+                  <div>با تشکر از شما</div>
+                  <div style={{ marginTop: "4px" }}>***</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* فاکتور آشپزخانه (بدون قیمت کلی، فقط آیتم‌ها و تعداد برای تایید) */}
+          <div id="receipt-kitchen">
+            {selected && (
+              <div
+                style={{
+                  width: "300px",
+                  fontFamily: "monospace, Tahoma",
+                  fontSize: "13px",
+                  padding: "10px",
+                  direction: "rtl",
+                  background: "#fff",
+                  color: "#000",
+                  border: "2px solid #000",
+                }}
+              >
+                <div style={{ textAlign: "center", fontWeight: "900", fontSize: "18px", borderBottom: "2px dashed #000", paddingBottom: "8px", marginBottom: "8px" }}>
+                  آشپزخانه — رستوران وطندار
+                </div>
+                <div style={{ fontSize: "11px", marginBottom: "6px" }}>
+                  <div>سفارش: <b>{selected.id.slice(0, 8).toUpperCase()}</b></div>
+                  <div>مشتری: <b>{selected.customer_name}</b></div>
+                  <div>نوع: <b>{selected.order_type === "delivery" ? "بیرون‌بر 🛵" : selected.order_type === "inter_city" ? "ارسال شهر دیگر 📦" : `داخل - میز ${selected.table_number || "-"}`}</b></div>
+                  {selected.customer_phone && <div>تلفن: <b>{selected.customer_phone}</b></div>}
+                  {selected.delivery_address && <div>آدرس: <b>{selected.delivery_address}</b></div>}
+                  {selected.notes && <div>یادداشت: <b>{selected.notes}</b></div>}
+                  <div>زمان: <b>{new Date(selected.created_at).toLocaleString("fa-IR")}</b></div>
+                </div>
+                <div style={{ borderTop: "2px dashed #000", borderBottom: "2px dashed #000", padding: "6px 0", margin: "6px 0" }}>
+                  <div style={{ fontWeight: "900", marginBottom: "4px", fontSize: "14px" }}>اقلام سفارش:</div>
+                  {(selected.items || []).map((it: any, i: number) => (
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0", borderBottom: "1px dashed #ccc", fontSize: "12px" }}>
+                      <span>{it.is_store_item ? "📦 " : "🍽️ "}{it.name_fa} × {it.quantity}</span>
+                      {it.notes && <span style={{ color: "red", fontSize: "10px" }}>({it.notes})</span>}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ textAlign: "center", fontWeight: "bold", fontSize: "12px", borderTop: "2px dashed #000", paddingTop: "6px" }}>
+                  صندوق‌دار: لطفاً قبل از ارسال بررسی شود — وضعیت: {selected.status}
+                </div>
+                <div style={{ textAlign: "center", marginTop: "6px", fontSize: "10px", opacity: 0.7 }}>
+                  تأیید شده توسط صندوق‌دار
                 </div>
               </div>
             )}
