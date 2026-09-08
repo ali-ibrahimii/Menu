@@ -11,10 +11,11 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Plus, Minus, Trash2 } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Trash2, ReceiptText } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Image from "next/image";
+import CheckoutDrawer from "./CheckoutDrawer";
 
 // تم درست - روشن / تاریک مثل بقیه پروژه
 const theme = {
@@ -35,6 +36,7 @@ export default function CartDrawer() {
   } = useCartStore();
 
   const [open, setOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const subtotal = getTotalPrice();
 
@@ -77,6 +79,7 @@ export default function CartDrawer() {
   const t = getTranslations();
 
   return (
+    <>
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
@@ -133,7 +136,10 @@ export default function CartDrawer() {
                         className="rounded-xl object-cover h-14 w-14 shrink-0"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-sm truncate">
+                        <p className="font-bold text-sm truncate flex items-center gap-1.5">
+                          {item.is_store_item ? (
+                            <span className="inline-flex items-center gap-0.5 text-[9px] bg-blue-500 text-white px-1 rounded">📦 فروشگاهی</span>
+                          ) : null}
                           {language === "fa"
                             ? item.name_fa
                             : language === "ar"
@@ -211,9 +217,25 @@ export default function CartDrawer() {
             >
               {t.continueShopping}
             </Button>
+            {items.length > 0 && (
+              <Button
+                className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+                onClick={() => setCheckoutOpen(true)}
+              >
+                <ReceiptText size={16} />
+                تکمیل سفارش
+              </Button>
+            )}
           </DrawerFooter>
         </div>
       </DrawerContent>
     </Drawer>
+
+    <CheckoutDrawer
+      open={checkoutOpen}
+      onOpenChange={setCheckoutOpen}
+      onSuccess={() => setOpen(false)}
+    />
+  </>
   );
 }

@@ -37,6 +37,7 @@ export default function AddToCartButton({
       name_en: food.name_en!,
       price: food.price,
       image_url: food.image_url,
+      is_store_item: !!food.is_store_item,
     };
 
     addToCart(cartItem);
