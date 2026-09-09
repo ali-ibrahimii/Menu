@@ -10,6 +10,7 @@ import {
   Hash,
   Bike,
   Store,
+  Package,
   ArrowLeft,
   Printer,
 } from "lucide-react";
@@ -21,9 +22,10 @@ type Order = {
   device_id: string;
   customer_name: string;
   customer_phone: string | null;
-  order_type: "dine_in" | "delivery";
+  order_type: "dine_in" | "delivery" | "inter_city";
   table_number: string | null;
   delivery_address: string | null;
+  inter_city_city: string | null;
   total_price: number;
   delivery_fee: number;
   final_price: number;
@@ -49,6 +51,13 @@ const statusLabel: Record<string, string> = {
   paid: "پرداخت شد",
   cancelled: "لغو شد",
 };
+
+const orderTypeLabel = (order: Order): string =>
+  order.order_type === "delivery"
+    ? "بیرون‌بر 🛵"
+    : order.order_type === "inter_city"
+      ? "ارسال شهر دیگر 📦"
+      : `داخل - میز ${order.table_number || "-"}`;
 
 export default function MyOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -130,9 +139,10 @@ export default function MyOrdersPage() {
           <div>شماره: ${order.id.slice(0, 8)}</div>
           <div>تاریخ: ${new Date(order.created_at).toLocaleString("fa-IR")}</div>
           <div>مشتری: ${order.customer_name}</div>
-          <div>نوع: ${order.order_type === "delivery" ? "بیرون‌بر" : "میز " + (order.table_number || "-")}</div>
+          <div>نوع: ${order.order_type === "delivery" ? "بیرون‌بر 🛵" : order.order_type === "inter_city" ? "ارسال شهر دیگر 📦" : "میز " + (order.table_number || "-")}</div>
           ${order.customer_phone ? `<div>تماس: ${order.customer_phone}</div>` : ""}
           ${order.delivery_address ? `<div>آدرس: ${order.delivery_address}</div>` : ""}
+          ${order.order_type === "inter_city" && order.inter_city_city ? "<div>شهر مقصد: " + order.inter_city_city + "</div>" : ""}
         </div>
         <div class="line"></div>
         ${itemsHtml}
@@ -243,20 +253,15 @@ export default function MyOrdersPage() {
                   <div className="flex justify-between">
                     <span className="opacity-60 flex items-center gap-1">
                       {order.order_type === "delivery" ? (
-                        <>
-                          <Bike size={12} /> نوع
-                        </>
+                        <Bike size={12} />
+                      ) : order.order_type === "inter_city" ? (
+                        <Package size={12} />
                       ) : (
-                        <>
-                          <Store size={12} /> نوع
-                        </>
-                      )}
+                        <Store size={12} />
+                      )}{" "}
+                      نوع
                     </span>
-                    <span>
-                      {order.order_type === "delivery"
-                        ? "بیرون‌بر"
-                        : `داخل - میز ${order.table_number || "-"}`}
-                    </span>
+                    <span>{orderTypeLabel(order)}</span>
                   </div>
                   {order.customer_phone && (
                     <div className="flex justify-between">
