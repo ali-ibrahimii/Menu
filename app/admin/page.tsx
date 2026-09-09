@@ -508,10 +508,10 @@ export default function AdminDashboard() {
             <CardContent className="p-4 sm:p-5">
               <p className="text-xs opacity-60 font-bold">درآمد کل</p>
               <p className="text-lg sm:text-xl font-black mt-1">
-                {stats.totalRevenue.toLocaleString()} ؋
+                {stats.totalRevenue.toLocaleString()} تومان
               </p>
               <p className="text-xs text-emerald-600 mt-1">
-                سود: {stats.profit.toLocaleString()} ؋
+                سود: {stats.profit.toLocaleString()} تومان
               </p>
             </CardContent>
           </Card>
@@ -519,7 +519,7 @@ export default function AdminDashboard() {
             <CardContent className="p-4 sm:p-5">
               <p className="text-xs opacity-60 font-bold">امروز</p>
               <p className="text-lg sm:text-xl font-black mt-1">
-                {stats.todayRevenue.toLocaleString()} ؋
+                {stats.todayRevenue.toLocaleString()} تومان
               </p>
               <p className="text-xs opacity-60 mt-1">
                 {stats.todayOrders} سفارش
@@ -774,7 +774,7 @@ export default function AdminDashboard() {
                       {Number(
                         (o as any).final_price || o.total_price,
                       ).toLocaleString()}{" "}
-                      ؋
+                      تومان
                     </p>
                     <Badge variant="outline" className="text-[10px] mt-1">
                       {o.status}

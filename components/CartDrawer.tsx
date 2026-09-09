@@ -11,7 +11,20 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Plus, Minus, Trash2, ReceiptText } from "lucide-react";
+import {
+  ShoppingCart,
+  Plus,
+  Minus,
+  Trash2,
+  User,
+  Hash,
+  MapPin,
+  Phone,
+  Store,
+  Bike,
+  Banknote,
+  CreditCard,
+} from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Image from "next/image";
