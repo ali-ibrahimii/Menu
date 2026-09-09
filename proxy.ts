@@ -1,8 +1,8 @@
-// middleware.ts
+// proxy.ts (Next.js 16: middleware → proxy)
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export default function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // مسیرهای عمومی (بدون نیاز به لاگین)
