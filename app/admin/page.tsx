@@ -15,6 +15,7 @@ import {
   Eye,
   Bike,
   Store,
+  Package,
   CreditCard,
   Banknote,
   QrCode,
@@ -63,7 +64,8 @@ type Order = {
   total_price: number;
   final_price?: number;
   status: string;
-  order_type?: "dine_in" | "delivery";
+  order_type?: "dine_in" | "delivery" | "inter_city";
+  inter_city_city?: string | null;
   payment_method?: "cash" | "online";
   branch_id?: string;
   items: any[];
@@ -437,9 +439,13 @@ export default function AdminDashboard() {
                         >
                           <div className="flex items-center gap-2">
                             <div
-                              className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-xs ${o.order_type === "delivery" ? "bg-orange-500" : "bg-emerald-500"}`}
+                              className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-xs ${o.order_type === "delivery" ? "bg-orange-500" : o.order_type === "inter_city" ? "bg-blue-500" : "bg-emerald-500"}`}
                             >
-                              {o.order_type === "delivery" ? "🛵" : "🍽️"}
+                              {o.order_type === "delivery"
+                                ? "🛵"
+                                : o.order_type === "inter_city"
+                                  ? "📦"
+                                  : "🍽️"}
                             </div>
                             <div>
                               <p className="font-bold text-sm">
@@ -456,7 +462,11 @@ export default function AdminDashboard() {
                               <p className="text-xs opacity-60">
                                 {o.order_type === "delivery"
                                   ? o.delivery_address?.slice(0, 30)
-                                  : `میز ${o.table_number || "-"}`}{" "}
+                                  : o.order_type === "inter_city"
+                                    ? o.inter_city_city ||
+                                      o.delivery_address?.slice(0, 30) ||
+                                      "شهر دیگر"
+                                    : `میز ${o.table_number || "-"}`}{" "}
                                 •{" "}
                                 {new Date(o.created_at).toLocaleDateString(
                                   "fa-IR-u-nu-latn",
@@ -732,10 +742,12 @@ export default function AdminDashboard() {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`h-10 w-10 rounded-full flex items-center justify-center text-white ${o.order_type === "delivery" ? "bg-orange-500" : "bg-emerald-500"}`}
+                      className={`h-10 w-10 rounded-full flex items-center justify-center text-white ${o.order_type === "delivery" ? "bg-orange-500" : o.order_type === "inter_city" ? "bg-blue-500" : "bg-emerald-500"}`}
                     >
                       {o.order_type === "delivery" ? (
                         <Bike size={16} />
+                      ) : o.order_type === "inter_city" ? (
+                        <Package size={16} />
                       ) : (
                         <Store size={16} />
                       )}
@@ -747,7 +759,10 @@ export default function AdminDashboard() {
                       <p className="text-xs opacity-60 flex items-center gap-1">
                         <Phone size={10} />
                         {o.customer_phone || "-"} • <Hash size={10} />
-                        {o.table_number || "-"} •{" "}
+                        {o.order_type === "inter_city"
+                          ? o.inter_city_city || "-"
+                          : o.table_number || "-"}{" "}
+                        •{" "}
                         {new Date(o.created_at).toLocaleDateString(
                           "fa-IR-u-nu-latn",
                         )}

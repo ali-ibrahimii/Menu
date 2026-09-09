@@ -35,6 +35,8 @@ type Order = {
   final_price: number;
   status: string;
   payment_method: string;
+  notes: string | null;
+  inter_city_city: string | null;
   is_printed: boolean;
   created_at: string;
   items: any[];
@@ -79,6 +81,46 @@ const playSound = () => {
     }, 200);
   } catch {}
 };
+
+// برچسب کوتاه نوع سفارش (برای نوتیفیکیشن‌ها و لیست‌ها)
+const orderTypeLabel = (order: Order): string =>
+  order.order_type === "delivery"
+    ? "بیرون‌بر 🛵"
+    : order.order_type === "inter_city"
+      ? "ارسال شهر دیگر 📦"
+      : `میز ${order.table_number || "-"}`;
+
+// جزئیات نمایشی نوع سفارش (شماره میز / تلفن / شهر مقصد)
+const orderTypeDetail = (order: Order): string =>
+  order.order_type === "delivery"
+    ? order.customer_phone || "-"
+    : order.order_type === "inter_city"
+      ? order.inter_city_city || order.delivery_address || "شهر دیگر"
+      : `میز ${order.table_number || "-"}`;
+
+// رنگ پس‌زمینه آیکون نوع سفارش
+const orderTypeBg = (order: Order): string =>
+  order.order_type === "delivery"
+    ? "bg-orange-500"
+    : order.order_type === "inter_city"
+      ? "bg-blue-500"
+      : "bg-emerald-500";
+
+// آیکون نوع سفارش
+const OrderTypeIcon = ({
+  order,
+  size = 16,
+}: {
+  order: Order;
+  size?: number;
+}) =>
+  order.order_type === "delivery" ? (
+    <Bike size={size} />
+  ) : order.order_type === "inter_city" ? (
+    <Package size={size} />
+  ) : (
+    <Store size={size} />
+  );
 
 export default function AdminOrdersWithNotifications() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -143,7 +185,7 @@ export default function AdminOrdersWithNotifications() {
           if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
 
           toast(`🔔 سفارش جدید - ${newOrder.customer_name}`, {
-            description: `${newOrder.order_type === "delivery" ? "بیرون‌بر" : `میز ${newOrder.table_number || "-"}`} • ${Number(newOrder.final_price || 0).toLocaleString()} ؋`,
+            description: `${orderTypeLabel(newOrder)} • ${Number(newOrder.final_price || 0).toLocaleString()} ؋`,
             duration: 8000,
             action: { label: "مشاهده", onClick: () => setSelected(newOrder) },
           });
@@ -153,7 +195,7 @@ export default function AdminOrdersWithNotifications() {
             Notification.permission === "granted"
           ) {
             new Notification(`سفارش جدید - ${newOrder.customer_name}`, {
-              body: `${newOrder.order_type === "delivery" ? "بیرون‌بر" : `میز ${newOrder.table_number}`} - ${Number(newOrder.final_price).toLocaleString()} تومان`,
+              body: `${orderTypeLabel(newOrder)} - ${Number(newOrder.final_price).toLocaleString()} تومان`,
               icon: "/logo1.png",
               tag: newOrder.id,
             });
@@ -389,20 +431,14 @@ export default function AdminOrdersWithNotifications() {
                           className={`p-3 rounded-xl border flex gap-3 ${!n.read ? "bg-amber-50 dark:bg-amber-950/20 border-amber-500/20" : "bg-white dark:bg-slate-900 border-black/5 dark:border-white/10"}`}
                         >
                           <div
-                            className={`h-9 w-9 rounded-full flex items-center justify-center text-white shrink-0 ${n.order.order_type === "delivery" ? "bg-orange-500" : "bg-emerald-500"}`}
+                            className={`h-9 w-9 rounded-full flex items-center justify-center text-white shrink-0 ${orderTypeBg(n.order)}`}
                           >
-                            {n.order.order_type === "delivery" ? (
-                              <Bike size={16} />
-                            ) : (
-                              <Store size={16} />
-                            )}
+                            <OrderTypeIcon order={n.order} size={16} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-sm truncate">
                               {n.order.customer_name} •{" "}
-                              {n.order.order_type === "delivery"
-                                ? "بیرون‌بر"
-                                : `میز ${n.order.table_number}`}
+                              {orderTypeLabel(n.order)}
                             </p>
                             <p className="text-xs opacity-70 truncate">
                               {Number(n.order.final_price).toLocaleString()} ؋ -{" "}
@@ -568,22 +604,15 @@ export default function AdminOrdersWithNotifications() {
                           <CardContent className="p-3 flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2.5 min-w-0">
                               <div
-                                className={`h-10 w-10 rounded-full flex items-center justify-center text-white shrink-0 ${order.order_type === "delivery" ? "bg-orange-500" : "bg-emerald-500"}`}
+                                className={`h-10 w-10 rounded-full flex items-center justify-center text-white shrink-0 ${orderTypeBg(order)}`}
                               >
-                                {order.order_type === "delivery" ? (
-                                  <Bike size={16} />
-                                ) : (
-                                  <Store size={16} />
-                                )}
+                                <OrderTypeIcon order={order} size={16} />
                               </div>
                               <div className="min-w-0">
                                 <p className="font-bold text-sm truncate">
                                   {order.customer_name}{" "}
                                   <span className="text-xs opacity-50">
-                                    •{" "}
-                                    {order.order_type === "delivery"
-                                      ? order.customer_phone
-                                      : `میز ${order.table_number}`}
+                                    • {orderTypeDetail(order)}
                                   </span>
                                 </p>
                                 <p className="text-xs opacity-60 truncate">
@@ -686,6 +715,7 @@ export default function AdminOrdersWithNotifications() {
                         : `داخل - میز ${selected.table_number || "-"}`}
                   </div>
                   {selected.delivery_address && <div>آدرس: {selected.delivery_address}</div>}
+                  {selected.order_type === "inter_city" && selected.inter_city_city && <div>شهر مقصد: {selected.inter_city_city}</div>}
                   {(selected.items || []).some((it: any) => it.is_store_item) && (
                     <div style={{ color: "#2563eb", fontWeight: "bold", marginTop: "4px" }}>⚡ شامل محصولات فروشگاهی</div>
                   )}
@@ -804,6 +834,7 @@ export default function AdminOrdersWithNotifications() {
                   <div>نوع: <b>{selected.order_type === "delivery" ? "بیرون‌بر 🛵" : selected.order_type === "inter_city" ? "ارسال شهر دیگر 📦" : `داخل - میز ${selected.table_number || "-"}`}</b></div>
                   {selected.customer_phone && <div>تلفن: <b>{selected.customer_phone}</b></div>}
                   {selected.delivery_address && <div>آدرس: <b>{selected.delivery_address}</b></div>}
+                  {selected.order_type === "inter_city" && selected.inter_city_city && <div>شهر مقصد: <b>{selected.inter_city_city}</b></div>}
                   {selected.notes && <div>یادداشت: <b>{selected.notes}</b></div>}
                   <div>زمان: <b>{new Date(selected.created_at).toLocaleString("fa-IR")}</b></div>
                 </div>
