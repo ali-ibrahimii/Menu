@@ -187,7 +187,7 @@ export default function AdminSidebar({
           >
             <span className="text-xs opacity-60">درآمد</span>
             <span className="font-black text-sm text-emerald-400">
-              {stats.totalRevenue.toLocaleString()} ؋
+              {stats.totalRevenue.toLocaleString()} تومان
             </span>
           </div>
         </div>

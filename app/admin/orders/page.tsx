@@ -547,8 +547,8 @@ export default function AdminOrdersWithNotifications() {
                                       : `میز ${order.table_number}`}
                                   </span>
                                 </p>
-                                <p className="text-xs opacity-60 truncate">
-                                  {order.final_price?.toLocaleString()} ؋ •{" "}
+                                <p className="text-xs opacity-60 truncate font-bold">
+                                  {order.final_price?.toLocaleString()} تومان •{" "}
                                   {new Date(
                                     order.created_at,
                                   ).toLocaleTimeString("fa-IR-u-nu-latn")}{" "}
