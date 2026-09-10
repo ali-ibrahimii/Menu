@@ -54,7 +54,7 @@ const statusLabel: Record<string, string> = {
 
 const orderTypeLabel = (order: Order): string =>
   order.order_type === "delivery"
-    ? "بیرون‌بر 🛵"
+    ? "بیرون‌بر"
     : order.order_type === "inter_city"
       ? "ارسال شهر دیگر 📦"
       : `داخل - میز ${order.table_number || "-"}`;

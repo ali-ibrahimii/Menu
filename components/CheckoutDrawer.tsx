@@ -221,24 +221,34 @@ export default function CheckoutDrawer({
     };
 
     try {
-      const { data, error } = await supabase
-        .from("orders")
-        .insert([orderPayload])
-        .select()
-        .single();
+            const { error } = await supabase
+              .from("orders")
+              .insert(orderPayload);
+
+        
 
       if (error) {
-        console.error("Insert error:", error);
-        toast.error("خطا در ثبت سفارش");
+        console.error(
+          "Insert error:",
+          JSON.stringify(error, null, 2),
+          error,
+        );
+        toast.error(
+          error?.message
+          ? `خطا در ثبت سفارش: ${error.message}`
+          : "خطا در ثبت سفارش"
+        );
       } else {
         toast.success("سفارش با موفقیت ثبت شد");
         clearCart();
-        setStep("done");
-        onSuccess?.();
       }
     } catch (e: any) {
       console.error("Submit error:", e);
-      toast.error("خطا در ثبت سفارش");
+      toast.error(
+        e?.message
+          ? `خطا در ثبت سفارش: ${e.message}`
+          : "خطا در ثبت سفارش"
+      );
     } finally {
       setLoading(false);
     }

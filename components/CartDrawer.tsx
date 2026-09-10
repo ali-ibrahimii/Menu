@@ -24,6 +24,7 @@ import {
   Bike,
   Banknote,
   CreditCard,
+  ReceiptText,
 } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { useLanguage } from "@/contexts/LanguageContext";
