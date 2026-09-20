@@ -17,7 +17,7 @@ const theme = {
   page: "min-h-screen w-full bg-[#fff8ed] text-slate-900 dark:bg-slate-950 dark:text-white transition-colors duration-500",
   card: "rounded-[2rem] border border-black/[0.08] bg-white/90 shadow-2xl shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30",
   input:
-    "h-[52px] w-full rounded-2xl border border-black/10 bg-white pr-11 pl-11 text-[14px] font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-emerald-500/30 focus-visible:border-emerald-500/30 dark:border-white/10 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500 transition-all",
+    "ios-no-zoom-input h-[52px] w-full rounded-2xl border border-black/10 bg-white pr-11 pl-11 text-base font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-emerald-500/30 focus-visible:border-emerald-500/30 dark:border-white/10 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500 transition-all sm:text-[14px]",
   label: "text-[13px] font-bold text-slate-700 dark:text-slate-200",
   button:
     "h-[52px] w-full rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-500 text-white font-black text-[15px] shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/30 hover:from-emerald-600 hover:to-teal-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed",

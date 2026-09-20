@@ -207,6 +207,11 @@ export default function CheckoutDrawer({
       is_printed: false,
       items: items.map((i) => ({
         id: i.id,
+        variant_id: i.variant_id || null,
+        variant_label_fa: i.variant_label_fa || null,
+        variant_label_ar: i.variant_label_ar || null,
+        variant_label_en: i.variant_label_en || null,
+        weight_grams: i.weight_grams || null,
         name_fa: i.name_fa,
         name_ar: i.name_ar || null,
         name_en: i.name_en || null,

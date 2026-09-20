@@ -109,6 +109,39 @@
   display: none !important; /* Chrome + Safari */
 }
 
+/* نام دوم برای همان کاربرد (در FoodDetails و کشوی سبد استفاده می‌شود) */
+.scrollbar-hide {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE + Edge */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important; /* Chrome + Safari */
+}
+
+/*
+ * اسکرول نرم‌تر داخل کشوها روی iOS:
+ * از زنجیره شدن اسکرول به صفحه‌ی پشت جلوگیری می‌کند و لایه‌ی اسکرول را
+ * روی GPU نگه می‌دارد تا هنگام تایپ یا اسکرول، فریم جا نیفتد.
+ */
+.smooth-scroll-area {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  will-change: scroll-position;
+}
+
+/*
+ * جلوگیری از زوم خودکار iOS هنگام فوکوس روی فیلد:
+ * سافاری آیفون اگر فونت فیلد کمتر از ۱۶px باشد صفحه را زوم می‌کند.
+ * این کلاس فقط روی iOS اعمال می‌شود و در موبایل فونت را به ۱۶px می‌رساند.
+ */
+@supports (-webkit-touch-callout: none) {
+  .ios-no-zoom-input {
+    font-size: 16px !important;
+  }
+}
+
 /* حذف سایه هنگام اسکرول */
 .hide-scroll-shadow {
   -webkit-overflow-scrolling: touch;

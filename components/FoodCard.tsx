@@ -5,7 +5,13 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import AddToCartButton from "@/components/AddToCartButton";
+import { useBranch } from "@/contexts/BranchContext";
 import { Food } from "@/types";
+import {
+  formatNumber,
+  isShopBranchSlug,
+  type ShopLanguage,
+} from "@/lib/shopWeights";
 
 
 const theme = {
@@ -61,9 +67,17 @@ const FoodCard = memo(function FoodCard({
     [food, getIngredients],
   );
 
+  // در شعبه‌ی فروشگاهی قیمتِ ثبت‌شده «قیمت هر کیلوگرم» است، پس روی کارت
+  // هم همان‌طور نوشته می‌شود تا مشتری گمراه نشود.
+  const { selectedBranch } = useBranch();
+  const isShopBranch = isShopBranchSlug(selectedBranch?.slug);
+
   const priceText = useMemo(() => {
-    return `${food.price.toLocaleString()} ${t("price")}`;
-  }, [food.price, t]);
+    const amount = `${formatNumber(food.price, language as ShopLanguage)} ${t(
+      "price",
+    )}`;
+    return isShopBranch ? `${amount} / ${t("perKiloShort")}` : amount;
+  }, [food.price, isShopBranch, language, t]);
 
   const hasIngredients = ingredients && ingredients.length > 0;
 
