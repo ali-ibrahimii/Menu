@@ -742,7 +742,8 @@ export default function AdminOrdersWithNotifications() {
                       }}
                     >
                       <span style={{ flex: 1 }}>
-                        {item.is_store_item ? "🛒 " : "🍽️ "}{item.name_fa} x{item.quantity}
+                        {item.is_store_item ? "🛒 " : "🍽️ "}{item.name_fa}
+                        {item.variant_label_fa ? ` (${item.variant_label_fa})` : ""} x{item.quantity}
                       </span>
                       <span style={{ fontWeight: "bold" }}>
                         {(item.price * item.quantity).toLocaleString()}
@@ -842,7 +843,7 @@ export default function AdminOrdersWithNotifications() {
                   <div style={{ fontWeight: "900", marginBottom: "4px", fontSize: "14px" }}>اقلام سفارش:</div>
                   {(selected.items || []).map((it: any, i: number) => (
                     <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0", borderBottom: "1px dashed #ccc", fontSize: "12px" }}>
-                      <span>{it.is_store_item ? "📦 " : "🍽️ "}{it.name_fa} × {it.quantity}</span>
+                      <span>{it.is_store_item ? "📦 " : "🍽️ "}{it.name_fa}{it.variant_label_fa ? ` (${it.variant_label_fa})` : ""} × {it.quantity}</span>
                       {it.notes && <span style={{ color: "red", fontSize: "10px" }}>({it.notes})</span>}
                     </div>
                   ))}

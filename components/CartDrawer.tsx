@@ -26,7 +26,7 @@ import {
   CreditCard,
   ReceiptText,
 } from "lucide-react";
-import { useCartStore } from "@/stores/cartStore";
+import { useCartStore, cartKey, cartVariantLabel } from "@/stores/cartStore";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Image from "next/image";
 import CheckoutDrawer from "./CheckoutDrawer";
@@ -137,9 +137,16 @@ export default function CartDrawer() {
               <>
                 {/* لیست آیتم‌های سبد خرید */}
                 <div className="space-y-2">
-                  {items.map((item) => (
+                  {items.map((item) => {
+                    const key = cartKey(item);
+                    const variantLabel = cartVariantLabel(
+                      item,
+                      language === "en" || language === "ar" ? language : "fa",
+                    );
+
+                    return (
                     <div
-                      key={item.id}
+                      key={key}
                       className={theme.card + " p-2.5 flex items-center gap-3"}
                     >
                       <Image
@@ -160,8 +167,20 @@ export default function CartDrawer() {
                               ? item.name_ar || item.name_fa
                               : item.name_en || item.name_fa}
                         </p>
+
+                        {variantLabel && (
+                          <p className="text-[11px] font-bold text-amber-600 dark:text-amber-400 truncate">
+                            ⚖️ {variantLabel}
+                          </p>
+                        )}
+
                         <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">
                           {item.price.toLocaleString()} {t.toman}
+                          {item.quantity > 1 && (
+                            <span className="ms-1 text-[11px] font-medium opacity-80">
+                              = {(item.price * item.quantity).toLocaleString()}
+                            </span>
+                          )}
                         </p>
                       </div>
                       <div className="flex items-center gap-1">
@@ -170,7 +189,7 @@ export default function CartDrawer() {
                           variant="ghost"
                           className="h-7 w-7 rounded-full bg-black/5 dark:bg-white/10"
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
+                            updateQuantity(key, item.quantity - 1)
                           }
                         >
                           <Minus size={12} />
@@ -183,7 +202,7 @@ export default function CartDrawer() {
                           variant="ghost"
                           className="h-7 w-7 rounded-full bg-black/5 dark:bg-white/10"
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
+                            updateQuantity(key, item.quantity + 1)
                           }
                         >
                           <Plus size={12} />
@@ -192,13 +211,14 @@ export default function CartDrawer() {
                           size="icon"
                           variant="ghost"
                           className="h-7 w-7 text-red-500"
-                          onClick={() => removeFromCart(item.id)}
+                          onClick={() => removeFromCart(key)}
                         >
                           <Trash2 size={14} />
                         </Button>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* جمع کل */}

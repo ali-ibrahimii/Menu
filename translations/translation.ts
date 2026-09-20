@@ -207,6 +207,19 @@ export const translations = {
     badgeBranches: "اصالت طعم افغانستانی",
     quickActions: "دسترسی سریع",
     ingredients: "مواد تشکیل دهنده",
+    // ── محصولات وزن‌دار شعبه‌ی فروشگاهی (سوغات وطن‌دار) ──
+    food: "غذا",
+    product: "محصول",
+    shopProduct: "محصول فروشگاهی",
+    productDescription: "توضیحات محصول",
+    productContents: "محتویات",
+    selectWeight: "انتخاب وزن",
+    pricePerKilo: "قیمت هر کیلوگرم",
+    perKiloShort: "کیلو",
+    weightPricingNote:
+      "قیمت بر اساس وزن محاسبه می‌شود و همان مبلغ در سبد خرید ثبت می‌شود.",
+    quantityLabel: "تعداد",
+    addedToCart: "به سبد خرید اضافه شد",
   },
 
   ar: {
@@ -416,6 +429,19 @@ export const translations = {
     badgeBranches: "اصالت طعم افغانستانی",
     quickActions: "إجراءات سريعة",
     ingredients: "مكونات",
+    // ── المنتجات الموزونة (متجر وطن‌دار) ──
+    food: "طبق",
+    product: "منتج",
+    shopProduct: "منتج متجر",
+    productDescription: "وصف المنتج",
+    productContents: "المحتويات",
+    selectWeight: "اختيار الوزن",
+    pricePerKilo: "سعر الكيلوغرام",
+    perKiloShort: "كيلو",
+    weightPricingNote:
+      "يُحسب السعر حسب الوزن ويُضاف المبلغ المحدد كما هو إلى السلة.",
+    quantityLabel: "الكمية",
+    addedToCart: "تمت الإضافة إلى السلة",
   },
 
   en: {
@@ -625,6 +651,19 @@ export const translations = {
     badgeBranches: "Authentic Afghan Taste",
     quickActions: "Quick Actions",
     ingredients: "Ingredints",
+    // ── Weight-based shop products (Vatandar souvenir shop) ──
+    food: "Dish",
+    product: "Product",
+    shopProduct: "Shop Product",
+    productDescription: "Product Description",
+    productContents: "Contents",
+    selectWeight: "Choose Weight",
+    pricePerKilo: "Price per kg",
+    perKiloShort: "kg",
+    weightPricingNote:
+      "Prices are calculated by weight and the selected amount is added to the cart as is.",
+    quantityLabel: "Quantity",
+    addedToCart: "Added to cart",
   },
 };
 // Types برای امنیت
