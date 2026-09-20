@@ -452,17 +452,6 @@ export default function FoodDetails({
                   onRatingStatsChange={setRatingStats}
                 />
               </div>
-
-              {/* Add button */}
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                disabled={!food.is_available}
-                className={`sticky bottom-4 mt-auto flex w-full items-center justify-center gap-2.5 rounded-2xl px-5 py-4 text-sm font-black transition duration-300 hover:-translate-y-0.5 ${theme.addButton}`}
-              >
-                <ShoppingCart size={18} />
-                {food.is_available ? t("addToCart") : t("notAvailable")}
-              </button>
             </section>
           </div>
         </div>

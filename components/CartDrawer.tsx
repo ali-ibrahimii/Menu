@@ -60,7 +60,7 @@ export default function CartDrawer() {
         cartTitle: "سبد خرید شما",
         emptyCart: "سبد خالی است",
         goToMenu: "رفتن به منو",
-        itemsCount: `${getTotalItems()} آیتم`,
+        itemsDes: `تمام قیمت ها با احتساب ده درصد مالیات ارزش افزوده می باشد`,
         toman: "تومان",
         subtotal: "جمع کل",
         continueShopping: "ادامه خرید",
@@ -70,7 +70,7 @@ export default function CartDrawer() {
         cartTitle: "سلة التسوق الخاصة بك",
         emptyCart: "السلة فارغة",
         goToMenu: "اذهب إلى القائمة",
-        itemsCount: `${getTotalItems()} عنصر`,
+        itemsDes: `جميع الأسعار تشمل ضريبة القيمة المضافة بنسبة عشرة بالمائة`,
         toman: "تومان",
         subtotal: "المجموع الكلي",
         continueShopping: "مواصلة التسوق",
@@ -80,7 +80,7 @@ export default function CartDrawer() {
         cartTitle: "Your Cart",
         emptyCart: "Cart is empty",
         goToMenu: "Go to menu",
-        itemsCount: `${getTotalItems()} items`,
+        itemsDes: `All prices include ten percent value-added tax`,
         toman: "Toman",
         subtotal: "Total",
         continueShopping: "Continue shopping",
@@ -115,9 +115,7 @@ export default function CartDrawer() {
             <DrawerTitle className="text-xl font-black">
               {t.cartTitle}
             </DrawerTitle>
-            <p className={theme.mutedText + " text-sm"}>
-              {t.itemsCount}
-            </p>
+            <p className={`${theme.mutedText} text-sm`} >{t.itemsDes}</p>
           </DrawerHeader>
 
           <div className="flex-1 overflow-y-auto px-4 space-y-4">
@@ -231,25 +229,12 @@ export default function CartDrawer() {
             >
               {t.continueShopping}
             </Button>
-            {items.length > 0 && (
-              <Button
-                className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
-                onClick={() => setCheckoutOpen(true)}
-              >
-                <ReceiptText size={16} />
-                تکمیل سفارش
-              </Button>
-            )}
           </DrawerFooter>
         </div>
       </DrawerContent>
     </Drawer>
 
-    <CheckoutDrawer
-      open={checkoutOpen}
-      onOpenChange={setCheckoutOpen}
-      onSuccess={() => setOpen(false)}
-    />
+    
   </>
   );
 }
