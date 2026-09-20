@@ -63,7 +63,7 @@ const MAX_QUANTITY = 99;
  */
 const theme = {
   drawer:
-    "border-black/10 bg-[#fff8ed] text-slate-950 shadow-2xl dark:border-white/10 dark:bg-[#09090a] dark:text-white",
+    "border-black/10 bg-white text-slate-950 shadow-2xl dark:border-white/10 dark:bg-[#09090a] dark:text-white",
   imageCard:
     "border border-black/10 bg-slate-100 shadow-2xl shadow-black/15 dark:border-white/10 dark:bg-slate-900 dark:shadow-black/35",
   strongText: "text-slate-950 dark:text-white",
@@ -84,7 +84,7 @@ const theme = {
   addButton:
     "bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-500 text-white shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/35 dark:from-emerald-400 dark:via-emerald-500 dark:to-teal-500 dark:text-slate-950 dark:hover:shadow-emerald-400/35 disabled:cursor-not-allowed disabled:from-slate-400 disabled:to-slate-500 disabled:text-white/70 disabled:shadow-none dark:disabled:from-slate-500 dark:disabled:to-slate-600 dark:disabled:text-white/60",
   footerBar:
-    "border-t border-black/10 bg-[#fff8ed] dark:border-white/10 dark:bg-[#09090a]",
+    "border-t border-black/10 bg-accent dark:border-white/10 dark:bg-[#09090a]",
   stepperBox:
     "border border-black/10 bg-white dark:border-white/10 dark:bg-white/5",
   stepperButton:
