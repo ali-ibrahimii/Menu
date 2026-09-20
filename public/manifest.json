@@ -2,7 +2,7 @@
   "name": "رستوران وطندار",
   "short_name": "وطندار",
   "description": "منوی کامل رستوران وطندار با غذاهای افغانی و ایرانی",
-  "start_url": "/",
+  "start_url": "/admin",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
