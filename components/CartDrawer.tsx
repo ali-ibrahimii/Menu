@@ -60,7 +60,7 @@ export default function CartDrawer() {
         cartTitle: "سبد خرید شما",
         emptyCart: "سبد خالی است",
         goToMenu: "رفتن به منو",
-        itemsDes: "تمام قیمت ها با احتساب ده درصد مالیات ارزش افزوده می باشد",
+        cartDes: "تمام قیمت ها با احتساب ده درصد مالیات ارزش افزوده می باشد",
         toman: "تومان",
         subtotal: "جمع کل",
         continueShopping: "ادامه خرید",
@@ -70,7 +70,7 @@ export default function CartDrawer() {
         cartTitle: "سلة التسوق الخاصة بك",
         emptyCart: "السلة فارغة",
         goToMenu: "اذهب إلى القائمة",
-        itemsDes: "",
+        cartDes: "جميع الأسعار تشمل ضريبة القيمة المضافة بنسبة 10%",
         toman: "تومان",
         subtotal: "المجموع الكلي",
         continueShopping: "مواصلة التسوق",
@@ -80,7 +80,7 @@ export default function CartDrawer() {
         cartTitle: "Your Cart",
         emptyCart: "Cart is empty",
         goToMenu: "Go to menu",
-        itemsDes: `All `,
+        cartDes: "All prices include 10% Value Added Tax",
         toman: "Toman",
         subtotal: "Total",
         continueShopping: "Continue shopping",
@@ -116,7 +116,7 @@ export default function CartDrawer() {
               {t.cartTitle}
             </DrawerTitle>
             <p className={theme.mutedText + " text-sm"}>
-              تمام قیمت ها با احتساب ده درصد مالیات ارزش افزوده می باشد
+              {t.cartDes}
             </p>
           </DrawerHeader>
 
