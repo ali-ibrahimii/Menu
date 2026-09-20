@@ -29,7 +29,6 @@ import {
 import { useCartStore, cartKey, cartVariantLabel } from "@/stores/cartStore";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Image from "next/image";
-import CheckoutDrawer from "./CheckoutDrawer";
 
 // تم درست - روشن / تاریک مثل بقیه پروژه
 const theme = {
