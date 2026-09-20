@@ -521,26 +521,6 @@ function RatingSystem({ foodId, onRatingStatsChange }: RatingSystemProps) {
       className="space-y-5 sm:space-y-6"
       dir={language === "en" ? "ltr" : "rtl"}
     >
-      {/* خلاصه امتیاز */}
-      {reviews.length > 0 && (
-        <div className={`${theme.card} p-4 sm:p-5 flex items-center gap-4`}>
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:bg-amber-400/10 dark:text-amber-300">
-            <Star className="h-6 w-6 fill-amber-500 text-amber-500 dark:fill-amber-300 dark:text-amber-300" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-              {dict.averageRating} — {averageRating.toFixed(1)} / 5
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              {dict.basedOn} {reviews.length} {dict.reviewsCount}
-            </p>
-          </div>
-          <div className="hidden sm:flex gap-1">
-            <Stars value={Math.round(averageRating)} />
-          </div>
-        </div>
-      )}
-
       {/* فرم ثبت نظر */}
       <ReviewForm
         dict={dict}

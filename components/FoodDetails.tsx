@@ -732,7 +732,7 @@ export default function FoodDetails({
                 type="button"
                 onClick={handleAddToCart}
                 disabled={!food.is_available}
-                className={`flex flex-1 items-center justify-center gap-2.5 rounded-2xl px-4 py-3.5 transition duration-300 active:scale-[0.98] ${theme.addButton}`}
+                className={`flex flex-1 items-center justify-center gap-2.5 rounded-2xl px-4 py-3 transition duration-300 active:scale-[0.98] ${theme.addButton}`}
               >
                 <ShoppingCart size={18} className="shrink-0" />
                 <span className="flex min-w-0 flex-col items-start leading-tight">

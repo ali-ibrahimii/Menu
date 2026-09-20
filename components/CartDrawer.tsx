@@ -60,7 +60,7 @@ export default function CartDrawer() {
         cartTitle: "سبد خرید شما",
         emptyCart: "سبد خالی است",
         goToMenu: "رفتن به منو",
-        itemsCount: `${getTotalItems()} آیتم`,
+        itemsDes: "تمام قیمت ها با احتساب ده درصد مالیات ارزش افزوده می باشد",
         toman: "تومان",
         subtotal: "جمع کل",
         continueShopping: "ادامه خرید",
@@ -70,7 +70,7 @@ export default function CartDrawer() {
         cartTitle: "سلة التسوق الخاصة بك",
         emptyCart: "السلة فارغة",
         goToMenu: "اذهب إلى القائمة",
-        itemsCount: `${getTotalItems()} عنصر`,
+        itemsDes: "",
         toman: "تومان",
         subtotal: "المجموع الكلي",
         continueShopping: "مواصلة التسوق",
@@ -80,7 +80,7 @@ export default function CartDrawer() {
         cartTitle: "Your Cart",
         emptyCart: "Cart is empty",
         goToMenu: "Go to menu",
-        itemsCount: `${getTotalItems()} items`,
+        itemsDes: `All `,
         toman: "Toman",
         subtotal: "Total",
         continueShopping: "Continue shopping",
@@ -116,7 +116,7 @@ export default function CartDrawer() {
               {t.cartTitle}
             </DrawerTitle>
             <p className={theme.mutedText + " text-sm"}>
-              {t.itemsCount}
+              تمام قیمت ها با احتساب ده درصد مالیات ارزش افزوده می باشد
             </p>
           </DrawerHeader>
 
@@ -158,16 +158,13 @@ export default function CartDrawer() {
                       />
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm truncate flex items-center gap-1.5">
-                          {item.is_store_item ? (
-                            <span className="inline-flex items-center gap-0.5 text-[9px] bg-blue-500 text-white px-1 rounded">📦 فروشگاهی</span>
-                          ) : null}
                           {language === "fa"
                             ? item.name_fa
                             : language === "ar"
                               ? item.name_ar || item.name_fa
-                              : item.name_en || item.name_fa}
+                              : item.name_en || item.name_fa
+                          }
                         </p>
-
                         {variantLabel && (
                           <p className="text-[11px] font-bold text-amber-600 dark:text-amber-400 truncate">
                             ⚖️ {variantLabel}
@@ -251,25 +248,10 @@ export default function CartDrawer() {
             >
               {t.continueShopping}
             </Button>
-            {items.length > 0 && (
-              <Button
-                className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
-                onClick={() => setCheckoutOpen(true)}
-              >
-                <ReceiptText size={16} />
-                تکمیل سفارش
-              </Button>
-            )}
           </DrawerFooter>
         </div>
       </DrawerContent>
     </Drawer>
-
-    <CheckoutDrawer
-      open={checkoutOpen}
-      onOpenChange={setCheckoutOpen}
-      onSuccess={() => setOpen(false)}
-    />
   </>
   );
 }
