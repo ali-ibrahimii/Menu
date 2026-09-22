@@ -241,7 +241,7 @@ const WeightSelector = memo(function WeightSelector({
                 {formatWeight(option.grams, language)}
               </span>
               <span
-                className={`text-[13px] font-black ${theme.priceText}`}
+                className={`text-[13px] font-black ${theme.priceText} border`}
               >
                 {formatPrice(
                   computeWeightPrice(basePrice, option.grams),
@@ -259,7 +259,7 @@ const WeightSelector = memo(function WeightSelector({
         })}
       </div>
 
-      <p className={`mt-3 text-[11px] leading-5 ${theme.softText}`}>{note}</p>
+      {/* <p className={`mt-3 text-[11px] leading-5 ${theme.softText}`}>{note}</p> */}
     </div>
   );
 });
