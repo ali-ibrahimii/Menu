@@ -220,6 +220,12 @@ export const translations = {
       "قیمت بر اساس وزن محاسبه می‌شود و همان مبلغ در سبد خرید ثبت می‌شود.",
     quantityLabel: "تعداد",
     addedToCart: "به سبد خرید اضافه شد",
+    // ── پنل جزئیات غذا ──
+    spicy: "تند",
+    vegetarian: "گیاهی",
+    priceLabel: "قیمت",
+    previousImage: "تصویر قبلی",
+    nextImage: "تصویر بعدی",
   },
 
   ar: {
@@ -237,7 +243,7 @@ export const translations = {
     showingAll: "جميع الأطباق",
     noFoodInCategory: "لا توجد أطباق في هذه الفئة",
     noFoods: "لم يتم العثور على أطباق",
-    price: "ريال",
+    price: "تومان ",
     search: "بحث...",
     sideBarMenu: "انقر على الفئات لرؤية الأطباق",
     language: "اللغة",
@@ -442,6 +448,12 @@ export const translations = {
       "يُحسب السعر حسب الوزن ويُضاف المبلغ المحدد كما هو إلى السلة.",
     quantityLabel: "الكمية",
     addedToCart: "تمت الإضافة إلى السلة",
+    // ── لوحة تفاصيل الطعام ──
+    spicy: "حار",
+    vegetarian: "نباتي",
+    priceLabel: "السعر",
+    previousImage: "الصورة السابقة",
+    nextImage: "الصورة التالية",
   },
 
   en: {
@@ -664,6 +676,12 @@ export const translations = {
       "Prices are calculated by weight and the selected amount is added to the cart as is.",
     quantityLabel: "Quantity",
     addedToCart: "Added to cart",
+    // ── Food details panel ──
+    spicy: "Spicy",
+    vegetarian: "Vegetarian",
+    priceLabel: "Price",
+    previousImage: "Previous image",
+    nextImage: "Next image",
   },
 };
 // Types برای امنیت

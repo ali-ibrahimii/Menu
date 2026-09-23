@@ -188,7 +188,7 @@ const BranchCard = React.memo(
                 href={`tel:${(branch as any).phone_1}`}
                 onClick={(e) => e.stopPropagation()}
                 className="flex items-center gap-3 rounded-2xl transition hover:bg-white/5"
-                dir="ltr"
+                dir={isEnglish ? 'ltr' : 'rtl'}
               >
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-emerald-300/15 bg-emerald-400/10 text-emerald-300">
                   <Phone className="h-4 w-4" />
@@ -363,7 +363,7 @@ export default function BranchesPage() {
 
           <Link
             href="/"
-            className={`group inline-flex h-12 w-12 items-center justify-center rounded-2xl border bg-white/75 backdrop-blur-xl transition hover:border-emerald-500/30 hover:bg-white/90 dark:border-white/10 dark:bg-white/[0.055] dark:hover:bg-white/10 ${isEnglish ? "" : ""}`}
+            className={`group inline-flex h-11 w-11 items-center justify-center rounded-2xl border bg-white/75 backdrop-blur-xl transition hover:border-emerald-500/30 hover:bg-white/90 dark:border-white/10 dark:bg-white/[0.055] dark:hover:bg-white/10 ${isEnglish ? "" : ""}`}
             aria-label="Back"
           >
             {isEnglish ? (

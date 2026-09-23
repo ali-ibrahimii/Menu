@@ -116,7 +116,7 @@ export function useMenuData({
       const foodsPromise = supabase
         .from("foods")
         .select("*")
-        .eq("is_available", true)
+        // .eq("is_available", true)
         .or(`branch_id.eq.${selectedBranchId},branch_id.is.null`)
         .abortSignal(abortControllerRef.current.signal);
 

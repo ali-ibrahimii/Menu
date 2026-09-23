@@ -221,8 +221,20 @@ export default function HomeContent() {
         getDescription={getFoodDescription}
       />
 
-      <div className="mt-auto">
-        <Footer />
+      {/* فوتر */}
+      <div className="border-t border-black/5 dark:border-white/10 px-5 py-3 opacity-70">
+          <p className="text-center text-[12px]">
+            {
+              language === 'fa'
+                ? selectedBranch?.name_fa
+                : language === 'ar'
+                  ? selectedBranch?.name_ar
+                  : selectedBranch?.name_en
+            }
+          </p>
+        <p className="text-center text-[11px] opacity-60">
+          © {new Date().getFullYear()} Vatandar Restaurant
+        </p>
       </div>
     </main>
   );

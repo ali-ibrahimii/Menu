@@ -140,7 +140,10 @@ const FoodCard = memo(function FoodCard({
           )}
 
           {food.is_store_item && (
-            <Badge className="absolute top-2 right-2 z-10 bg-blue-500 text-white text-[9px] px-1.5 py-0.5 rounded-md shadow-md" variant="secondary">
+            <Badge
+              className="absolute top-2 right-2 z-10 bg-blue-500 text-white text-[9px] px-1.5 py-0.5 rounded-md shadow-md"
+              variant="secondary"
+            >
               فروشگاهی 📦
             </Badge>
           )}
@@ -151,7 +154,12 @@ const FoodCard = memo(function FoodCard({
 
         {/* دکمه افزودن به سبد */}
         {!food.is_available ? (
-          <Badge variant="destructive" className="opacity-80">
+          <Badge
+            variant="destructive"
+            className={`absolute bottom-3 ${
+              language === "en" ? "right-3" : "left-3"
+            }`}
+          >
             {t("notAvailable")}
           </Badge>
         ) : (
