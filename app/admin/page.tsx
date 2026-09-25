@@ -53,6 +53,7 @@ import {
   Legend,
 } from "recharts";
 import type { Food } from "@/types";
+import LoadingPage from "./loading/page";
 
 type Order = {
   id: string;
@@ -306,10 +307,8 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div
-        className={`flex items-center justify-center min-h-screen ${theme.page}`}
-      >
-        <div className="h-12 w-12 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin" />
+      <div>
+        
       </div>
     );
   }
@@ -323,9 +322,6 @@ export default function AdminDashboard() {
               <h1 className="text-2xl sm:text-3xl font-black">
                 داشبورد
               </h1>
-              <p className={`text-sm mt-1 ${theme.muted}`}>
-                جستجو بین غذاها، مشتریان، شماره‌ها
-              </p>
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />

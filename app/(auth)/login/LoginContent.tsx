@@ -161,9 +161,6 @@ export default function LoginPage() {
                   {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                پیش‌فرض: admin / 5515896
-              </p>
             </div>
 
             <button type="submit" disabled={loading} className={theme.button}>
