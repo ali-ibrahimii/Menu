@@ -218,9 +218,6 @@ export default function AddFoodPage() {
           <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
             افزودن غذای جدید
           </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            دسته‌بندی‌ها از جدول categories سوپابیس میاد
-          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -536,7 +533,7 @@ export default function AddFoodPage() {
             </div>
           </div>
 
-          <div className="sticky bottom-0 z-10 -mx-4 p-4 bg-[#fff8ed]/80 dark:bg-slate-950/80 backdrop-blur-xl border-t border-black/5 dark:border-white/10 sm:mx-0 sm:rounded-2xl sm:border">
+          <div className="z-10 -mx-4 p-4 backdrop-blur-xl border-black/5 dark:border-white/10 sm:mx-0 sm:rounded-2xl sm:border">
             <Button
               type="submit"
               disabled={

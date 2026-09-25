@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -29,6 +29,8 @@ import {
 import { useCartStore, cartKey, cartVariantLabel } from "@/stores/cartStore";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Image from "next/image";
+import { formatPrice } from "@/lib/shopWeights";
+import { translations } from "@/translations/translation";
 
 // تم درست - روشن / تاریک مثل بقیه پروژه
 const theme = {
@@ -47,49 +49,26 @@ export default function CartDrawer() {
     getTotalPrice,
     getTotalItems,
   } = useCartStore();
+  const t = useCallback(
+      (key: string) => {
+        const dict = translations[language] as Record<string, string>;
+        return dict[key] ?? key;
+      },
+      [language],
+    );
+  
 
   const [open, setOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const subtotal = getTotalPrice();
 
-  const getTranslations = () => {
-    const dict: Record<string, any> = {
-      fa: {
-        cartTitle: "سبد خرید شما",
-        emptyCart: "سبد خالی است",
-        goToMenu: "رفتن به منو",
-        cartDes: "تمام قیمت ها با احتساب ده درصد مالیات ارزش افزوده می باشد",
-        toman: "تومان",
-        subtotal: "جمع کل",
-        continueShopping: "ادامه خرید",
-        clearCart: "خالی کردن سبد",
-      },
-      ar: {
-        cartTitle: "سلة التسوق الخاصة بك",
-        emptyCart: "السلة فارغة",
-        goToMenu: "اذهب إلى القائمة",
-        cartDes: "جميع الأسعار تشمل ضريبة القيمة المضافة بنسبة 10%",
-        toman: "تومان",
-        subtotal: "المجموع الكلي",
-        continueShopping: "مواصلة التسوق",
-        clearCart: "مسح السلة",
-      },
-      en: {
-        cartTitle: "Your Cart",
-        emptyCart: "Cart is empty",
-        goToMenu: "Go to menu",
-        cartDes: "All prices include 10% Value Added Tax",
-        toman: "Toman",
-        subtotal: "Total",
-        continueShopping: "Continue shopping",
-        clearCart: "Clear cart",
-      },
-    };
-    return dict[language] || dict.fa;
-  };
+  const priceText = useMemo(
+      () => formatPrice(subtotal, language, t("price")),
+      [language, subtotal],
+    );
+  
 
-  const t = getTranslations();
 
   return (
     <>
@@ -112,10 +91,10 @@ export default function CartDrawer() {
         <div className="mx-auto w-full max-w-lg flex flex-col max-h-[92vh] overflow-y-auto scrollbar-hide">
           <DrawerHeader className="shrink-0">
             <DrawerTitle className="text-xl font-black">
-              {t.cartTitle}
+              {t("cartTitle")}
             </DrawerTitle>
             <p className={theme.mutedText + " text-sm"}>
-              {t.cartDes}
+              {t("cartDes")}
             </p>
           </DrawerHeader>
 
@@ -123,13 +102,13 @@ export default function CartDrawer() {
             {items.length === 0 ? (
               <div className="py-20 text-center">
                 <ShoppingCart className="mx-auto opacity-20 mb-3" size={48} />
-                <p className="font-medium">{t.emptyCart}</p>
+                <p className="font-medium">{t("emptyCart")}</p>
                 <Button
                   variant="outline"
                   className="mt-3 rounded-full border-black/10 dark:border-white/10"
                   onClick={() => setOpen(false)}
                 >
-                  {t.goToMenu}
+                  {t("goToMenu")}
                 </Button>
               </div>
             ) : (
@@ -171,10 +150,10 @@ export default function CartDrawer() {
                         )}
 
                         <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">
-                          {item.price.toLocaleString()} {t.toman}
+                          {formatPrice(item.price, language, t("price"))}
                           {item.quantity > 1 && (
                             <span className="ms-1 text-[11px] font-medium opacity-80">
-                              = {(item.price * item.quantity).toLocaleString()}
+                              = {priceText}
                             </span>
                           )}
                         </p>
@@ -191,7 +170,7 @@ export default function CartDrawer() {
                           <Minus size={12} />
                         </Button>
                         <span className="w-6 text-center text-sm font-bold">
-                          {item.quantity}
+                          {formatPrice(item.quantity, language, t(""))}
                         </span>
                         <Button
                           size="icon"
@@ -220,9 +199,9 @@ export default function CartDrawer() {
                 {/* جمع کل */}
                 <div className={theme.card + " p-4 space-y-2 text-sm"}>
                   <div className="flex justify-between font-black text-lg">
-                    <span>{t.subtotal}</span>
+                    <span>{t("subtotal")}</span>
                     <span className="text-emerald-600 dark:text-emerald-400">
-                      {subtotal.toLocaleString()} {t.toman}
+                      {formatPrice(subtotal, language, t("price"))}
                     </span>
                   </div>
                 </div>
@@ -237,7 +216,7 @@ export default function CartDrawer() {
                 className="flex-1 h-12 rounded-xl border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
                 onClick={clearCart}
               >
-                {t.clearCart}
+                {t("clearCart")}
               </Button>
             )}
             <Button
@@ -245,7 +224,7 @@ export default function CartDrawer() {
               className="flex-1 h-12 rounded-xl border-black/10 dark:border-white/10 bg-white dark:bg-slate-900"
               onClick={() => setOpen(false)}
             >
-              {t.continueShopping}
+              {t("continueShopping")}
             </Button>
           </DrawerFooter>
         </div>

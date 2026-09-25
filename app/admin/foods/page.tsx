@@ -533,7 +533,7 @@ export default function AdminFoodsPage() {
                         </p>
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-sm font-black text-emerald-600 dark:text-emerald-300">
-                            {food.price.toLocaleString()} ؋
+                            {food.price.toLocaleString()} تومان
                           </span>
                           <div className="flex items-center gap-1.5">
                             <Link href={`/admin/edit/${food.id}`}>

@@ -22,7 +22,6 @@ export const translations = {
     language: "زبان",
     shoppingCart: "یادداشت سفارشات",
     cartDescription: "لطفاً جهت ثبت سفارش خود به صندوق مراجعه کنید",
-    emptyCart: "سبد خرید شما خالی است",
     people: "نفر",
     serves: "مناسب برای",
     minutes: "دقیقه",
@@ -32,7 +31,6 @@ export const translations = {
     total: "جمع کل",
     notes: "یادداشت",
     notesPlaceholder: "توضیحات سفارش...",
-    clearCart: "پاک کردن سبد خرید",
     saveOrder: "ذخیره سفارش",
     close: "بستن",
     orderSaved: "سفارش با موفقیت ذخیره شد",
@@ -226,6 +224,16 @@ export const translations = {
     priceLabel: "قیمت",
     previousImage: "تصویر قبلی",
     nextImage: "تصویر بعدی",
+
+    // cart
+    cartTitle: "سبد خرید شما",
+    emptyCart: "سبد خالی است",
+    goToMenu: "رفتن به منو",
+    cartDes: "تمام قیمت ها با احتساب ده درصد مالیات ارزش افزوده می باشد",
+    toman: "تومان",
+    subtotal: "جمع کل",
+    continueShopping: "ادامه خرید",
+    clearCart: "خالی کردن سبد",
   },
 
   ar: {
@@ -249,7 +257,6 @@ export const translations = {
     language: "اللغة",
     shoppingCart: "ملاحظات الطلبات",
     cartDescription: "يرجى التوجه إلى الخزينة لتسجيل طلبك",
-    emptyCart: "سلة التسوق فارغة",
     people: "أشخاص",
     serves: "يكفي لـ",
     minutes: "دقيقة",
@@ -259,7 +266,6 @@ export const translations = {
     total: "المجموع",
     notes: "ملاحظات",
     notesPlaceholder: "وصف الطلب...",
-    clearCart: "تفريغ السلة",
     saveOrder: "حفظ الطلب",
     close: "إغلاق",
     orderSaved: "تم حفظ الطلب بنجاح",
@@ -454,6 +460,16 @@ export const translations = {
     priceLabel: "السعر",
     previousImage: "الصورة السابقة",
     nextImage: "الصورة التالية",
+
+    // cart
+    cartTitle: "سلة التسوق الخاصة بك",
+    emptyCart: "السلة فارغة",
+    goToMenu: "اذهب إلى القائمة",
+    cartDes: "جميع الأسعار تشمل ضريبة القيمة المضافة بنسبة 10%",
+    toman: "تومان",
+    subtotal: "المجموع الكلي",
+    continueShopping: "مواصلة التسوق",
+    clearCart: "مسح السلة",
   },
 
   en: {
@@ -477,7 +493,6 @@ export const translations = {
     language: "Language",
     shoppingCart: "Order Notes",
     cartDescription: "Please proceed to checkout to register your order",
-    emptyCart: "Your cart is empty",
     people: "people",
     serves: "Serves",
     minutes: "minutes",
@@ -487,7 +502,6 @@ export const translations = {
     total: "Total",
     notes: "Notes",
     notesPlaceholder: "Order notes...",
-    clearCart: "Clear cart",
     saveOrder: "Save order",
     close: "Close",
     orderSaved: "Order saved successfully",
@@ -682,6 +696,16 @@ export const translations = {
     priceLabel: "Price",
     previousImage: "Previous image",
     nextImage: "Next image",
+
+    // cart
+    cartTitle: "Your Cart",
+    emptyCart: "Cart is empty",
+    goToMenu: "Go to menu",
+    cartDes: "All prices include 10% Value Added Tax",
+    toman: "Toman",
+    subtotal: "Total",
+    continueShopping: "Continue shopping",
+    clearCart: "Clear cart",
   },
 };
 // Types برای امنیت

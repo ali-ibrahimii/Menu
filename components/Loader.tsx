@@ -55,9 +55,9 @@ export default function Loader({ text, className = "", size = 48 }: LoaderProps)
           style={{ width: size, height: size }}
         />
         {/* نقطه مرکزی */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        {/* <div className="absolute inset-0 flex items-center justify-center">
           <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        </div>
+        </div> */}
       </div>
       {text && (
         <p className="mt-4 text-sm font-medium text-slate-400 animate-pulse">

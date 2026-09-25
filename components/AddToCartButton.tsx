@@ -8,7 +8,7 @@ import type { Food } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useBranch } from "@/contexts/BranchContext";
 import { translations } from "@/translations/translation";
-import { getDefaultShopVariant, isShopBranchSlug } from "@/lib/shopWeights";
+import { computeWeightPrice, formatPrice, getDefaultShopVariant, isShopBranchSlug } from "@/lib/shopWeights";
 
 interface AddToCartButtonProps {
   food: Food;
@@ -71,6 +71,15 @@ export default function AddToCartButton({
     setShowControls(true);
   };
 
+  const unitPrice = shopVariant ? shopVariant.price : food.price;
+  
+    const totalPrice = unitPrice * quantity;
+  
+  const priceText = useMemo(
+    () => formatPrice(unitPrice, language, t("price")),
+    [language, t, unitPrice],
+  );
+
   const handleIncrement = () => {
     updateQuantity(lineKey, quantity + 1);
   };
@@ -95,7 +104,7 @@ export default function AddToCartButton({
         </Button>
 
         <span className="text-sm font-medium min-w-8 text-center">
-          {quantity}
+          {formatPrice(quantity, language, t(""))}
         </span>
 
         <Button
