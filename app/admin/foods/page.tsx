@@ -58,6 +58,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import type { Food, Category, Branch } from "@/types";
 import type { SortConfig } from "@/types/foods";
+import { FullPageLoader } from "@/components/Loader";
 
 const PLACEHOLDER_IMAGE =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='55' font-size='12' text-anchor='middle' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E";
@@ -283,19 +284,7 @@ export default function AdminFoodsPage() {
   }, [foods, branchFilter]);
 
   if (loading && foods.length === 0) {
-    return (
-      <div
-        className={`flex items-center justify-center min-h-screen ${theme.page}`}
-      >
-        <div className="text-center">
-          <div className="relative mx-auto mb-6 w-16 h-16">
-            <div className="absolute inset-0 rounded-full border-4 border-emerald-200/50 dark:border-white/10" />
-            <div className="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin" />
-          </div>
-          <p className="font-semibold">در حال بارگذاری...</p>
-        </div>
-      </div>
-    );
+    return <FullPageLoader />;
   }
 
   return (

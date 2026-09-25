@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import {
   Lock,
   User,
@@ -12,6 +11,8 @@ import {
   EyeOff,
 } from "lucide-react";
 import Image from "next/image";
+import { useAdminAuth, safeInternalPath } from "@/contexts/AdminAuthContext";
+import { Spinner } from "@/components/Loader";
 
 const theme = {
   page: "min-h-screen w-full bg-[#fff8ed] text-slate-900 dark:bg-slate-950 dark:text-white transition-colors duration-500",
@@ -24,46 +25,61 @@ const theme = {
 };
 
 export default function LoginPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { login, isAuthenticated } = useAdminAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const ADMIN_CREDENTIALS = {
-    username: "admin",
-    password: "5515896",
-  };
+  const [fromPath, setFromPath] = useState("/admin");
 
   useEffect(() => {
     try {
+      // اگر قبلاً وارد شده، مستقیم برو داشبورد (یا همان صفحه مقصد)
+      // نکته: باید «هم» فلگ localStorage باشد «هم» کوکی؛ چون کوکی بعد از
+      // ۲۴ ساعت منقضی می‌شود ولی localStorage می‌ماند. اگر کوکی نبود و
+      // ریدایرکت می‌کردیم، حلقه بی‌نهایت login ⇄ admin ساخته می‌شد
+      // (دقیقاً همان باگی که باعث می‌شد دفعه اول ورود کار نکند).
       const isLoggedIn = localStorage.getItem("isAdminLoggedIn");
-      if (isLoggedIn === "true") router.push("/admin");
+      const hasCookie = document.cookie.includes("admin_auth=true");
+      const params = new URLSearchParams(window.location.search);
+      const target = safeInternalPath(params.get("from"));
+      // خواندن query string بعد از hydration (client-only)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFromPath(target);
+      if (isLoggedIn === "true" && hasCookie) {
+        window.location.replace(target);
+      } else if (isLoggedIn === "true" && !hasCookie) {
+        // فلگ تاریخ‌مصرف‌گذشته — پاکش کن تا فرم لاگین درست کار کند
+        localStorage.removeItem("isAdminLoggedIn");
+      }
     } catch {}
-  }, [router]);
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated && !loading) {
+      window.location.replace(fromPath);
+    }
+  }, [isAuthenticated, loading, fromPath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      if (
-        username === ADMIN_CREDENTIALS.username &&
-        password === ADMIN_CREDENTIALS.password
-      ) {
-        localStorage.setItem("isAdminLoggedIn", "true");
-        localStorage.setItem("adminUsername", username);
-        document.cookie = "admin_auth=true; path=/; max-age=86400";
-        const from = searchParams.get("from") || "/admin";
-        router.push(from);
+      const ok = await login(username, password);
+      if (ok) {
+        // نکته مهم: بعد از ست شدن کوکی، یک «لود کامل صفحه» انجام می‌دهیم.
+        // router.push در بعضی دفعات اول، کش روتر یا درخواست RSC قبلی را
+        // استفاده می‌کرد و ورود در تلاش اول شکست می‌خورد.
+        window.location.assign(fromPath);
+        return;
       } else {
         setError("نام کاربری یا رمز عبور اشتباه است");
+        setLoading(false);
       }
     } catch {
       setError("خطا در ورود به سیستم");
-    } finally {
       setLoading(false);
     }
   };
@@ -131,6 +147,7 @@ export default function LoginPage() {
                   className={theme.input}
                   required
                   dir="ltr"
+                  autoFocus
                   autoComplete="username"
                 />
               </div>
@@ -166,7 +183,7 @@ export default function LoginPage() {
             <button type="submit" disabled={loading} className={theme.button}>
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <Spinner size={18} className="text-white" />
                   در حال ورود...
                 </span>
               ) : (

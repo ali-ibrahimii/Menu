@@ -27,7 +27,6 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import ThemeToggle from "@/components/ThemeToggle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Branch } from "@/types";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +44,6 @@ interface BranchDrawerProps {
   2. کارت شعبه فعلی: نام شعبه به 3 زبان + آدرس + تلفن + وضعیت باز/بسته + ساعت کاری
   3. اکشن‌های سریع: مسیریابی گوگل مپ + تماس
   4. منو ناوبری: منو / شعبه‌ها / درباره ما / تماس
-  5. تنظیمات: ThemeToggle + LanguageSwitcher (اگر داری)
   6. فوتر: کپی‌رایت + نسخه
 */
 
@@ -191,11 +189,6 @@ export default function BranchDrawer({
               </div>
             </div>
           </div>
-          {/* تنظیمات */}
-          <div className={` py-3 flex items-center justify-center w-full`}>
-            <ThemeToggle />
-          </div>
-
           {/* تغییر شعبه */}
           <div className="space-y-2 pb-2">
             <p className="text-center text-[11px] opacity-40">

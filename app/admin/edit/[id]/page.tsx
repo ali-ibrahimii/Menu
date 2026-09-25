@@ -34,6 +34,7 @@ import {
 import { SortableItem } from "@/components/ui/sortable-item";
 import { GripVertical, Trash2, ArrowRight } from "lucide-react";
 import type { Branch, Category } from "@/types";
+import { FullPageLoader, Spinner } from "@/components/Loader";
 
 interface FoodItem {
   id: string;
@@ -341,14 +342,7 @@ export default function EditFoodPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-[#fff8ed] dark:bg-slate-950 p-4">
-        <div className="text-center">
-          <div className="h-10 w-10 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin mx-auto" />
-          <p className="mt-3 text-sm font-medium">در حال بارگذاری...</p>
-        </div>
-      </div>
-    );
+    return <FullPageLoader />;
   }
 
   return (
@@ -711,8 +705,7 @@ export default function EditFoodPage() {
               >
                 {updating ? (
                   <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />{" "}
-                    ذخیره...
+                    <Spinner size={16} className="text-white" /> ذخیره...
                   </span>
                 ) : (
                   "ذخیره تغییرات"

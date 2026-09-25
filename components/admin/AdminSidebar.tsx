@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Home,
   Utensils,
   PlusCircle,
   ShoppingCart,
@@ -16,11 +15,9 @@ import {
   CheckCircle2,
   User,
   Menu,
-  X,
   LayoutDashboard,
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -37,96 +34,73 @@ interface AdminSidebarProps {
   children?: React.ReactNode;
 }
 
-const theme = {
-  sidebar: "bg-slate-900 text-white dark:bg-slate-950 border-r border-white/10",
-  sidebarLight:
-    "bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-r border-black/10 dark:border-white/10",
-  topbar:
-    "bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-black/10 dark:border-white/10",
-  active:
-    "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 dark:bg-emerald-500",
-  inactive:
-    "text-slate-400 hover:bg-white/10 hover:text-white dark:text-slate-400 dark:hover:bg-white/5",
-  statCard:
-    "rounded-xl bg-white/5 dark:bg-white/[0.04] border border-white/10 hover:bg-white/10 transition-colors",
+// آمار سریع سایدبار
+interface SidebarStats {
+  pending: number;
+  completed: number;
+  totalRevenue: number;
+}
+
+// فقط فیلدهای موردنیاز سایدبار از سفارش
+type SidebarOrder = Pick<Order, "id" | "status" | "total_price"> & {
+  final_price?: number | null;
 };
 
-export default function AdminSidebar({
+// تم سایت فقط تاریک است
+const theme = {
+  sidebar: "bg-slate-900 border-r border-white/10",
+  topbar: "bg-slate-900/90 backdrop-blur-xl border-b border-white/10",
+  active: "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20",
+  inactive: "text-slate-400 hover:bg-white/10 hover:text-white",
+  statCard:
+    "rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors",
+};
+
+const menuItems = [
+  { href: "/admin", label: "داشبورد", icon: LayoutDashboard },
+  { href: "/admin/orders", label: "سفارشات", icon: ShoppingCart },
+  { href: "/admin/foods", label: "لیست منو", icon: Utensils },
+  { href: "/admin/add-food", label: "افزودن غذا", icon: PlusCircle },
+  { href: "/menu", label: "نمایش منو", icon: TrendingUp },
+];
+
+/** وضعیت فعال بودن هر آیتم منو */
+function isActiveItem(pathname: string | null, href: string) {
+  // صفحات ویرایش غذا زیرمجموعه «لیست منو» حساب می‌شوند
+  if (href === "/admin/foods" && pathname?.startsWith("/admin/edit/")) {
+    return true;
+  }
+  if (href === "/admin") return pathname === "/admin";
+  return pathname === href || pathname?.startsWith(`${href}/`);
+}
+
+interface SidebarContentProps {
+  pathname: string | null;
+  collapsed: boolean;
+  isMobile?: boolean;
+  username: string;
+  stats: SidebarStats;
+  onLogout: () => void;
+  onNavigate?: () => void;
+  onToggleCollapse?: () => void;
+}
+
+/** محتوای سایدبار — خارج از رندر تعریف شده تا با هر رندر، ری‌مونت نشود */
+function SidebarContent({
+  pathname,
+  collapsed,
+  isMobile = false,
+  username,
+  stats,
   onLogout,
-  children,
-}: AdminSidebarProps) {
-  const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [orders, setOrders] = useState<Order[]>([]);
-
-  const fetchOrders = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("id, status, total_price, final_price")
-        .limit(50);
-      if (error) throw error;
-      setOrders((data as any) || []);
-    } catch {
-      // silent for sidebar
-    }
+  onNavigate,
+  onToggleCollapse,
+}: SidebarContentProps) {
+  const badges: Record<string, number | null> = {
+    "/admin/orders": stats.pending > 0 ? stats.pending : null,
   };
 
-  useEffect(() => {
-    fetchOrders();
-    const ch = supabase
-      .channel("sidebar-orders")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "orders" },
-        fetchOrders,
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(ch);
-    };
-  }, []);
-
-  const stats = {
-    pending: orders.filter((o) => o.status === "pending").length,
-    completed: orders.filter((o) =>
-      ["completed", "delivered", "paid"].includes(o.status),
-    ).length,
-    totalRevenue: orders
-      .filter((o) => ["completed", "delivered", "paid"].includes(o.status))
-      .reduce(
-        (sum, o) => sum + Number((o as any).final_price || o.total_price || 0),
-        0,
-      ),
-  };
-
-  const username =
-    typeof window !== "undefined"
-      ? localStorage.getItem("adminUsername") ||
-        localStorage.getItem("admin_username") ||
-        "ادمین"
-      : "ادمین";
-
-  const menuItems = [
-    { href: "/admin", label: "داشبورد", icon: LayoutDashboard, badge: null },
-    {
-      href: "/admin/orders",
-      label: "سفارشات",
-      icon: ShoppingCart,
-      badge: stats.pending > 0 ? stats.pending : null,
-    },
-    { href: "/admin/foods", label: "لیست منو", icon: Utensils, badge: null },
-    {
-      href: "/admin/add-food",
-      label: "افزودن غذا",
-      icon: PlusCircle,
-      badge: null,
-    },
-    { href: "/menu", label: "نمایش منو", icon: TrendingUp, badge: null },
-  ];
-
-  const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
+  return (
     <div className="flex h-full flex-col">
       {/* لوگو */}
       <div className="p-5 border-b border-white/10">
@@ -138,7 +112,9 @@ export default function AdminSidebar({
               <Utensils size={20} className="text-white" />
             </div>
             <div>
-              <h1 className="font-black text-[15px] leading-4">وطندار</h1>
+              <h1 className="font-black text-[15px] leading-4 text-white">
+                وطندار
+              </h1>
               <p className="text-[11px] opacity-60">پنل مدیریت</p>
             </div>
           </div>
@@ -148,13 +124,10 @@ export default function AdminSidebar({
               size="icon"
               variant="ghost"
               className="h-8 w-8 rounded-full bg-white/5 hover:bg-white/10 text-white"
-              onClick={() => setCollapsed(!collapsed)}
+              onClick={onToggleCollapse}
+              aria-label={collapsed ? "باز کردن سایدبار" : "جمع کردن سایدبار"}
             >
-              {collapsed ? (
-                <ChevronRight size={16} />
-              ) : (
-                <ChevronLeft size={16} />
-              )}
+              {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
             </Button>
           )}
         </div>
@@ -203,26 +176,27 @@ export default function AdminSidebar({
         <div className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive =
-              pathname === item.href ||
-              (item.href !== "/admin" && pathname?.startsWith(item.href));
+            const badge = badges[item.href] ?? null;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => isMobile && setMobileOpen(false)}
+                onClick={onNavigate}
                 className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all text-sm font-medium ${
-                  isActive ? theme.active : theme.inactive
+                  isActiveItem(pathname, item.href) ? theme.active : theme.inactive
                 } ${collapsed && !isMobile ? "justify-center" : ""}`}
-                title={collapsed ? item.label : ""}
+                title={collapsed && !isMobile ? item.label : ""}
+                aria-current={
+                  isActiveItem(pathname, item.href) ? "page" : undefined
+                }
               >
                 <Icon size={18} className="shrink-0" />
                 {(!collapsed || isMobile) && (
                   <>
                     <span className="flex-1 truncate">{item.label}</span>
-                    {item.badge && (
+                    {badge && (
                       <Badge className="bg-red-500 text-white rounded-full h-5 min-w-5 p-0 flex items-center justify-center text-[11px] px-1.5 animate-pulse">
-                        {item.badge}
+                        {badge}
                       </Badge>
                     )}
                   </>
@@ -243,7 +217,7 @@ export default function AdminSidebar({
           </div>
           {(!collapsed || isMobile) && (
             <div className="min-w-0 flex-1">
-              <p className="font-bold text-sm truncate">{username}</p>
+              <p className="font-bold text-sm truncate text-white">{username}</p>
               <p className="text-[11px] opacity-60">مدیر سیستم</p>
             </div>
           )}
@@ -259,23 +233,101 @@ export default function AdminSidebar({
       </div>
     </div>
   );
+}
+
+export default function AdminSidebar({
+  onLogout,
+  children,
+}: AdminSidebarProps) {
+  const pathname = usePathname();
+  const mainRef = useRef<HTMLElement>(null);
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [orders, setOrders] = useState<SidebarOrder[]>([]);
+  // نکته: خواندن localStorage در زمان رندر باعث خطای hydration می‌شد؛
+  // الان فقط بعد از mount خوانده می‌شود.
+  const [username, setUsername] = useState("ادمین");
+
+  useEffect(() => {
+    // الگوی استاندارد خواندن client-only storage بعد از hydration
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setUsername(
+      localStorage.getItem("adminUsername") ||
+        localStorage.getItem("admin_username") ||
+        "ادمین",
+    );
+  }, []);
+
+  const fetchOrders = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("orders")
+        .select("id, status, total_price, final_price")
+        .limit(200);
+      if (error) throw error;
+      setOrders((data as SidebarOrder[]) || []);
+    } catch {
+      // silent for sidebar
+    }
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchOrders();
+    const ch = supabase
+      .channel("sidebar-orders")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        fetchOrders,
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [fetchOrders]);
+
+  // هنگام جابه‌جایی بین صفحات ادمین، اسکرول به بالای صفحه برود
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0 });
+  }, [pathname]);
+
+  const stats: SidebarStats = {
+    pending: orders.filter((o) => o.status === "pending").length,
+    completed: orders.filter((o) =>
+      ["completed", "delivered", "paid"].includes(o.status),
+    ).length,
+    totalRevenue: orders
+      .filter((o) => ["completed", "delivered", "paid"].includes(o.status))
+      .reduce(
+        (sum, o) => sum + Number(o.final_price || o.total_price || 0),
+        0,
+      ),
+  };
 
   return (
     <div
-      className="flex min-h-screen w-full bg-[#fff8ed] dark:bg-slate-950"
+      className="flex h-[100dvh] w-full overflow-hidden bg-slate-950"
       dir="rtl"
     >
       {/* دسکتاپ سایدبار */}
       <aside
         className={`hidden lg:flex shrink-0 flex-col ${theme.sidebar} transition-all duration-300 shadow-2xl ${
           collapsed ? "w-[72px]" : "w-[260px]"
-        } sticky top-0 h-screen`}
+        } h-full`}
       >
-        <SidebarContent />
+        <SidebarContent
+          pathname={pathname}
+          collapsed={collapsed}
+          username={username}
+          stats={stats}
+          onLogout={onLogout}
+          onToggleCollapse={() => setCollapsed(!collapsed)}
+        />
       </aside>
 
       {/* موبایل - تاپ‌بار + شیت */}
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="flex flex-1 flex-col min-w-0 h-full">
         {/* تاپ‌بار موبایل */}
         <header
           className={`lg:hidden sticky top-0 z-30 ${theme.topbar} flex items-center justify-between px-4 h-[60px] shrink-0`}
@@ -286,7 +338,8 @@ export default function AdminSidebar({
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="rounded-full h-10 w-10 bg-black/5 dark:bg-white/5"
+                  className="rounded-full h-10 w-10 bg-white/5 text-white"
+                  aria-label="باز کردن منو"
                 >
                   <Menu size={20} />
                 </Button>
@@ -298,7 +351,15 @@ export default function AdminSidebar({
                 <SheetHeader className="sr-only">
                   <SheetTitle>منو</SheetTitle>
                 </SheetHeader>
-                <SidebarContent isMobile />
+                <SidebarContent
+                  pathname={pathname}
+                  collapsed={false}
+                  isMobile
+                  username={username}
+                  stats={stats}
+                  onLogout={onLogout}
+                  onNavigate={() => setMobileOpen(false)}
+                />
               </SheetContent>
             </Sheet>
 
@@ -306,7 +367,7 @@ export default function AdminSidebar({
               <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center">
                 <Utensils size={16} className="text-white" />
               </div>
-              <span className="font-black text-sm">وطندار ادمین</span>
+              <span className="font-black text-sm text-white">وطندار ادمین</span>
               {stats.pending > 0 && (
                 <Badge className="bg-red-500 text-white rounded-full h-5 px-2 text-xs animate-pulse">
                   {stats.pending} جدید
@@ -318,7 +379,8 @@ export default function AdminSidebar({
           <div className="flex items-center gap-2">
             <Link
               href="/admin/orders"
-              className="relative h-10 w-10 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center"
+              className="relative h-10 w-10 rounded-full bg-white/5 text-white flex items-center justify-center"
+              aria-label="سفارشات"
             >
               <ShoppingCart size={18} />
               {stats.pending > 0 && (
@@ -331,28 +393,29 @@ export default function AdminSidebar({
         </header>
 
         {/* ناوبری پایین موبایل - دسترسی سریع */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-black/10 dark:border-white/10 px-2 py-2 safe-area-pb">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 backdrop-blur-xl border-t border-white/10 px-2 pt-2 safe-area-pb">
           <div className="grid grid-cols-5 gap-1">
             {menuItems.map((item) => {
               const Icon = item.icon;
-              const isActive =
-                pathname === item.href ||
-                (item.href !== "/admin" && pathname?.startsWith(item.href));
+              const badge =
+                item.href === "/admin/orders" && stats.pending > 0
+                  ? stats.pending
+                  : null;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={`flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-[11px] font-bold transition-all relative ${
-                    isActive
-                      ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
-                      : "text-slate-500 dark:text-slate-400"
+                    isActiveItem(pathname, item.href)
+                      ? "text-emerald-400 bg-emerald-500/10"
+                      : "text-slate-400"
                   }`}
                 >
                   <Icon size={18} />
                   <span className="truncate max-w-[60px]">{item.label}</span>
-                  {item.badge && (
+                  {badge && (
                     <span className="absolute top-1 right-3 h-4 min-w-4 px-1 bg-red-500 text-white rounded-full text-[10px] flex items-center justify-center">
-                      {item.badge}
+                      {badge}
                     </span>
                   )}
                 </Link>
@@ -361,8 +424,11 @@ export default function AdminSidebar({
           </div>
         </div>
 
-        {/* محتوای اصلی */}
-        <main className="flex-1 overflow-y-auto bg-[#fff8ed] dark:bg-slate-950 pb-[80px] lg:pb-0">
+        {/* محتوای اصلی — تنها همین بخش اسکرول می‌شود */}
+        <main
+          ref={mainRef}
+          className="flex-1 min-h-0 overflow-y-auto bg-slate-950 pb-[88px] lg:pb-6"
+        >
           <div className="mx-auto w-full">{children}</div>
         </main>
       </div>

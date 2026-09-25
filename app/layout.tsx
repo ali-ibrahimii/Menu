@@ -121,11 +121,9 @@ export const viewport: Viewport = {
   maximumScale: 5, // بهتره 1 نباشه برای دسترسی بهتر
   userScalable: true, // بهتره true باشه برای کاربرانی که نیاز به زوم دارند
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#191919" },
-  ],
-  colorScheme: "light dark",
+  // سایت فقط حالت تاریک دارد
+  themeColor: "#020617",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
@@ -176,7 +174,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="fa" dir="rtl" suppressHydrationWarning>
+    <html lang="fa" dir="rtl" className="dark" suppressHydrationWarning>
       <head>
         {/* Structured Data */}
         <script
@@ -204,8 +202,8 @@ export default function RootLayout({
         />
         <link rel="manifest" href="/manifest.json" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#fff" />
-        <meta name="msapplication-TileColor" content="#fff" />
-        <meta name="theme-color" content="#fff" />
+        <meta name="msapplication-TileColor" content="#020617" />
+        <meta name="theme-color" content="#020617" />
 
         {/* Additional SEO */}
         <meta

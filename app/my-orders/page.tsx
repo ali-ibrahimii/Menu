@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { FullPageLoader } from "@/components/Loader";
 
 type Order = {
   id: string;
@@ -64,13 +65,6 @@ export default function MyOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [deviceId, setDeviceId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const id = getDeviceId();
-    setDeviceId(id);
-    if (id) fetchOrders(id);
-    else setLoading(false);
-  }, []);
-
   const fetchOrders = async (device: string) => {
     setLoading(true);
     const { data } = await supabase
@@ -81,6 +75,16 @@ export default function MyOrdersPage() {
     setOrders((data as any) || []);
     setLoading(false);
   };
+
+  useEffect(() => {
+    const id = getDeviceId();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDeviceId(id);
+    if (id) fetchOrders(id);
+    else setLoading(false);
+  }, []);
+
+
 
   // Realtime ساده
   useEffect(() => {
@@ -164,11 +168,7 @@ export default function MyOrdersPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#fff8ed] dark:bg-slate-950 flex items-center justify-center">
-        <div className="h-8 w-8 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin" />
-      </div>
-    );
+    return <FullPageLoader />;
   }
 
   if (!deviceId) {
