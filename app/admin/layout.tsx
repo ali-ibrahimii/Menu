@@ -1,59 +1,41 @@
 // app/admin/layout.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import { useAdminAuth, safeInternalPath } from "@/contexts/AdminAuthContext";
+import { FullPageLoader } from "@/components/Loader";
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
+  const pathname = usePathname();
+  const { isAuthenticated, isLoading, logout } = useAdminAuth();
 
+  // لایه دوم محافظت (لایه اول: proxy.ts سمت سرور)
+  // اگر کاربر لاگین نبود، به صفحه ورود برمی‌گردد
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const isLoggedIn = localStorage.getItem("isAdminLoggedIn");
-        const hasCookie = document.cookie.includes("admin_auth=true");
+    if (isLoading) return;
+    if (!isAuthenticated) {
+      const timer = setTimeout(() => {
+        window.location.replace(
+          `/login?from=${encodeURIComponent(safeInternalPath(pathname))}`,
+        );
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, isLoading, pathname]);
 
-        if (!isLoggedIn || !hasCookie) {
-          router.push("/login");
-        }
-      } catch (err) {
-        console.error("Auth check error:", err);
-        router.push("/login");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    setTimeout(checkAuth, 100);
-  }, [router]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("isAdminLoggedIn");
-    localStorage.removeItem("adminUsername");
-    document.cookie =
-      "admin_auth=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-    router.push("/login");
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">در حال بارگذاری...</p>
-        </div>
-      </div>
-    );
+  // لودینگ یکپارچه تا مشخص شدن وضعیت ورود
+  if (isLoading || !isAuthenticated) {
+    return <FullPageLoader />;
   }
 
   return (
-    <AdminSidebar onLogout={handleLogout}>
+    <AdminSidebar onLogout={logout}>
       {children}
     </AdminSidebar>
   );

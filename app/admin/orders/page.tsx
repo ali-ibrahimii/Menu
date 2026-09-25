@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { FullPageLoader } from "@/components/Loader";
 import {
   BellRing,
   Bike,
@@ -124,6 +125,7 @@ const OrderTypeIcon = ({
 
 export default function AdminOrdersWithNotifications() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -160,6 +162,7 @@ export default function AdminOrdersWithNotifications() {
       .order("created_at", { ascending: false })
       .limit(100);
     setOrders((data as any) || []);
+    setIsInitialLoading(false);
   };
 
   useEffect(() => {
@@ -348,6 +351,10 @@ export default function AdminOrdersWithNotifications() {
       }
     }
   };
+
+  if (isInitialLoading) {
+    return <FullPageLoader />;
+  }
 
   return (
     <div dir="rtl" className={`${theme.page} p-3 sm:p-6`}>

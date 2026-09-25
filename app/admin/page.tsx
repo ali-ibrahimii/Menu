@@ -38,7 +38,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import ThemeToggle from "@/components/ThemeToggle";
 import {
   AreaChart,
   Area,
@@ -53,7 +52,7 @@ import {
   Legend,
 } from "recharts";
 import type { Food } from "@/types";
-import LoadingPage from "./loading/page";
+import { FullPageLoader } from "@/components/Loader";
 
 type Order = {
   id: string;
@@ -88,10 +87,6 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [range, setRange] = useState<"today" | "week" | "month">("week");
-
-  useEffect(() => {
-    fetchAll();
-  }, []);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -145,6 +140,13 @@ export default function AdminDashboard() {
 
     setLoading(false);
   };
+
+  useEffect(() => {
+    // شروع داده‌کشی هنگام mount؛ setLoading اولین خط تابع است
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchAll();
+  }, []);
+
 
   // موتور جستجو - بین غذاها و اسم مشتری و شماره موبایل و...
   const searchResults = useMemo(() => {
@@ -306,11 +308,7 @@ export default function AdminDashboard() {
   const recentOrders = orders.slice(0, 5);
 
   if (loading) {
-    return (
-      <div>
-        
-      </div>
-    );
+    return <FullPageLoader />;
   }
 
   return (
@@ -324,7 +322,6 @@ export default function AdminDashboard() {
               </h1>
             </div>
             <div className="flex items-center gap-2">
-              <ThemeToggle />
               <Button
                 variant="outline"
                 size="sm"
@@ -373,7 +370,7 @@ export default function AdminDashboard() {
             >
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
-                  نتایج جستجو برای "{search}"{" "}
+                  نتایج جستجو برای «{search}»{" "}
                   <Badge className="rounded-full">
                     {searchResults.foods.length + searchResults.orders.length}{" "}
                     مورد
@@ -490,7 +487,7 @@ export default function AdminDashboard() {
                 {searchResults.foods.length === 0 &&
                   searchResults.orders.length === 0 && (
                     <p className="text-center text-sm opacity-50 py-4">
-                      نتیجه‌ای برای "{search}" یافت نشد
+                      نتیجه‌ای برای «{search}» یافت نشد
                     </p>
                   )}
               </CardContent>

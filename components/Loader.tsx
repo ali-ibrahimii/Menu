@@ -1,116 +1,91 @@
-import React from 'react';
-import styled from 'styled-components';
+"use client";
 
-const Loader = () => {
+import React from "react";
+
+/**
+ * لودر یکپارچه پروژه
+ * ---------------------------------------------
+ * تنها منوی رسمی «در حال بارگذاری» در کل سایت همین کامپوننت است.
+ *
+ *  - <Loader />                 : خودِ اسپینر (برای استفاده داخل کانتینر دلخواه)
+ *  - <FullPageLoader />         : لودینگ تمام‌صفحه با پس‌زمینه تاریک و متن
+ *  - <Loader text="..." />      : اسپینر همراه با متن دلخواه
+ *  - <Spinner />                : اسپینر کوچک برای داخل دکمه‌ها
+ */
+
+type SpinnerProps = {
+  size?: number;
+  className?: string;
+};
+
+/** اسپینر کوچک — برای داخل دکمه‌ها و جایگاه‌های تنگ */
+export function Spinner({ size = 20, className = "" }: SpinnerProps) {
   return (
-    <StyledWrapper>
-      <div className="loader">
-        <div className="bar1" />
-        <div className="bar2" />
-        <div className="bar3" />
-        <div className="bar4" />
-        <div className="bar5" />
-        <div className="bar6" />
-        <div className="bar7" />
-        <div className="bar8" />
-        <div className="bar9" />
-        <div className="bar10" />
-        <div className="bar11" />
-        <div className="bar12" />
-      </div>
-    </StyledWrapper>
+    <span
+      className={`inline-block animate-spin rounded-full border-2 border-current border-t-transparent align-middle ${className}`}
+      style={{ width: size, height: size }}
+      role="status"
+      aria-label="در حال بارگذاری"
+    />
   );
 }
 
-const StyledWrapper = styled.div`
-  .loader {
-    position: relative;
-    width: 30px;
-    height: 30px;
-    border-radius: 10px;
-  }
+type LoaderProps = {
+  /** متن اختیاری زیر اسپینر */
+  text?: string;
+  /** کلاس اضافه برای کانتینر */
+  className?: string;
+  /** اندازه اسپینر */
+  size?: number;
+};
 
-  .loader div {
-    width: 8%;
-    height: 24%;
-    background: rgb(128, 128, 128);
-    position: absolute;
-    left: 50%;
-    top: 30%;
-    opacity: 0;
-    border-radius: 50px;
-    box-shadow: 0 0 3px rgba(0,0,0,0.2);
-    animation: fade458 1s linear infinite;
-  }
+/** اسپینر برند سایت (هماهنگ با تم تاریک و رنگ زمردی) */
+export default function Loader({ text, className = "", size = 48 }: LoaderProps) {
+  return (
+    <div className={`flex flex-col items-center justify-center ${className}`}>
+      <div className="relative" style={{ width: size, height: size }}>
+        {/* حلقه پس‌زمینه */}
+        <div
+          className="absolute inset-0 rounded-full border-4 border-emerald-500/15"
+          style={{ width: size, height: size }}
+        />
+        {/* حلقه چرخان */}
+        <div
+          className="absolute inset-0 rounded-full border-4 border-transparent border-t-emerald-500 animate-spin"
+          style={{ width: size, height: size }}
+        />
+        {/* نقطه مرکزی */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        </div>
+      </div>
+      {text && (
+        <p className="mt-4 text-sm font-medium text-slate-400 animate-pulse">
+          {text}
+        </p>
+      )}
+    </div>
+  );
+}
 
-  @keyframes fade458 {
-    from {
-      opacity: 1;
-    }
+type FullPageLoaderProps = LoaderProps & {
+  /** جهت چیدمان؛ پیش‌فرض راست‌چین */
+  dir?: "rtl" | "ltr";
+};
 
-    to {
-      opacity: 0.25;
-    }
-  }
-
-  .loader .bar1 {
-    transform: rotate(0deg) translate(0, -130%);
-    animation-delay: 0s;
-  }
-
-  .loader .bar2 {
-    transform: rotate(30deg) translate(0, -130%);
-    animation-delay: -1.1s;
-  }
-
-  .loader .bar3 {
-    transform: rotate(60deg) translate(0, -130%);
-    animation-delay: -1s;
-  }
-
-  .loader .bar4 {
-    transform: rotate(90deg) translate(0, -130%);
-    animation-delay: -0.9s;
-  }
-
-  .loader .bar5 {
-    transform: rotate(120deg) translate(0, -130%);
-    animation-delay: -0.8s;
-  }
-
-  .loader .bar6 {
-    transform: rotate(150deg) translate(0, -130%);
-    animation-delay: -0.7s;
-  }
-
-  .loader .bar7 {
-    transform: rotate(180deg) translate(0, -130%);
-    animation-delay: -0.6s;
-  }
-
-  .loader .bar8 {
-    transform: rotate(210deg) translate(0, -130%);
-    animation-delay: -0.5s;
-  }
-
-  .loader .bar9 {
-    transform: rotate(240deg) translate(0, -130%);
-    animation-delay: -0.4s;
-  }
-
-  .loader .bar10 {
-    transform: rotate(270deg) translate(0, -130%);
-    animation-delay: -0.3s;
-  }
-
-  .loader .bar11 {
-    transform: rotate(300deg) translate(0, -130%);
-    animation-delay: -0.2s;
-  }
-
-  .loader .bar12 {
-    transform: rotate(330deg) translate(0, -130%);
-    animation-delay: -0.1s;
-  }`;
-
-export default Loader;
+/** لودینگ تمام‌صفحه یکپارچه — بافت تاریک برند */
+export function FullPageLoader({
+  text = "در حال بارگذاری...",
+  className = "",
+  size = 56,
+  dir = "rtl",
+}: FullPageLoaderProps) {
+  return (
+    <div
+      dir={dir}
+      className={`min-h-screen w-full flex items-center justify-center bg-slate-950 ${className}`}
+    >
+      <Loader text={text} size={size} />
+    </div>
+  );
+}
