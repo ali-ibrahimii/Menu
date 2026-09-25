@@ -1,5 +1,3 @@
-import { allowedNodeEnvironmentFlags } from "process";
-
 // next.config.js
 const nextConfig = {
   images: {
@@ -18,6 +16,8 @@ const nextConfig = {
       },
     ],
   },
+  // هدر X-Powered-By حذف شود (امنیت + جزئی سئو)
+  poweredByHeader: false,
 };
 
 module.exports = nextConfig;

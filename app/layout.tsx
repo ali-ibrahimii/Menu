@@ -1,5 +1,5 @@
-import type { Viewport } from "next";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import "../styles/globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { Toaster } from "@/components/ui/sonner";
@@ -10,208 +10,179 @@ import { Analytics } from "@vercel/analytics/react";
 import AOSProvider from "@/contexts/AOSProvider";
 import Providers from "@/contexts/providers";
 import VisitTracker from "@/components/VisitTracker";
+import {
+  SITE_URL,
+  BRAND,
+  DEFAULT_DESCRIPTION,
+  KEYWORDS,
+  SEO_DEFAULTS,
+  buildJsonLd,
+  getSeoData,
+} from "@/lib/seo";
+
+/**
+ * فونت اصلی سایت (وزیرمتن — فونت متغیر، self-host شده)
+ * قبلاً --font-sans در globals.css به فونتی اشاره می‌کرد که هرگز لود نمی‌شد؛
+ * نتیجه‌اش رندر فارسی با فونت پیش‌فرض مرورگر و CLS بود.
+ */
+const vazirmatn = localFont({
+  src: [{ path: "../public/fonts/Vazirmatn-Variable.woff2", weight: "100 900", style: "normal" }],
+  variable: "--font-vazirmatn",
+  display: "swap",
+  fallback: ["Tahoma", "Segoe UI", "Noto Sans Arabic", "system-ui", "sans-serif"],
+});
+
+/* ================================ متادیتا ================================ */
 
 export const metadata: Metadata = {
-  // متادیتای اصلی
-  metadataBase: new URL("https://vatandar-menu.vercel.app"),
+  // دامنهٔ canonical — با NEXT_PUBLIC_SITE_URL قابل تغییر (lib/seo.ts)
+  metadataBase: new URL(SITE_URL),
 
   title: {
-    default: "رستوران وطندار | منوی دیجیتال",
-    template: "%s | رستوران وطندار مشهد",
+    default: `${BRAND.fa} ${SEO_DEFAULTS.city} | منوی دیجیتال و سفارش آنلاین غذا`,
+    template: `%s | ${BRAND.fa}`,
   },
 
-  description:
-    "منوی آنلاین رستوران وطندار مشهد | سفارش غذاهای ایرانی، افغانی، صبحانه، نوشیدنی‌های گرم و سرد با بهترین کیفیت و قیمت مناسب",
+  description: DEFAULT_DESCRIPTION,
 
-  // آیکون‌ها
-  icons: {
-    icon: [
-      { url: "/logo1.png", sizes: "50x50", type: "image/png" },
-      { url: "/logo1.png", sizes: "40x40", type: "image/png" },
-    ],
-    apple: [{ url: "/logo1.png", sizes: "180x180", type: "image/png" }],
-    shortcut: "/logo1.png",
+  applicationName: BRAND.fa,
+
+  // آدرس canonical صفحهٔ ریشه (بقیهٔ صفحات در layout هر مسیر تنظیم می‌شوند)
+  alternates: {
+    canonical: "/",
   },
 
-  // منیفست برای PWA
-  manifest: "/manifest.json",
-
-  // کلیدواژه‌های جامع
-  keywords: [
-    "رستوران مشهد",
-    "منوی آنلاین مشهد",
-    "سفارش غذا مشهد",
-    "غذای ایرانی مشهد",
-    "رستوران وطندار",
-    "غذای افغانی مشهد",
-    "صبحانه مشهد",
-    "قهوه مشهد",
-    "نوشیدنی گرم مشهد",
-    "بهترین رستوران مشهد",
-    "غذا در مشهد",
-    "رستوران خوب مشهد",
-    "رستوران سنتی مشهد",
-    "کباب مشهد",
-    "چلوکباب مشهد",
-    "فست فود مشهد",
-    "پیتزا مشهد",
-    "برگر مشهد",
-    "رستوران خانوادگی مشهد",
-    "رستوران با موزیک مشهد",
-    "تولد در رستوران مشهد",
-    "رزرو میز رستوران مشهد",
-  ],
-
-  // نویسنده و تولیدکننده
-  authors: [{ name: "Ali Ibrahimi", url: "https://github.com/ali-ibrahimii" }],
-  creator: "Ali Ibrahimi",
-  publisher: "Vatandar Restaurant",
-
-  // متادیتای شبکه‌های اجتماعی
-  openGraph: {
-    title: "رستوران وطندار | منوی دیجیتال ",
-    description:
-      "سفارش آنلاین انواع غذاهای ایرانی، افغانی، صبحانه و نوشیدنی در رستوران وطندار مشهد",
-    url: "https://vatandar-menu.vercel.app",
-    siteName: "رستوران وطندار",
-    images: ["/card-image.jpg"],
-    locale: "fa_IR",
-    type: "website",
-  },
-
-
-
-
-  // تأییدیه‌ها
-  verification: {
-    google: "googleec72074d61f7d798", // کد تأیید گوگل سرچ کنسول
-    yandex: "yandex-verification-code", // برای یاندکس (اختیاری)
-    yahoo: "yahoo-verification-code", // برای یاهو (اختیاری)
-    other: {
-      "google-site-verification": "googleec72074d61f7d798",
-      me: ["ali-ibrahimii@example.com"],
+  // دستور صریح به خزنده‌ها + تنظیمات googlebot برای پیش‌نمایش بزرگ تصاویر
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
 
-  // اعتبارسنجی
+  keywords: KEYWORDS,
+
+  authors: [{ name: "Ali Ibrahimi", url: "https://github.com/ali-ibrahimii" }],
+  creator: "Ali Ibrahimi",
+  publisher: BRAND.fa,
+
+  // آیکون‌ها — فایل‌های سبک و واقعی (قبلاً favicon همان logo1.png با حجم ۱.۸MB بود!)
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/icons/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icons/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: ["/favicon.ico"],
+  },
+
+  manifest: "/manifest.json",
+
+  openGraph: {
+    type: "website",
+    siteName: BRAND.fa,
+    title: `${BRAND.fa} ${SEO_DEFAULTS.city} | منوی دیجیتال و سفارش آنلاین غذا`,
+    description: DEFAULT_DESCRIPTION,
+    url: SITE_URL,
+    locale: "fa_IR",
+    alternateLocale: ["en_US", "ar_AR"],
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: `فضای داخلی ${BRAND.fa} ${SEO_DEFAULTS.city}`,
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: `${BRAND.fa} ${SEO_DEFAULTS.city} | منوی دیجیتال و سفارش آنلاین غذا`,
+    description: DEFAULT_DESCRIPTION,
+    images: ["/og-image.jpg"],
+  },
+
+  // فقط تأییدیهٔ واقعی گوگل سرچ کنسول (کدهای ساختگی yandex/yahoo حذف شدند)
+  verification: {
+    google: "googleec72074d61f7d798",
+  },
+
   category: "restaurant",
 
-  // طبقه‌بندی
-  classification: "Restaurant, Food Delivery, Online Menu",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: BRAND.fa,
+  },
 
-  // سایر متا تگ‌های مفید
+  formatDetection: {
+    telephone: true,
+    address: true,
+    email: true,
+  },
+
+  // تگ‌های جغرافیایی برای جست‌وجوی محلی
   other: {
-    "geo.region": "IR-09", // استان خراسان رضوی
+    "geo.region": SEO_DEFAULTS.geoRegion,
     "geo.placename": "Mashhad",
-    "geo.position": "36.299265;59.640879", // مختصات رستوران
-    ICBM: "36.299265, 59.640879",
+    "geo.position": SEO_DEFAULTS.geoPosition,
+    ICBM: SEO_DEFAULTS.geoPosition.replace(";", ", "),
     language: "fa",
-    rating: "4.5",
-    target: "all",
-    audience: "all",
-    distribution: "global",
-    "revisit-after": "1 days",
   },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
-  height: "device-height",
   initialScale: 1,
-  maximumScale: 5, // بهتره 1 نباشه برای دسترسی بهتر
-  userScalable: true, // بهتره true باشه برای کاربرانی که نیاز به زوم دارند
+  // زوم باید برای دسترسی‌پذیری آزاد بماند
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: "cover",
-  // سایت فقط حالت تاریک دارد
   themeColor: "#020617",
   colorScheme: "dark",
 };
 
-export default function RootLayout({
+/* ================================ لایهٔ ریشه ================================ */
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // اضافه کردن structured data برای رستوران
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Restaurant",
-    name: "رستوران وطندار",
-    image: "https://vatandar-menu.vercel.app/logo1.png",
-    url: "https://vatandar-menu.vercel.app",
-    telephone: "+98-513-xxx-xxxx", // شماره تلفن واقعی
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "آدرس دقیق رستوران",
-      addressLocality: "مشهد",
-      addressRegion: "خراسان رضوی",
-      addressCountry: "IR",
-    },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: 36.299265,
-      longitude: 59.640879,
-    },
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday",
-        ],
-        opens: "08:00",
-        closes: "23:00",
-      },
-    ],
-    menu: "https://vatandar-menu.vercel.app/menu",
-    acceptsReservations: "True",
-    priceRange: "$$",
-    servesCuisine: ["Iranian", "Afghan", "International"],
-  };
+  // Structured Data واقعی از دیتابیس (کش‌شده برای یک ساعت)
+  const seoData = await getSeoData();
+  const jsonLd = buildJsonLd(seoData);
+
+  // پیش‌اتصال به میزبان تصاویر سوپابیس برای بهبود LCP
+  const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
+    : null;
 
   return (
-    <html lang="fa" dir="rtl" className="dark" suppressHydrationWarning>
-      <head>
-        {/* Structured Data */}
+    <html
+      lang="fa"
+      dir="rtl"
+      className={`dark ${vazirmatn.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="bg-white text-slate-950 antialiased dark:bg-black dark:text-white">
+        {/* Structured Data — بدون هیچ تگ دستی تکراری در head */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
 
-        {/* Favicon for all platforms */}
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href="/logo1.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="320x320"
-          href="/logo1.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="160x160"
-          href="/logo1.png"
-        />
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#fff" />
-        <meta name="msapplication-TileColor" content="#020617" />
-        <meta name="theme-color" content="#020617" />
+        {supabaseOrigin && (
+          <link rel="preconnect" href={supabaseOrigin} crossOrigin="anonymous" />
+        )}
 
-        {/* Additional SEO */}
-        <meta
-          name="google-site-verification"
-          content="googleec72074d61f7d798"
-        />
-      </head>
-      <body>
         <Providers>
           <AOSProvider>
             <ThemeProvider>
