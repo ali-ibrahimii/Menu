@@ -123,7 +123,7 @@ export function useMenuData({
       const categoriesPromise = supabase
         .from("categories")
         .select("*")
-        .order("order_number", { ascending: true, nullsFirst: false })
+        .order("order_number", { ascending: false, nullsFirst: false })
         .abortSignal(abortControllerRef.current.signal);
 
       // اجرای همزمان کوئری‌ها

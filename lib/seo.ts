@@ -151,7 +151,7 @@ async function fetchSeoData(): Promise<SeoData> {
           .from("foods")
           .select("name_fa,price,category,is_available")
           .limit(2000),
-        db.from("reviews").select("rating").limit(5000),
+        db.from("reviews").select("rating").eq("is_approved", true).limit(5000),
         db
           .from("restaurant_info")
           .select("instagram_url,whatsapp_number")

@@ -4,40 +4,49 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useBranch } from "@/contexts/BranchContext";
-import { Branch } from "@/types";
+import type { Branch } from "@/types";
+import { getFolderForBranch } from "@/lib/mediaPaths";
+import { listImages } from "@/lib/storageImages";
 
 // گالری عکس‌های هر شعبه
-const branchImageGalleries: Record<string, string[]> = {
-  main: ["/branch1/1.jpg", "/branch1/2.jpg", "/branch1/3.jpg", "/branch1/4.jpg"],
-  branch2: [
-    "/branch2/1.jpg",
-    "/branch2/2.jpg",
-    "/branch2/3.jpg",
-    "/branch2/4.jpg",
-    "/branch2/5.jpg",
-    "/branch2/6.jpg",
-    "/branch2/7.jpg",
-  ],
-  default: ["/bg.jpg", "/bg1.jpg", "/bg2.jpg", "/bg3.jpg"],
-};
+const DEFAULT_IMAGES = ["/bg.jpg", "/bg1.jpg", "/bg2.jpg", "/bg3.jpg"];
 
-export const getBranchImageGallery = (branchSlug: string) => {
-  return branchImageGalleries[branchSlug] || branchImageGalleries.default;
-};
+export async function getBranchImageGallery(slug: string): Promise<string[]> {
+  try {
+    const folder = getFolderForBranch(slug);
+    const images = await listImages(folder);
+    return images.length > 0
+      ? images.map((image) => image.url)
+      : DEFAULT_IMAGES;
+  } catch (error) {
+    console.error("Error loading branch images:", error);
+    return DEFAULT_IMAGES;
+  }
+}
+
 
 export function useBranchData() {
   const [bgImages, setBgImages] = useState<string[]>([]);
   const [isRedirecting, setIsRedirecting] = useState(true);
   const { selectedBranch, setSelectedBranch } = useBranch();
   const searchParams = useSearchParams();
+  const branchSlug = searchParams?.get("branch");
   const router = useRouter();
 
   useEffect(() => {
-    const checkBranch = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const branchSlug = searchParams?.get("branch");
+    let cancelled = false;
 
-      // بررسی URL
+    const applyBranch = async (branch: Branch) => {
+      const images = await getBranchImageGallery(branch.slug);
+      // A slow response for the previous branch must not overwrite the new one.
+      if (cancelled) return;
+      setSelectedBranch(branch);
+      setBgImages(images);
+      setIsRedirecting(false);
+    };
+
+    const checkBranch = async () => {
+      setIsRedirecting(true);
       if (branchSlug) {
         try {
           const { data, error } = await supabase
@@ -46,11 +55,10 @@ export function useBranchData() {
             .eq("slug", branchSlug)
             .eq("is_active", true)
             .single();
-            
+
+          if (cancelled) return;
           if (!error && data) {
-            setSelectedBranch(data);
-            setBgImages(getBranchImageGallery(data.slug));
-            setIsRedirecting(false);
+            await applyBranch(data as Branch);
             return;
           }
         } catch (error) {
@@ -58,31 +66,31 @@ export function useBranchData() {
         }
       }
 
-      // بررسی localStorage
-      const storedBranch = localStorage.getItem("selectedBranch");
-      if (storedBranch) {
-        try {
-          const branch = JSON.parse(storedBranch);
-          setSelectedBranch(branch);
-          setBgImages(getBranchImageGallery(branch.slug));
-          setIsRedirecting(false);
-          return;
-        } catch (error) {
-          console.error("Error parsing stored branch:", error);
+      if (cancelled) return;
+      try {
+        const storedBranch = localStorage.getItem("selectedBranch");
+        if (storedBranch) {
+          const branch = JSON.parse(storedBranch) as Branch | null;
+          if (branch && typeof branch.slug === "string" && branch.slug.trim()) {
+            await applyBranch(branch);
+            return;
+          }
         }
+      } catch (error) {
+        console.error("Error parsing stored branch:", error);
       }
 
-      // هدایت به صفحه انتخاب شعبه
+      if (cancelled) return;
       setIsRedirecting(false);
       router.push("/branches");
     };
 
-    checkBranch();
-  }, [searchParams, setSelectedBranch, router]);
+    // Remote loading also controls the loading state when the URL changes.
+    void checkBranch();
+    return () => {
+      cancelled = true;
+    };
+  }, [branchSlug, setSelectedBranch, router]);
 
-  return {
-    selectedBranch,
-    bgImages,
-    isRedirecting,
-  };
+  return { selectedBranch, bgImages, isRedirecting };
 }

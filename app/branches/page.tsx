@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useBranch } from "@/contexts/BranchContext";
+import { getFolderForBranch } from "@/lib/mediaPaths";
+import {listImages} from "@/lib/storageImages";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Image from "next/image";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -32,53 +34,12 @@ const theme = {
   strongText: "text-slate-950 dark:text-white",
 };
 
-const BRANCH_FOLDER_MAP: Record<string, string> = {
-  main: "first-branch",
-  "main-branch": "first-branch",
-  "first-branch": "first-branch",
-  branch2: "second-branch",
-  "second-branch": "second-branch",
-  shop: "shop",
-  "vatandar-shop": "shop",
-  gallery: "gallery",
-  default: "first-branch",
-};
 
-const BUCKET = "images";
 const DEFAULT_IMAGES = ["/bg.jpg", "/bg1.jpg", "/bg2.jpg", "/bg3.jpg"];
-
-function getFolderForBranch(slug: string) {
-  if (!slug) return "first-branch";
-  const lower = slug.toLowerCase().trim();
-  return BRANCH_FOLDER_MAP[lower] || "first-branch";
-}
 
 async function fetchImagesFromFolder(folder: string): Promise<string[]> {
   try {
-    const { data, error } = await supabase.storage.from(BUCKET).list(folder, {
-      limit: 100,
-      sortBy: { column: "name", order: "asc" },
-    });
-    if (error || !data || data.length === 0) {
-      // Fallback مستقیم - چون 1.jpg تا 4.jpg داری
-      const direct = ["1.jpg", "2.jpg", "3.jpg", "4.jpg"].map((name) => {
-        const { data } = supabase.storage
-          .from(BUCKET)
-          .getPublicUrl(`${folder}/${name}`);
-        return data.publicUrl;
-      });
-      return direct;
-    }
-    const imageFiles = data.filter(
-      (f: any) => f.id && /\.(jpe?g|png|webp)$/i.test(f.name),
-    );
-    if (imageFiles.length === 0) return DEFAULT_IMAGES;
-    return imageFiles.map((file: any) => {
-      const { data } = supabase.storage
-        .from(BUCKET)
-        .getPublicUrl(`${folder}/${file.name}`);
-      return data.publicUrl;
-    });
+    return (await listImages(folder)).map((img) => img.url);
   } catch {
     return DEFAULT_IMAGES;
   }
@@ -154,7 +115,7 @@ const BranchCard = React.memo(
         <div className="relative z-10 flex h-full flex-col justify-between p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1.5 text-xs font-bold text-emerald-200 backdrop-blur-md">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-2 py-1 text-xs font-bold text-emerald-200 backdrop-blur-md">
                 <Sparkles className="h-3.5 w-3.5" />
                 <span>
                   {language === "fa"
@@ -168,7 +129,7 @@ const BranchCard = React.memo(
                 {name}
               </h3>
             </div>
-            <div className="shrink-0 rounded-2xl border border-white/15 bg-white/10 px-3 py-2 text-[11px] backdrop-blur-xl">
+            <div className="shrink-0 rounded-2xl border border-white/15 bg-white/10 px-1 text-center pt-1 text-[11px] backdrop-blur-xl">
               <CheckRestaurantStatus />
             </div>
           </div>
@@ -387,7 +348,7 @@ export default function BranchesPage() {
           </div>
           <div className="mb-4 flex items-center justify-center gap-3">
             <span className="h-px w-16 bg-gradient-to-r from-transparent to-emerald-300/70" />
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-200">
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-200">
               <Navigation className="h-3.5 w-3.5" />
               {language === "fa"
                 ? "انتخاب شعبه"

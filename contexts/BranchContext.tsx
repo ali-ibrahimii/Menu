@@ -1,7 +1,7 @@
 // contexts/BranchContext.tsx
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Branch } from '@/types';
 
 interface BranchContextType {
@@ -44,14 +44,14 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
     // فعلاً خالی می‌گذاریم
   };
 
-  const handleSetBranch = (branch: Branch | null) => {
+  const handleSetBranch = useCallback((branch: Branch | null) => {
     setSelectedBranch(branch);
     if (branch) {
       localStorage.setItem('selectedBranch', JSON.stringify(branch));
     } else {
       localStorage.removeItem('selectedBranch');
     }
-  };
+  }, []);
 
   const clearSelectedBranch = () => {
     setSelectedBranch(null);

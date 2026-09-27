@@ -15,6 +15,9 @@ import {
   CheckCircle2,
   User,
   Menu,
+  Building2,
+  Images,
+  MessageSquare,
   LayoutDashboard,
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
@@ -61,6 +64,9 @@ const menuItems = [
   { href: "/admin/orders", label: "سفارشات", icon: ShoppingCart },
   { href: "/admin/foods", label: "لیست منو", icon: Utensils },
   { href: "/admin/add-food", label: "افزودن غذا", icon: PlusCircle },
+  { href: "/admin/branches", label: "شعبه‌ها", icon: Building2 },
+  { href: "/admin/media", label: "مدیریت رسانه‌ها", icon: Images },
+  { href: "/admin/reviews", label: "نظرات", icon: MessageSquare },
   { href: "/menu", label: "نمایش منو", icon: TrendingUp },
 ];
 

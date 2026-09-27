@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Link from "next/link";
 import Image from "next/image";
+import {listImages} from "@/lib/storageImages";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { supabase } from "@/lib/supabaseClient";
 import {
@@ -24,9 +25,7 @@ import {
 import { useTranslate } from "@/hooks/useTranslate";
 import type { Branch } from "@/types";
 
-const BUCKET = "images";
-const GALLERY_FOLDER = "gallery";
-const AVATAR_FOLDER = "avatar";
+
 const DEFAULT_GALLERY = ["/bg.jpg", "/bg1.jpg", "/bg2.jpg", "/bg3.jpg"];
 
 const theme = {
@@ -39,51 +38,15 @@ const theme = {
 
 async function fetchGalleryFromSupabase(): Promise<string[]> {
   try {
-    const { data, error } = await supabase.storage
-      .from(BUCKET)
-      .list(GALLERY_FOLDER, {
-        limit: 100,
-        sortBy: { column: "name", order: "asc" },
-      });
-    if (error) throw error;
-    if (!data || data.length === 0) return [];
-    const images = data.filter(
-      (f: any) => f.id && /\.(jpe?g|png|webp)$/i.test(f.name),
-    );
-    if (images.length === 0) return [];
-    return images.map((file: any) => {
-      const { data: urlData } = supabase.storage
-        .from(BUCKET)
-        .getPublicUrl(`${GALLERY_FOLDER}/${file.name}`);
-      return urlData.publicUrl;
-    });
+    return (await listImages("gallery")).map((img) => img.url);
   } catch {
-    // fallback مستقیم
-    return ["1.jpg", "2.jpg", "3.jpg", "4.jpg"].map((n) => {
-      const { data } = supabase.storage
-        .from(BUCKET)
-        .getPublicUrl(`${GALLERY_FOLDER}/${n}`);
-      return data.publicUrl;
-    });
+   return DEFAULT_GALLERY;
   }
 }
 
 async function fetchAvatarFromSupabase(): Promise<string | null> {
   try {
-    const { data } = await supabase.storage
-      .from(BUCKET)
-      .list(AVATAR_FOLDER, { limit: 1 });
-    if (data && data.length > 0 && data[0].id) {
-      const { data: urlData } = supabase.storage
-        .from(BUCKET)
-        .getPublicUrl(`${AVATAR_FOLDER}/${data[0].name}`);
-      return urlData.publicUrl;
-    }
-    // اگر لیست نشد، مستقیم avatar.jpg رو امتحان کن
-    const { data: direct } = supabase.storage
-      .from(BUCKET)
-      .getPublicUrl(`${AVATAR_FOLDER}/avatar.jpg`);
-    return direct.publicUrl;
+    return (await listImages("avatar"))[0]?.url ?? null
   } catch {
     return null;
   }
@@ -358,7 +321,7 @@ export default function AboutPage() {
                         <Clock size={16} className="text-slate-400" />
                         <span>
                           {language === "fa"
-                            ? "هر روز 8:00 - 23:00"
+                            ? `${(branch as any).open} تا ${(branch as any).close}`
                             : language === "ar"
                               ? "كل يوم 8:00 - 23:00"
                               : "Every day 8:00 - 23:00"}
